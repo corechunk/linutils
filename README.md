@@ -6,7 +6,21 @@ sh <(curl -L https://raw.githubusercontent.com/corechunk/linutils/main/linutil.s
 
 
 
+.
 
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
 
 
 
