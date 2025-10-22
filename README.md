@@ -1,5 +1,26 @@
 # linutil
+usage
+```
+sh <(curl -L https://raw.githubusercontent.com/corechunk/linutils/main/linutil.sh)
+```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+for my futureself [dev note]
 ```
 curl -sS https://debian.griffo.io/EA0F721D231FDD3A0A17B9AC7808B4DD62C41256.asc | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/debian.griffo.io.gpg
 ```
