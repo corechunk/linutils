@@ -34,7 +34,7 @@ sh <(curl -L https://raw.githubusercontent.com/corechunk/linutils/main/linutil.s
 
 
 
-for my futureself [dev note]
+for my futureself [dev note] yazi's repo as its not added in apt [third party repo]
 ```
 curl -sS https://debian.griffo.io/EA0F721D231FDD3A0A17B9AC7808B4DD62C41256.asc | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/debian.griffo.io.gpg
 ```
