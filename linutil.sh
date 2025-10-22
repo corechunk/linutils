@@ -18,6 +18,7 @@ SKY_BLUE="$(tput setaf 6)"
 RESET="$(tput sgr0)"
 log_start="$GREEN ----------$BLUE  ----------$RESET"
 log_end="$BLUE ----------$GREEN  ----------$RESET"
+divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
 
 command_exists(){
     command -v "$1" >/dev/null 2>&1
@@ -213,10 +214,14 @@ main_menu (){
     while true;do
         echo "$WARNING 00.$RESET edit apt source"
         echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
+        echo "$divider"
         echo "$BLUE 1.$RESET essential softwares (not made yet)"
         echo "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)"
         echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
+        echo "$divider"
+        echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
         echo "$RED x. EXIT $RESET "
+        echo ""
         read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho_1
 
         case $cho_1 in 
