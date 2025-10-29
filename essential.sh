@@ -1,35 +1,35 @@
-apt_menu(){
-    clear
-    while true;do
-        echo "$BLUE edit.$RESET edit '/etc/apt/sources.list' manually "
-        echo "$RED sid.$RESET Pre-configured template [sid/unstable]"
-        echo "$ORANGE x. EXIT $RESET "
-        read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho_1
+apps_cli_dev=(
+    build-essential   # essential build tools (gcc, g++, make)
+    make               # GNU make utility
+    ninja              # fast build system
+    cmake              # cross-platform build tool for c++
+    openjdk-25-jdk     # Java Development Kit
+    openjdk-25-jre     # Java runtime
+    python3
+)
 
-        case $cho_1 in 
-            edit)
-                sudo nano /etc/apt/sources.list
-                clear
-                ;;
-            sid)
-                sid_prompt
-                if (($?==0));then
-                    echo "$log_start"
-                    echo "you apt source is perfectly altered. The pre-configured sid/unstable template has been installed."
-                    echo "$GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET"
-                    echo "$log_end"
-                elif (($?==1));then
-                    echo ""
-                    echo "$log_start"
-                    echo "$ORANGE the task is aborted "
-                    echo "$log_end"
-                    echo 
-                fi
-                ;;
-            x|X)
-                break
-                ;;
-        esac
-    done
-    clear
-}
+
+core_cli=(
+    tmux               # terminal multiplexer
+    neovim             # cli code editor [standard]
+    nano               # cli text editor [standard]
+    mpv                # cli media playback [gui will work in Desktop Environments]
+    btop    # System Observer [ like: taskmanager ] > even tho idk if management is possible
+)
+
+core_gui=(
+    kitty        # excelent terminal emulator [supports: image, mouse-trail(from v0.37)]
+    thunar       # nice & compatible file manager
+    mousepad     # text editor [like notepad from windows]
+    mpv          # media playback audio/video
+    waybar       # taskbar type thing
+    rofi
+    obs-studio   # screen recorder/streamer [free]
+    shotcut      # video editor [free]
+)
+
+github_apps=(
+    oh-my-posh
+    auto-cpufreq
+)
+
