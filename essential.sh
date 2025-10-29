@@ -75,7 +75,7 @@ github_apps=(
     auto-cpufreq
 )
 
-local dev_sign=[ unavailable right now ]
+dev_sign=" [ unavailable right now ] "
 
 menu_essential(){
     while true;do
