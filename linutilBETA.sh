@@ -105,6 +105,9 @@ main_menu (){
                 install_pkg tasksel
             fi
             ;;
+        1)
+            menu_essential
+            ;;
         2)
             ufw_menu
             ;;
