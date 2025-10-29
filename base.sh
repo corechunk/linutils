@@ -26,30 +26,35 @@ install_pkg(){
 
 install_pkg_dynamic(){
     if   [[ $2 == default || -z $2 ]];then
+    echo d
         if   [[ $package_manager == apt ]];then
             sudo apt install "$1"
         elif [[ $package_manager == pacman ]];then
             sudo pacman -S "$1" --needed
         fi
     elif [[ $2 == install-force ]];then
+    echo if
         if   [[ $package_manager == apt ]];then
             sudo apt install "$1" -y
         elif [[ $package_manager == pacman ]];then
             sudo pacman -S "$1" --noconfirm
         fi
     elif [[ $2 == re-install ]];then
+    echo ri
         if   [[ $package_manager == apt ]];then
             sudo apt install "$1" --reinstall
         elif [[ $package_manager == pacman ]];then
             sudo pacman -S "$1"
         fi
     elif [[ $2 == remove ]];then
+    echo r
         if   [[ $package_manager == apt ]];then
             sudo apt remove "$1"
         elif [[ $package_manager == pacman ]];then
             sudo pacman -R "$1"
         fi
     elif [[ $2 == remove-force ]];then
+    echo rf
         if   [[ $package_manager == apt ]];then
             sudo apt remove "$1" -y
         elif [[ $package_manager == pacman ]];then

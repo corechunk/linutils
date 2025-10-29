@@ -42,7 +42,7 @@ done
 
 for pkg in "${dev_cli[@]}";do
     echo $pkg;
-    install_pkg_dynamic $pkg install-force
+    install_pkg_dynamic "$pkg" install-force
 done
 
 install_pkg_dynamic lsd install-force
