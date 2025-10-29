@@ -90,7 +90,7 @@ menu_essential(){
         echo "$RED all.$RESET$dev_sign install$ORANGE all packages$RESET shown here"
         echo "$RED all_f.$RESET install$ORANGE all packages$RESET shown here [force]"
         echo "$divider"
-        read -p "Select Your Preferred Option"
+        read -p "Select Your Preferred Option" cho
 
         case $cho in
         all_f|ALL_F)
