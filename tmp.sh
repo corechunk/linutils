@@ -41,7 +41,7 @@ for depp in "${dep[@]}";do
 done
 
 for pkg in "${dev_cli[@]}";do
-    echo $pkg;
+    echo ">$pkg<";
     install_pkg_dynamic "$pkg" install-force
 done
 
