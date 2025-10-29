@@ -60,7 +60,6 @@ install_pkg_dynamic(){
         return;
     fi
 
-    i
 }
 
 #install_pkg yazi
