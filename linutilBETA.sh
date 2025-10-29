@@ -27,12 +27,6 @@ divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RE
 
 echo "loading data from online ..."
 
-# these are loaded from the same repo that contained this script itself
-# https://github.com/corechunk/linutils
-# inside this link you will find all of these scripts that are sourced bellow
-
-#src(){}
-
 dep=(
     base.sh
     apt-source.sh
@@ -42,29 +36,33 @@ dep=(
 )
 
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
-
 total=${#dep[@]}
-bar_length=30  # length of the progress bar in characters
+bar_length=30
 
 echo "Loading dependencies..."
 
 for i in "${!dep[@]}"; do
-    # Load the dependency
-    curl -fsSL "$main/${dep[i]}" | source /dev/stdin
+    tmpfile=$(mktemp)
 
-    # Calculate progress
+    if ! curl -fsSL "$main/${dep[i]}" -o "$tmpfile"; then
+        echo -e "\n$ERROR Failed to download ${dep[i]}"
+        rm -f "$tmpfile"
+        exit 1
+    fi
+
+    source "$tmpfile"
+    rm -f "$tmpfile"
+
     progress=$(( (i+1) * 100 / total ))
     filled=$(( (i+1) * bar_length / total ))
     empty=$(( bar_length - filled ))
 
-    # Build the bar
     bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
-
-    # Print the bar with percentage
     printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "${dep[i]}"
 done
 
 echo -e "\n$OK All dependencies loaded!"
+
 
 
 #source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/base.sh)
