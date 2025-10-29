@@ -1,6 +1,11 @@
 #!/bin/bash
+
+# dependency ( git, !!curl, !dialog,  )
+
+# 
+
 clear
-# Set some colors for output messages
+# Set some colors for output messages 
 OK="$(tput setaf 2)[OK]$(tput sgr0)"
 ERROR="$(tput setaf 1)[ERROR]$(tput sgr0)"
 NOTE="$(tput setaf 3)[NOTE]$(tput sgr0)"
@@ -21,164 +26,34 @@ log_end="$BLUE ----------$GREEN  ----------$RESET"
 divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
 
 echo "loading data from online ..."
-source <(curl -fL https://raw.githubusercontent.com/corechunk/linutils/main/base.sh)
 
+# these are loaded from the same repo that contained this script itself
+# https://github.com/corechunk/linutils
+# inside this link you will find all of these scripts that are sourced bellow
 
-sid_prompt(){
-    clear
-    while true;do
-        echo ""
-        echo "$log_start"
-        echo "Are you sure you want to change your apt source to$RED unstable/sid."
-        echo "These two lines bellow will be added to$MAGENTA /etc/apt/sources.list$RESET"
-        echo ""
-        echo "$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
-        echo "$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
-        echo "$log_end"
-        echo ""
-        local cho
-        read -p "Are you sure ? (confirm or no) :" cho
-        case $cho in
-        confirm)
-            clear
-            echo "deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" | sudo tee /etc/apt/sources.list
-            echo "deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
-            return 0
-            ;;
-        no|x|X)
-            clear
-            echo "aborting ...."
-            return 1
-            break
-            ;;
-        *)
-            echo "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET"
-        esac
+#src(){}
 
-    done
+main="https://raw.githubusercontent.com/corechunk/linutils/main"
+dep=(
+    base.sh
+    apt-source.sh
+    essential.sh
+    auto-cpufreq.sh
+    security.sh
+)
 
-}
-apt_menu(){
-    clear
-    while true;do
-        echo "$BLUE edit.$RESET edit '/etc/apt/sources.list' manually "
-        echo "$RED sid.$RESET Pre-configured template [sid/unstable]"
-        echo "$ORANGE x. EXIT $RESET "
-        read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho_1
+for depp in "${dep[@]}";do
+    source <(curl -fsSL "$main/$depp")
+done
 
-        case $cho_1 in 
-            edit)
-                sudo nano /etc/apt/sources.list
-                clear
-                ;;
-            sid)
-                sid_prompt
-                if (($?==0));then
-                    echo "$log_start"
-                    echo "you apt source is perfectly altered. The pre-configured sid/unstable template has been installed."
-                    echo "$GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET"
-                    echo "$log_end"
-                elif (($?==1));then
-                    echo ""
-                    echo "$log_start"
-                    echo "$ORANGE the task is aborted "
-                    echo "$log_end"
-                    echo 
-                fi
-                ;;
-            x|X)
-                break
-                ;;
-        esac
-    done
-    clear
-}
-acf(){
-    if command_exists auto-cpufreq;then acf_stat="already enabled"; else acf_stat="$n"; fi
-    local cho
-    while true;do
-        echo "$BLUE 1.$RESET install GUI monitor"
-        echo "$BLUE 2.$RESET view status"
-        echo "$BLUE 3.$RESET remove auto-cpufreq totally"
-        
-        echo "$RED x.$RESET EXIT"
-        read -p "Select a option :" cho
-        case $cho in
-        1)
-            sudo auto-cpufreq --install
-            ;;
-        2)
-            sudo auto-cpufreq --stats
-            ;;
-        3)
-            git clone https://github.com/AdnanHodzic/auto-cpufreq.git
-            cd auto-cpufreq
-            sudo ./auto-cpufreq-installer --remove
-            cd ..
-            rm -rf auto-cpufreq
-            ;;
-        x|X)
-            break
-            ;;
-        *)
-            clear
-            echo "#RED Invalid Choice$RESET"
-            echo "$log_end"
-            ;;
-        esac
-    done
-}
-ufw_menu(){
-    local y="[$GREEN installed$RESET ]"
-    local n="[$RED not installed$RESET ]"
+#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/base.sh)
+#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/apt-source.sh)
+#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/essential.sh)
+#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/auto-cpufreq.sh)
+#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/security.sh)
 
-
-    local cho
-    while true;do
-        if sudo_command_exists ufw;then ufw_stat="$y"; else ufw_stat="$n"; fi
-        if sudo_command_exists fail2ban;then f2b_stat="$y"; else f2b_stat="$n"; fi
-        echo "$BLUE 1.$RESET install ufw firewall $ufw_stat"
-        echo "$BLUE 2.$RESET enable ufw & set rules"
-        echo "$BLUE 3.$RESET install fail2ban $f2b_stat"
-        echo "$BLUE 4.$RESET enable fail2ban & set rules"
-        echo "$log_end"
-        echo "$RED x.$RESET EXIT"
-        read -p "Select a option :" cho
-        case $cho in
-        1)
-            install_pkg ufw
-            echo "$log_end"
-            ;;
-        2)
-            sudo ufw limit 22/tcp
-            sudo ufw allow 80/tcp
-            sudo ufw allow 443/tcp
-            sudo ufw default deny incoming
-            sudo ufw default allow outgoing
-            sudo ufw enable
-            echo "$log_end"
-            ;;
-        3)
-            install_pkg fail2ban
-            echo "$log_end"
-            ;;
-        4)
-            sudo systemctl enable fail2ban
-            sudo systemctl start fail2ban
-            echo "$log_end"
-            ;;
-        x|X)
-            break
-            ;;
-        *)
-            clear
-            echo "#RED Invalid Choice$RESET"
-            echo "$log_end"
-            ;;
-        esac
-    done
-}
 main_menu (){
+    clear
     #local down_stat="(downloaded)"
     local y="[$GREEN installed$RESET ]"
     local n="[$RED not installed$RESET ]"
