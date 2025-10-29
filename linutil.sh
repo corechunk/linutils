@@ -21,6 +21,7 @@ log_end="$BLUE ----------$GREEN  ----------$RESET"
 divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
 
 source <(curl -L https://raw.githubusercontent.com/corechunk/linutils/main/var.sh)
+echo $msg
 
 prompt_user(){
     local cho
