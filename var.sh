@@ -1,0 +1,1 @@
+msg="this 'msg' variable is sourced from the internet"

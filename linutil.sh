@@ -20,6 +20,8 @@ log_start="$GREEN ----------$BLUE  ----------$RESET"
 log_end="$BLUE ----------$GREEN  ----------$RESET"
 divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
 
+source <(curl -L https://raw.githubusercontent.com/corechunk/linutils/main/var.sh)
+
 prompt_user(){
     local cho
     local times=0
