@@ -37,7 +37,7 @@ dep=(
 
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
 total=${#dep[@]}
-bar_length=30
+bar_length=70
 
 echo "Loading dependencies..."
 
@@ -59,6 +59,7 @@ for i in "${!dep[@]}"; do
 
     bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
     printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "${dep[i]}"
+    sleep 0.1
 done
 
 echo -e "\n$OK All dependencies loaded!"
