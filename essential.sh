@@ -107,5 +107,6 @@ menu_essential(){
             echo "invalid choice !"
             echo "you need to type the text shown before the dots as option"
             ;;
+        esac
     done
 }
