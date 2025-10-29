@@ -1,10 +1,12 @@
 # linutil
-usage
+### Stable Usage
 ```
 sh <(curl -L https://raw.githubusercontent.com/corechunk/linutils/main/linutil.sh)
 ```
-
-
+### Beta Usage
+```
+sh <(curl -L https://raw.githubusercontent.com/corechunk/linutils/main/linutilBETA.sh)
+```
 
 .
 
