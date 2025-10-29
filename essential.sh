@@ -101,7 +101,7 @@ menu_essential(){
             ;;
         x|X)
             clear
-            return;
+            break;
             ;;
         *)
             echo "invalid choice !"
