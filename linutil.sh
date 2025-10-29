@@ -22,6 +22,7 @@ divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RE
 
 source <(curl -L https://raw.githubusercontent.com/corechunk/linutils/main/var.sh)
 echo $msg
+echo $data
 
 prompt_user(){
     local cho
