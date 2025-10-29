@@ -1,3 +1,6 @@
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
 ufw_menu(){
     local y="[$GREEN installed$RESET ]"
     local n="[$RED not installed$RESET ]"

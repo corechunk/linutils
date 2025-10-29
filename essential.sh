@@ -1,12 +1,32 @@
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
+# Detect package manager
+if [ $package_manager="apt" ]; then
+    # Debian/Ubuntu/Sid  [ or debian based ]
+    build_essential_pkg="build-essential"
+    manpages_pkg="manpages-dev"
+    openjdk_pkg="openjdk-25-jdk"
+elif [ $package_manager="pacman" ]; then
+    # Arch [ or arch based ]
+    build_essential_pkg="base-devel"
+    manpages_pkg="man-pages"
+    openjdk_pkg="jdk-openjdk"
+else
+    echo "Unsupported distro"
+    exit 1
+fi
+
+# Now define the array using the variables
 apps_cli_dev=(
     git
-    build-essential   # essential build tools (gcc, g++, make)
+    "$build_essential_pkg"  # essential build tools (gcc, g++, make)
     gdb
-    manpages-dev
-    make               # GNU make utility
-    ninja              # fast build system
-    cmake              # cross-platform build tool for c++
-    openjdk-25-jdk     # Java Development Kit #contains: openjdk-25-jre # Java runtime
+    "$manpages_pkg"
+    make
+    ninja
+    cmake
+    "$openjdk_pkg"
     python3
     python3-pip
 )

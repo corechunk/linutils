@@ -1,3 +1,6 @@
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
 acf(){
     if command_exists auto-cpufreq;then acf_stat="already enabled"; else acf_stat="$n"; fi
     local cho

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# dependency ( git, !!curl, !dialog,  )
+# some functions/variable called here are available on other file
+# and they are need to be sourced in order to run properly
 
-# 
+# dependency ( git, !dialog[in-future]  )
 
 clear
 # Set some colors for output messages 
