@@ -27,33 +27,33 @@ install_pkg(){
 install_pkg_dynamic(){
     if   [[ $2 == default || -z $2 ]];then
         if   [[ $package_manager == apt ]];then
-            sudo apt install $1
+            sudo apt install "$1"
         elif [[ $package_manager == pacman ]];then
-            sudo pacman -S $1 --needed
+            sudo pacman -S "$1" --needed
         fi
     elif [[ $2 == install-force ]];then
         if   [[ $package_manager == apt ]];then
-            sudo apt install $1 -y
+            sudo apt install "$1" -y
         elif [[ $package_manager == pacman ]];then
-            sudo pacman -S $1 --noconfirm
+            sudo pacman -S "$1" --noconfirm
         fi
     elif [[ $2 == re-install ]];then
         if   [[ $package_manager == apt ]];then
-            sudo apt install $1 --reinstall
+            sudo apt install "$1" --reinstall
         elif [[ $package_manager == pacman ]];then
-            sudo pacman -S $1
+            sudo pacman -S "$1"
         fi
     elif [[ $2 == remove ]];then
         if   [[ $package_manager == apt ]];then
-            sudo apt remove $1
+            sudo apt remove "$1"
         elif [[ $package_manager == pacman ]];then
-            sudo pacman -R $1
+            sudo pacman -R "$1"
         fi
     elif [[ $2 == remove-force ]];then
         if   [[ $package_manager == apt ]];then
-            sudo apt remove $1 -y
+            sudo apt remove "$1" -y
         elif [[ $package_manager == pacman ]];then
-            sudo pacman -R $1 --noconfirm
+            sudo pacman -R "$1" --noconfirm
         fi
     else
         echo "invalid option for installation, ..."
