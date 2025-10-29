@@ -20,6 +20,32 @@ log_start="$GREEN ----------$BLUE  ----------$RESET"
 log_end="$BLUE ----------$GREEN  ----------$RESET"
 divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
 
+prompt_user(){
+    local cho
+    local times=0
+    while true;do
+        read -p "$1 [y/n]; " cho
+        case $cho in
+        y|Y)
+            return 0
+            ;;
+        n|N)
+            return 1
+            ;;
+        *)
+            ((times++));
+            if ((times>2));then return 1; fi
+            echo "invalid choice !"
+        esac
+    done
+}
+#prompt_user "Do you agree ?"
+#if [[ $? == 0 ]];then
+#    echo yes
+#elif [[ $? == 1 ]];then
+#    echo no
+#fi
+
 command_exists(){
     command -v "$1" >/dev/null 2>&1
     return $?
