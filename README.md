@@ -1,9 +1,9 @@
 # linutil
-### Stable Usage
+## Stable Usage
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutil.sh)
 ```
-### Beta Usage
+## Beta Usage
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutilBETA.sh)
 ```
@@ -13,27 +13,16 @@ bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linu
 .
 
 .
+## Development Related
 
-.
+### current issues
+- the option `00. edit apt source` is not arch compatible
+- the option `01. Download Desktop Environment (via tasksel)` is not arch compatible
+- ufw and fail2ban checking if they exists and showing is unstable/broken inside option `2. Enable firewall (via ufw & fail2ban)`
 
-.
-
-.
-
-.
-
-.
-
-
-
-
-
-
-
-
-
-
-
+### future development ideas
+- adding an option to source dependencies locally if cloned from github
+- tasksel type system for arch manuall
 
 
 for my futureself [dev note] yazi's repo as its not added in apt [third party repo]

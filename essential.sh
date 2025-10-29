@@ -18,15 +18,15 @@ else
 fi
 
 # Now define the array using the variables
-apps_cli_dev=(
+dev_cli=(
     git
     "$build_essential_pkg"  # essential build tools (gcc, g++, make)
-    gdb
+    gdb                     # debugging tools
     "$manpages_pkg"
-    make
-    ninja
-    cmake
-    "$openjdk_pkg"
+    make                    # GNU make utility
+    ninja                   # fast build system
+    cmake                   # cross-platform build tool for c++
+    "$openjdk_pkg"          # Java Development Kit #contains: openjdk-25-jre # Java runtime
     python3
     python3-pip
 )
@@ -62,6 +62,7 @@ core_gui=(
     thunar       # nice & compatible file manager
     mousepad     # text editor [like notepad from windows]
     mpv          # media playback audio/video
+    zathura
     obs-studio   # screen recorder/streamer [free]
     shotcut      # video editor [free]
     waybar       # taskbar type thing
@@ -74,3 +75,37 @@ github_apps=(
     auto-cpufreq
 )
 
+local dev_sign=[ unavailable right now ]
+
+menu_essential(){
+    while true;do
+        local cho
+        echo ""
+        echo "$divider"
+        echo "$BLUE 1.$RESET$dev_sign Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
+        echo "$BLUE 2.$RESET$dev_sign Core$YELLOW GUI$RESET packages"
+        echo "$BLUE 3.$RESET$dev_sign Core$BLUE CLI$RESET packages"
+        echo "$BLUE 4.$RESET$dev_sign Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
+        echo "$BLUE 5.$RESET$dev_sign github software packages"
+        echo "$RED all.$RESET$dev_sign install$ORANGE all packages$RESET shown here"
+        echo "$RED all_f.$RESET install$ORANGE all packages$RESET shown here [force]"
+        echo "$divider"
+        read -p "Select Your Preferred Option"
+
+        case $cho in
+        all_f|ALL_F)
+            for pkg in "${dev_cli[@]}";do install_pkg_dynamic $pkg install-force; done
+            for pkg in "${core_cli[@]}";do install_pkg_dynamic $pkg install-force; done
+            for pkg in "${core_gui[@]}";do install_pkg_dynamic $pkg install-force; done
+            for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic $pkg install-force; done
+            ;;
+        x|X)
+            clear
+            return;
+            ;;
+        *)
+            echo "invalid choice !"
+            echo "you need to type the text shown before the dots as option"
+            ;;
+    done
+}
