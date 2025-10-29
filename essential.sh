@@ -24,7 +24,7 @@ dev_cli=(
     gdb                     # debugging tools
     "$manpages_pkg"
     make                    # GNU make utility
-    ninja                   # fast build system
+    ninja-build             # fast build system
     cmake                   # cross-platform build tool for c++
     "$openjdk_pkg"          # Java Development Kit #contains: openjdk-25-jre # Java runtime
     python3
