@@ -84,16 +84,16 @@ github_apps=(   # this section will be constructed later
     oh-my-posh
     auto-cpufreq
 )
-firmware-intel=(
+firmware_intel=(
     firmware-misc-nonfree
     firmware-linux-nonfree
     firmware-sof-signed
     firmware-iwlwifi
 )
-firmware-amd=(
+firmware_amd=(
     firmware-amd-graphics
 )
-firmware-nvidia=(
+firmware_nvidia=(
     nvidia-driver
 )
 
@@ -122,13 +122,13 @@ menu_essential(){
 
         case $cho in
         01)
-            for pkg in "${firmware-intel[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done
             ;;
         02)
-            for pkg in "${firmware-amd[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done
             ;;
         03)
-            for pkg in "${firmware-nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            for pkg in "${firmware_nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done
             ;;
         1)
             for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
