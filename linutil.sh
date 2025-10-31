@@ -38,6 +38,7 @@ main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(
     base.sh
     apt-source.sh
+    essential_pre.sh
     essential.sh
     auto-cpufreq.sh
     security.sh
@@ -49,6 +50,7 @@ done
 
 #source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/base.sh)
 #source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/apt-source.sh)
+#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/essential_pre.sh)
 #source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/essential.sh)
 #source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/auto-cpufreq.sh)
 #source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/security.sh)

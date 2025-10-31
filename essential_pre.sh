@@ -1,44 +1,3 @@
-#!/bin/bash
-
-# some functions/variable called here are available on other file
-# and they are need to be sourced in order to run properly
-
-# dependency ( git, !dialog[in-future]  )
-
-clear
-# Set some colors for output messages 
-OK="$(tput setaf 2)[OK]$(tput sgr0)"
-ERROR="$(tput setaf 1)[ERROR]$(tput sgr0)"
-NOTE="$(tput setaf 3)[NOTE]$(tput sgr0)"
-INFO="$(tput setaf 4)[INFO]$(tput sgr0)"
-WARN="$(tput setaf 1)[WARN]$(tput sgr0)"
-CAT="$(tput setaf 6)[ACTION]$(tput sgr0)"
-MAGENTA="$(tput setaf 5)"
-ORANGE="$(tput setaf 214)"
-WARNING="$(tput setaf 1)"
-RED="$(tput setaf 1)"
-YELLOW="$(tput setaf 3)"
-GREEN="$(tput setaf 2)"
-BLUE="$(tput setaf 4)"
-SKY_BLUE="$(tput setaf 6)"
-RESET="$(tput sgr0)"
-log_start="$GREEN ----------$BLUE  ----------$RESET"
-log_end="$BLUE ----------$GREEN  ----------$RESET"
-divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
-
-echo "loading data from online ..."
-
-# these are loaded from the same repo that contained this script itself
-# https://github.com/corechunk/linutils
-# inside this link you will find all of these scripts that are sourced bellow
-
-#src(){}
-
-
-
-source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/base.sh)
-source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/apt-source.sh)
-
 # some functions/variable called here maybe on other file
 # and they are need to be sourced in order to run properly
 
@@ -58,19 +17,47 @@ else
     exit 1
 fi
 
+shrink() {
+    local src="$1"   # name of source array
+    local dest="$2"  # name of destination array
+
+    # make src a nameref (reference to original array)
+    declare -n src_ref="$src"
+    declare -n dest_ref="$dest"
+
+    dest_ref=()  # clear destination array
+
+    echo ""
+    for ((i=0; i<${#src_ref[@]}; i+=3)); do
+        pkg="${src_ref[i]}"
+        [[ $pkg == _HEADER_* ]] && continue   # skip headers
+        dest_ref+=("$pkg")
+        echo "$pkg"
+    done
+}
+
 # Now define the array using the variables
-dev_cli=(
-    git
-    "$build_essential_pkg"  # essential build tools (gcc, g++, make)
-    gdb                     # debugging tools
-    "$manpages_pkg"
-    make                    # GNU make utility
-    ninja-build             # fast build system
-    cmake                   # cross-platform build tool for c++
-    "$openjdk_pkg"          # Java Development Kit #contains: openjdk-25-jre # Java runtime
-    python3
-    python3-pip
+dev_cli_dialog=(
+    git                     "Version control system" on
+    "$build_essential_pkg"  "Essential build tools (gcc, g++, make)" on
+    gdb                     "Debugging tools for C/C++" on
+    "$manpages_pkg"         "Developer manual pages" on
+    make                    "GNU build utility" on
+    ninja-build             "Fast alternative build system" on
+    cmake                   "Cross-platform C++ build tool" on
+    "$openjdk_pkg"          "Java Development Kit (includes JRE)" on
+    python3                 "Python programming language" on
+    python3-pip             "Python package manager" on
 )
+dev_cli=()
+shrink dev_cli_dialog dev_cli
+
+#for ((i=0; i<${#dev_cli_dialog[@]}; i+=3)); do
+#    pkg="${dev_cli_dialog[i]}"
+#    [[ $pkg == _HEADER_* ]] && continue   # skip headers
+#    dev_cli+=("$pkg")
+#    echo "$pkg"
+#done
 core_cli=(
     gawk               # needed for ble.sh [ core dependency ]
     tmux               # terminal multiplexer
@@ -144,7 +131,32 @@ firmware_nvidia=(
     nvidia-driver
 )
 
-dev_sign=" [ unavailable right now ] "
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 menu_info(){
     local info_text="
@@ -245,257 +257,3 @@ NVIDIA                | nvidia-driver                                  | x86_64 
     # Use less for scrollable output
     echo -e "$info_text" | less -RS
 }
-
-menu_essential_dialog() {
-    # Build list for dialog checklist (category headers + packages)
-    local dialog_list=(
-        _HEADER_DEV_ "──── Development CLI Packages ────" off
-        git "Version control system" on
-        "$build_essential_pkg" "GCC/G++/make build tools" on
-        gdb "Debugger for compiled languages" off
-        "$manpages_pkg" "Developer manpages" off
-        make "Build automation tool" on
-        ninja-build "Fast build system" off
-        cmake "Cross-platform build tool" off
-        "$openjdk_pkg" "Java Development Kit" off
-        python3 "Python interpreter" on
-        python3-pip "Python package manager" on
-
-        _HEADER_CORE_ "──── Core CLI Packages ────" off
-        gawk "Text processing/scripting tool" on
-        tmux "Terminal multiplexer" on
-        neovim "Modern text editor" on
-        nano "Simple text editor" on
-        mpv "CLI media player" off
-        btop "System monitor" off
-        fastfetch "System info viewer" off
-        zip "File compression tool" on
-        unzip "File decompression tool" on
-        bat "cat alternative with highlighting" off
-        lsd "ls alternative with icons" off
-        zoxide "Smart cd alternative" off
-        fzf "Fuzzy finder" off
-        ripgrep "Fast grep alternative" off
-        fonts-firacode "Monospace font" off
-
-        _HEADER_NET_ "──── Network Tools ────" off
-        wget "Command-line downloader" on
-        ufw "Simple firewall manager" off
-        fail2ban "Intrusion prevention tool" off
-
-        _HEADER_GUI_ "──── Core GUI Packages ────" off
-        blueman "Bluetooth manager" off
-        network-manager "Network connection manager" off
-        kitty "Terminal emulator" off
-        thunar "File manager" off
-        mousepad "Text editor (GUI)" off
-        mpv "Media player" off
-        zathura "Document viewer" off
-        obs-studio "Screen recorder/streamer" off
-        shotcut "Video editor" off
-        xdg-desktop-portal "Screen share portal" off
-        xdg-utils "Desktop utilities" off
-        maim "Screenshot tool" off
-        xclip "Clipboard tool" off
-
-        _HEADER_HYPR_ "──── Hyprland Ecosystem ────" off
-        xdg-desktop-portal-hyprland "Hyprland portal backend" off
-        hyprpaper "Wallpaper manager" off
-        hyprcursor "Cursor theme manager" off
-        waybar "Status/task bar" off
-        rofi "Launcher / menu" off
-        grim "Wayland screenshot tool" off
-        slurp "Region selector for screenshots" off
-        wl-copy "Wayland clipboard utility" off
-
-        _HEADER_GH_ "──── GitHub Apps (Custom) ────" off
-        oh-my-posh "Shell prompt theme engine" off
-        auto-cpufreq "CPU frequency optimizer" off
-
-        _HEADER_FW_ "──── Firmware Packages ────" off
-        firmware-misc-nonfree "Intel misc firmware" on
-        firmware-linux-nonfree "Generic Linux firmware" on
-        firmware-sof-signed "Intel sound firmware" on
-        firmware-iwlwifi "Intel Wi-Fi firmware" on
-        firmware-amd-graphics "AMD GPU firmware" off
-        nvidia-driver "NVIDIA proprietary driver" off
-    )
-
-    local selected_packages
-    selected_packages=$(dialog --clear --colors \
-        --backtitle "Package Installer" \
-        --title "Select Packages to Install" \
-        --checklist "Use [SPACE] to toggle, [ENTER] to confirm.\nHeaders (────) are not selectable." \
-        40 120 25 \
-        "${dialog_list[@]}" 2>&1 >/dev/tty)
-
-    # Check if user pressed Cancel or Esc
-    if [ $? -ne 0 ]; then
-        clear
-        echo "Cancelled by user."
-        return
-    fi
-
-    # Clean up: remove quotes, split, and skip header entries
-    local pkgs_array=()
-    for pkg in $selected_packages; do
-        pkg=${pkg//\"/} # remove quotes
-        [[ $pkg == _HEADER_* ]] && continue
-        pkgs_array+=("$pkg")
-    done
-
-    # Confirm installation summary
-    clear
-    echo -e "${INFO} Installing selected packages:${RESET}"
-    printf '  %s\n' "${pkgs_array[@]}"
-    echo
-
-    # Begin installation
-    for pkg in "${pkgs_array[@]}"; do
-        install_pkg_dynamic "$pkg" install-force
-    done
-}
-
-
-menu_essential(){
-    while true;do
-        local cho
-        echo ""
-        echo "$divider"
-        echo "$BLUE 01.$BLUE [INTEL]$ORANGE Firmware packages$RESET"
-        echo "$BLUE 02.$RED [AMD]$ORANGE Firmware packages$RESET"
-        echo "$BLUE 03.$GREEN [NVIDIA]$ORANGE Firmware packages$RESET"
-        echo "$divider"
-        echo "$BLUE 1.$RESET Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
-        echo "$BLUE 2.$RESET Core$BLUE CLI$RESET packages"
-        echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
-        echo "$BLUE 4.$RESET$SKY_BLUE Hyprland$RESET Echosystem packages"
-        echo "$BLUE 5.$RESET Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
-        echo "$BLUE 6.$RESET github software packages"
-        echo "$BLUE 7.$RESET INFO PAGE [navigation with up/down arrow]"
-        echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
-        echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
-        echo "$RED x.$RED EXIT$RESET"
-        echo "$divider"
-        read -p "Select Your Preferred Option :" cho
-        echo ""
-
-        case $cho in
-        00)
-            install_pkg_dynamic dialog
-            ;;
-        01)
-            for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        02)
-            for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        03)
-            for pkg in "${firmware_nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        0)
-            menu_essential_dialog
-            ;;
-        1)
-            for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        2)
-            for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        3)
-            for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        4)
-            for pkg in "${hypr_utils[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        5)
-            for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        7)
-            menu_info
-            ;;
-        all_f|ALL_F)
-            for grps in dev_cli core_cli core_gui hypr_utils network_tools_cli;do
-                for pkg in "${grps[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            done
-            ;;
-        x|X)
-            clear
-            break;
-            ;;
-        *)
-            echo "invalid choice !"
-            echo "you need to type the text shown before the dots as option"
-            ;;
-        esac
-    done
-}
-
-source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/auto-cpufreq.sh)
-source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/security.sh)
-
-main_menu (){
-    clear
-    #local down_stat="(downloaded)"
-    local y="[$GREEN installed$RESET ]"
-    local n="[$RED not installed$RESET ]"
-
-    if command_exists tasksel;then tasksel_stat="$y"; else tasksel_stat="$n"; fi
-    if command_exists auto-cpufreq;then acf_stat="$y"; else acf_stat="$n"; fi
-
-    #clear
-    while true;do
-        echo "$WARNING 00.$RESET edit apt source"
-        echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
-        echo "$divider"
-        echo "$BLUE 1.$RESET essential softwares (not made yet)"
-        echo "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)"
-        echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
-        echo "$divider"
-        echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
-        echo "$RED x. EXIT $RESET "
-        echo ""
-        read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho_1
-
-        case $cho_1 in 
-        00)
-            apt_menu
-            ;;
-        01)
-            if command_exists tasksel;then
-                sudo tasksel
-            else
-                install_pkg tasksel
-            fi
-            ;;
-        1)
-            menu_essential
-            ;;
-        2)
-            ufw_menu
-            ;;
-        3)
-            if command_exists auto-cpufreq;then
-                acf
-            else
-                git clone https://github.com/AdnanHodzic/auto-cpufreq.git
-                cd auto-cpufreq
-                sudo ./auto-cpufreq-installer
-                cd ..
-                rm -rf auto-cpufreq
-            fi
-            ;;
-        x|X)
-            break
-            ;;
-        *)
-            echo "invalid choice"
-            ;;
-        esac
-
-    done
-}
-main_menu
-
-
-
