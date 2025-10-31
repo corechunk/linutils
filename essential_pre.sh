@@ -205,13 +205,16 @@ menu_info(){
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 git                   | Version control system                         | CLI (All)                | Essential for dev work            | git
-build-essential       | GCC, G++, Make build tools                     | CLI (Debian-based)       | Core compiler tools               | gcc, g++, make
+build-essential(debian)| GCC, G++, Make build tools                    | CLI (Debian-based)       | Core compiler tools               | gcc, g++, make
+base-devel(arch)                                                                                                                      | [same as above]
 gdb                   | Debugger for compiled languages                | CLI (All)                | Used for debugging C/C++          | gdb
-manpages-dev          | Developer manual pages                         | CLI (All)                | Adds developer manpages           | man
+manpages-dev(debian)  | Developer manual pages                         | CLI (All)                | Adds developer manpages           | man
+man-pages(arch)                                                                                                                       | [same as above]
 make                  | GNU build automation tool                      | CLI (All)                | Often pre-installed               | make
 ninja-build           | Fast build system                              | CLI (All)                | Alternative to make               | ninja
 cmake                 | Cross-platform build system generator          | CLI (All)                | Generates build configs           | cmake
-openjdk-25-jdk        | Java Development Kit (includes JRE)            | CLI/GUI (All)            | Required for Java development     | java, javac
+openjdk-25-jdk(debian)| Java Development Kit (includes JRE)            | CLI/GUI (All)            | Required for Java development     | java, javac
+jdk-openjdk(arch)                                                                                                                     | [same as above]
 python3               | Python programming language                    | CLI/GUI (All)            | Modern scripting language         | python3
 python3-pip           | Python package manager                         | CLI (All)                | For installing Python modules     | pip3
 
