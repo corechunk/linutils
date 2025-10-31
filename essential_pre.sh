@@ -46,11 +46,16 @@ dev_cli_dialog=(
     ninja-build             "Fast alternative build system" on
     cmake                   "Cross-platform C++ build tool" on
     "$openjdk_pkg"          "Java Development Kit (includes JRE)" on
-    python3                 "Python programming language" on
-    python3-pip             "Python package manager" on
+    python3                 "Python programming language" off
+    python3-pip             "Python package manager" off
 )
 dev_cli=()
 shrink dev_cli_dialog dev_cli
+
+echo ""
+for pkg in ${dev_cli[@]};do
+    echo $pkg
+done
 
 #for ((i=0; i<${#dev_cli_dialog[@]}; i+=3)); do
 #    pkg="${dev_cli_dialog[i]}"
