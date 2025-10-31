@@ -8,17 +8,48 @@ Works on **Debian/Ubuntu-based** systems and partially on **Arch-based** systems
 
 ## 🚀 **Usage**
 
-### ✅ **Stable Version**
-For a stable and reliable experience:
+This script supports two main usage modes: **online** (run directly from GitHub) or **local** (run from a cloned repository).  
+
+> ⚠️ **Important:** If using locally, always run the script from its **own directory**; otherwise dependency sourcing will fail.
+
+---
+
+### 🟢 **Option 1: Run Directly from GitHub (Online)**
+Automatically downloads and runs the latest stable scripts:
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutil.sh)
 ```
+- All required scripts will be fetched and sourced automatically.
+- No cloning required.
+- Ideal for quick setups or testing.
+
+---
+
+### 🟡 **Option 2: Run Locally (Cloned Repository)**
+Use this if you cloned the repo and want offline/local execution:
+```
+git clone https://github.com/corechunk/linutils.git
+cd linutils
+bash linutil.sh local
+```
+- The `local` argument tells the script to source dependencies from the local directory instead of downloading them.
+- **Must** be run from the repo root directory (`linutils/`), otherwise dependencies like `base.sh`, `essential.sh`, etc., won't be found.
+
+---
 
 ### 🧪 **Beta Version**
 For testing the latest features and improvements:
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutilBETA.sh)
 ```
+> Works the same way as above (`local` argument supported if cloned).
+
+---
+
+### 🔹 Notes
+- Dependencies are modular; missing or outdated scripts will be fetched automatically when running online.
+- Local execution ensures reproducibility without needing internet.
+- If you encounter issues with missing packages or scripts, check that you are in the repo root directory.
 
 ---
 
@@ -55,7 +86,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linu
 
 ---
 
-## 🛠️ **Package Groups**
+## 🧰 **Package Groups**
 
 ### 🧑‍💻 **Developer Tools (CLI)**
 Includes compilers, debuggers, and build systems.
@@ -89,18 +120,17 @@ GUI-based essentials for desktop systems.
 - `mpv`, `zathura`
 - `obs-studio`, `shotcut`
 - `waybar`, `rofi`
-- `xdg-utils`
+- `xdg-utils`, `xdg-desktop-portal`
+- `maim`, `xclip` (for screenshots & clipboard management)
 
 ---
 
 ### 🌐 **Network & Security Tools**
 Network management, firewall, and system security.
 - `wget`
-- `net-tools`
-- `nmap`
-- `iwd`
 - `ufw`
 - `fail2ban`
+- *(Optional / future)*: `net-tools`, `nmap`, `iwd`
 
 ---
 
@@ -111,12 +141,19 @@ Third-party tools automatically cloned and installed:
 
 ---
 
+### 💾 **Firmware Packages**
+- **Intel**: `firmware-misc-nonfree`, `firmware-linux-nonfree`, `firmware-sof-signed`, `firmware-iwlwifi`  
+- **AMD**: `firmware-amd-graphics`  
+- **NVIDIA**: `nvidia-driver`
+
+---
+
 ## 🧠 **Development Notes**
 
 ### ⚠️ **Current Issues**
-- Option **`00. edit apt source`** — not yet Arch compatible.  
-- Option **`01. Download Desktop Environment (via tasksel)`** — not yet Arch compatible.  
-- **Firewall check (UFW + Fail2Ban)** — detection is unstable/broken on some setups.
+- Option **00. edit apt source** — not yet Arch compatible.  
+- Option **01. Download Desktop Environment (via tasksel)** — not yet Arch compatible.  
+- Firewall detection (UFW + Fail2Ban) may be unstable on some setups.
 
 ---
 
@@ -144,6 +181,7 @@ sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/debian.griffo.io.gpg
 ```
 
 Then add the source:
+
 ```
 echo "deb https://debian.griffo.io/apt $(lsb_release -sc 2>/dev/null) main" | \
 sudo tee /etc/apt/sources.list.d/debian.griffo.io.list
