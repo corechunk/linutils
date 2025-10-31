@@ -56,7 +56,7 @@ done
 #source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/security.sh)
 
 main_menu (){
-    clear
+    #clear
     #local down_stat="(downloaded)"
     local y="[$GREEN installed$RESET ]"
     local n="[$RED not installed$RESET ]"
