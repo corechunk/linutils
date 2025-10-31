@@ -41,6 +41,9 @@ network_tools_cli=(
 )
 
 core_cli=(
+    gawk               # needed for ble.sh [ core dependency ]
+    pipewire
+    pipewire-audio-client-libraries
     tmux               # terminal multiplexer
     neovim             # cli code editor [standard]
     nano               # cli text editor [standard]
@@ -58,6 +61,8 @@ core_cli=(
 )
 
 core_gui=(
+    blueman
+    network-manager   # may work in cli but no need in cli/server setup
     kitty        # excelent terminal emulator [supports: image, mouse-trail(from v0.37)]
     thunar       # nice & compatible file manager
     mousepad     # text editor [like notepad from windows]
@@ -67,12 +72,32 @@ core_gui=(
     shotcut      # video editor [free]
     waybar       # taskbar type thing
     rofi
+    xdg-desktop-portal
     xdg-utils    # cli [for all Desktop Environment]
 )
 
 github_apps=(
     oh-my-posh
     auto-cpufreq
+)
+
+hypr_utils=(
+    xdg-desktop-portal-hyprland
+    hyprpaper
+    hyprcursor
+)
+
+firmware-intel=(
+    firmware-misc-nonfree
+    firmware-linux-nonfree
+    firmware-sof-signed
+    firmware-iwlwifi
+)
+firmware-amd=(
+    firmware-amd-graphics
+)
+firmware-nvidia=(
+    nvidia-driver
 )
 
 dev_sign=" [ unavailable right now ] "
