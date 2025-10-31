@@ -40,7 +40,7 @@ bash linutil.sh local
 
 ---
 
-### 🧪 **Beta Version [ broken right now ]**
+### 🧪 **Beta Version**
 For testing the latest features and improvements:
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutilBETA.sh)

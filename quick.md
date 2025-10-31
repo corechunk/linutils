@@ -18,7 +18,7 @@
 - Dotfiles & wallpapers (`4`)  
 - Exit (`x`)
 
-**Step 3: Optional Beta Testing [ broken right now ]**
+**Step 3: Optional Beta Testing**
 
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutilBETA.sh)
