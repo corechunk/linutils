@@ -30,63 +30,60 @@ dev_cli=(
     python3
     python3-pip
 )
-
-network_tools_cli=(
-    wget
-    net-tools
-    nmap
-    iwd
-    ufw
-    fail2ban
-)
-
 core_cli=(
     gawk               # needed for ble.sh [ core dependency ]
-    pipewire
-    pipewire-audio-client-libraries
     tmux               # terminal multiplexer
     neovim             # cli code editor [standard]
     nano               # cli text editor [standard]
     mpv                # cli media playback [gui will work in Desktop Environments]
     btop               # System Observer [ like: taskmanager ] > even tho idk if management is possible
-    fastfetch
-    zip
-    unzip
-    bat
-    lsd
-    zoxide
+    fastfetch          # system stats view
+    zip                # no description needed
+    unzip              # no description needed
+    bat                # cat alternative
+    lsd                # modern ls alternative
+    zoxide             # modern cd alternative
     fzf
-    ripgrep
-    fonts-firacode
+    ripgrep            # modern grep alternative
+    fonts-firacode     # fonts without glyphs
 )
 
+network_tools_cli=(
+    wget
+    # net-tools  # ill add when i understand each
+    # nmap
+    # iwd
+    ufw
+    fail2ban
+)
+unknown=(
+    pipewire
+    pipewire-audio-client-libraries
+)
 core_gui=(
-    blueman
-    network-manager   # may work in cli but no need in cli/server setup
-    kitty        # excelent terminal emulator [supports: image, mouse-trail(from v0.37)]
-    thunar       # nice & compatible file manager
-    mousepad     # text editor [like notepad from windows]
-    mpv          # media playback audio/video
+    blueman            # gui bluetooth device manager[blueman-manager]
+    network-manager    # may work in cli but no need in cli/server setup
+    kitty              # excelent terminal emulator [supports: image, mouse-trail(from v0.37)]
+    thunar             # nice & compatible file manager
+    mousepad           # text editor [like notepad from windows]
+    mpv                # media playback audio/video
     zathura
-    obs-studio   # screen recorder/streamer [free]
-    shotcut      # video editor [free]
-    waybar       # taskbar type thing
-    rofi
-    xdg-desktop-portal
-    xdg-utils    # cli [for all Desktop Environment]
+    obs-studio         # screen recorder/streamer [free]
+    shotcut            # video editor [free]
+    waybar             # taskbar type thing
+    rofi               # menu type displayer
+    xdg-desktop-portal # needed for screen share [ All DE ]
+    xdg-utils          # cli [for all Desktop Environment]
 )
-
-github_apps=(
-    oh-my-posh
-    auto-cpufreq
-)
-
 hypr_utils=(
     xdg-desktop-portal-hyprland
     hyprpaper
     hyprcursor
 )
-
+github_apps=(   # this section will be constructed later
+    oh-my-posh
+    auto-cpufreq
+)
 firmware-intel=(
     firmware-misc-nonfree
     firmware-linux-nonfree
@@ -107,17 +104,40 @@ menu_essential(){
         local cho
         echo ""
         echo "$divider"
-        echo "$BLUE 1.$RESET$dev_sign Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
-        echo "$BLUE 2.$RESET$dev_sign Core$YELLOW GUI$RESET packages"
-        echo "$BLUE 3.$RESET$dev_sign Core$BLUE CLI$RESET packages"
-        echo "$BLUE 4.$RESET$dev_sign Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
-        echo "$BLUE 5.$RESET$dev_sign github software packages"
-        echo "$RED all.$RESET$dev_sign install$ORANGE all packages$RESET shown here"
+        echo "$BLUE 01.$BLUE [INTEL]$ORANGE Firmware packages$RESET"
+        echo "$BLUE 02.$RED [AMD]$ORANGE Firmware packages$RESET"
+        echo "$BLUE 03.$GREEN [NVIDIA]$ORANGE Firmware packages$RESET"
+        echo "$divider"
+        echo "$BLUE 1.$RESET Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
+        echo "$BLUE 3.$RESET Core$BLUE CLI$RESET packages"
+        echo "$BLUE 2.$RESET Core$YELLOW GUI$RESET packages"
+        echo "$BLUE 4.$RESET Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
+        echo "$BLUE 5.$RESET github software packages"
+        echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
         echo "$RED all_f.$RESET install$ORANGE all packages$RESET shown here [force]"
+        echo "$RED x.$RED EXIT$RESET"
         echo "$divider"
         read -p "Select Your Preferred Option :" cho
+        echo ""
 
         case $cho in
+        01)
+            for pkg in "${firmware-intel[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            ;;
+        02)
+            for pkg in "${firmware-amd[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            ;;
+        03)
+            for pkg in "${firmware-nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            ;;
+        1)
+            for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            ;;
+        2)
+            for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            ;;
+        3)
+            for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done
         all_f|ALL_F)
             for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
             for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
