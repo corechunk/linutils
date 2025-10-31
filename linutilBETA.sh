@@ -87,30 +87,56 @@ main_menu (){
     if command_exists auto-cpufreq; then acf_stat="$y"; else acf_stat="$n"; fi
 
     while true; do
-        echo "$WARNING 00.$RESET edit apt source"
-        echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
-        echo "$divider"
-        echo "$BLUE 1.$RESET essential softwares (not made yet)"
-        echo "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)"
-        echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
-        echo "$divider"
-        echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
-        echo "$RED x. EXIT $RESET"
-        echo ""
-        read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho_1
+        cho_1=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" \
+        20 60 15 \
+        00 "Edit apt source" \
+        01 "Download Desktop Environment (via tasksel) $tasksel_stat" \
+        1  "essential softwares (not made yet)" \
+        2  "Enable firewall (via ufw & fail2ban)" \
+        3  "Enable efficient battery optimization (via auto-cpufreq) $acf_stat" \
+        4  "dotfiles and wallpapers (not made yet)" \
+        x  "EXIT" \
+        2>&1 >/dev/tty)
+        #sleep 1;clear;reset
+        tput reset
+
+        #cho_1=$(dialog \
+        #--backtitle "https://github.com/corechunk/linutils.git" \
+        #--title "Main Menu" \
+        #--menu "Select the Preferred Option :" 20 60 15 \
+        #00 "$WARNING 00.$RESET edit apt source" \
+        #01 "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat" \
+        #1  "$BLUE 1.$RESET essential softwares (not made yet)" \
+        #2  "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)" \
+        #3  "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat" \
+        #4  "$MAGENTA 4. dotfiles and wallpapers$RESET (not made yet)" \
+        #x  "$RED x. EXIT $RESET" \
+        #2>&1 >/dev/tty)
+
+        #echo "$WARNING 00.$RESET edit apt source"
+        #echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
+        #echo "$divider"
+        #echo "$BLUE 1.$RESET essential softwares (not made yet)"
+        #echo "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)"
+        #echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
+        #echo "$divider"
+        #echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
+        #echo "$RED x. EXIT $RESET"
+        #echo ""
+        #read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho_1
 
         case $cho_1 in
-            00) apt_menu ;;
-            01)
+            00) clear;apt_menu ;;
+            01) clear;
                 if command_exists tasksel; then
                     sudo tasksel
                 else
                     install_pkg tasksel
                 fi
                 ;;
-            1) menu_essential ;;
-            2) ufw_menu ;;
-            3)
+            1) clear;menu_essential ;;
+            2) clear;ufw_menu ;;
+            3) clear;
                 if command_exists auto-cpufreq; then
                     acf
                 else
@@ -121,8 +147,11 @@ main_menu (){
                     rm -rf auto-cpufreq
                 fi
                 ;;
-            x|X) break ;;
-            *) echo "invalid choice" ;;
+            x|X) clear;
+                #clear
+                break
+                ;;
+            *) clear;echo "invalid choice" ;;
         esac
     done
 }
