@@ -215,6 +215,7 @@ menu_essential(){
         echo "$BLUE 4.$RESET$SKY_BLUE Hyprland$RESET Echosystem packages"
         echo "$BLUE 5.$RESET Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
         echo "$BLUE 6.$RESET github software packages"
+        echo "$BLUE 7.$RESET INFO PAGE [navigation with up/down arrow]"
         echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
         echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
         echo "$RED x.$RED EXIT$RESET"
