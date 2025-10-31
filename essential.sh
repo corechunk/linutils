@@ -70,17 +70,23 @@ core_gui=(
     zathura
     obs-studio         # screen recorder/streamer [free]
     shotcut            # video editor [free]
-    waybar             # taskbar type thing
-    rofi               # menu type displayer
     xdg-desktop-portal # needed for screen share [ All DE ]
     xdg-utils          # cli [for all Desktop Environment]
+    maim               # cli scriptable screenshot [full/region] [all DE and protocol]
+    xclip              # cli scriptable clipboard for ss [all DE and protocol]
 )
 hypr_utils=(
     xdg-desktop-portal-hyprland
     hyprpaper
     hyprcursor
+    waybar             # taskbar type thing
+    rofi               # menu type displayer
+    grim               # cli scriptable screenshot [full]  [wayland based]
+    slurp              # [region select for grim] [wayland based]
+    wl-copy            # cli scriptable clipboard for ss [wayland based]
 )
 github_apps=(   # this section will be constructed later
+                # cause these need special fetching from repo [custom]
     oh-my-posh
     auto-cpufreq
 )
@@ -109,18 +115,22 @@ menu_essential(){
         echo "$BLUE 03.$GREEN [NVIDIA]$ORANGE Firmware packages$RESET"
         echo "$divider"
         echo "$BLUE 1.$RESET Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
-        echo "$BLUE 3.$RESET Core$BLUE CLI$RESET packages"
-        echo "$BLUE 2.$RESET Core$YELLOW GUI$RESET packages"
-        echo "$BLUE 4.$RESET Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
-        echo "$BLUE 5.$RESET github software packages"
+        echo "$BLUE 2.$RESET Core$BLUE CLI$RESET packages"
+        echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
+        echo "$BLUE 4.$RESET$SKY_BLUE Hyprland$RESET Echosystem packages"
+        echo "$BLUE 5.$RESET Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
+        echo "$BLUE 6.$RESET github software packages"
         echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
-        echo "$RED all_f.$RESET install$ORANGE all packages$RESET shown here [force]"
+        echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
         echo "$RED x.$RED EXIT$RESET"
         echo "$divider"
         read -p "Select Your Preferred Option :" cho
         echo ""
 
         case $cho in
+        00)
+            install_pkg_dynamic dialog
+            ;;
         01)
             for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done
             ;;
@@ -139,11 +149,16 @@ menu_essential(){
         3)
             for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done
             ;;
-        all_f|ALL_F)
-            for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done
+        4)
+            for pkg in "${hypr_utils[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            ;;
+        5)
             for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            ;;
+        all_f|ALL_F)
+            for grps in dev_cli core_cli core_gui hypr_utils network_tools_cli;do
+                for pkg in "${grps[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            done
             ;;
         x|X)
             clear
