@@ -138,6 +138,7 @@ menu_essential(){
             ;;
         3)
             for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done
+            ;;
         all_f|ALL_F)
             for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
             for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
