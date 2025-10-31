@@ -13,6 +13,9 @@ This script supports two main usage modes: **online** (run directly from GitHub)
 > ⚠️ **Important:** If using locally, always run the script from its **own directory**; otherwise dependency sourcing will fail.
 
 ---
+You can follow Quick Start : [[ visit page ]](./quick.md)
+
+---
 
 ### 🟢 **Option 1: Run Directly from GitHub (Online)**
 Automatically downloads and runs the latest stable scripts:
@@ -37,7 +40,7 @@ bash linutil.sh local
 
 ---
 
-### 🧪 **Beta Version**
+### 🧪 **Beta Version [ broken right now ]**
 For testing the latest features and improvements:
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutilBETA.sh)
