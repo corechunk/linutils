@@ -63,78 +63,105 @@ done
 #    dev_cli+=("$pkg")
 #    echo "$pkg"
 #done
-core_cli=(
-    gawk               # needed for ble.sh [ core dependency ]
-    tmux               # terminal multiplexer
-    neovim             # cli code editor [standard]
-    nano               # cli text editor [standard]
-    mpv                # cli media playback [gui will work in Desktop Environments]
-    btop               # System Observer [ like: taskmanager ] > even tho idk if management is possible
-    fastfetch          # system stats view
-    zip                # no description needed
-    unzip              # no description needed
-    bat                # cat alternative
-    lsd                # modern ls alternative
-    zoxide             # modern cd alternative
-    fzf
-    ripgrep            # modern grep alternative
-    fonts-firacode     # fonts without glyphs
-)
 
-network_tools_cli=(
-    wget
+core_cli_dialog=(
+    gawk               "Needed for ble.sh (core dependency)" on
+    tmux               "Terminal multiplexer (split panes, sessions)" on
+    neovim             "Modern Vim-based text editor" on
+    nano               "Beginner-friendly terminal text editor" on
+    mpv                "CLI/GUI media player (audio/video)" off
+    btop               "System monitor (like Task Manager)" on
+    fastfetch          "System information fetcher (like neofetch)" on
+    zip                "File compression utility" on
+    unzip              "File decompression utility" on
+    bat                "Modern cat alternative with syntax highlighting" on
+    lsd                "Modern ls alternative with icons and colors" on
+    zoxide             "Smarter cd command that learns directory usage" on
+    fzf                "Fuzzy finder for fast search" on
+    ripgrep            "Fast grep alternative for searching text" on
+    fonts-firacode     "Monospace developer font (no glyphs)" off
+)
+core_cli=()
+shrink core_cli_dialog core_cli
+
+network_tools_cli_dialog=(
+    wget          "Command-line downloader (HTTP, HTTPS, FTP)" on
     # net-tools  # ill add when i understand each
     # nmap
     # iwd
-    ufw
-    fail2ban
+    ufw           "Simple firewall manager (iptables frontend)" on
+    fail2ban      "Intrusion prevention tool for SSH and services" on
 )
-unknown=(
-    pipewire
-    pipewire-audio-client-libraries
+network_tools_cli=()
+shrink network_tools_cli_dialog network_tools_cli
+
+unknown_dialog=(
+    pipewire                       "Modern audio/video server (PulseAudio/Jack replacement)" on
+    pipewire-audio-client-libraries "Audio client libraries for PipeWire" on
 )
-core_gui=(
-    blueman            # gui bluetooth device manager[blueman-manager]
-    network-manager    # may work in cli but no need in cli/server setup
-    kitty              # excelent terminal emulator [supports: image, mouse-trail(from v0.37)]
-    thunar             # nice & compatible file manager
-    mousepad           # text editor [like notepad from windows]
-    mpv                # media playback audio/video
-    zathura
-    obs-studio         # screen recorder/streamer [free]
-    shotcut            # video editor [free]
-    xdg-desktop-portal # needed for screen share [ All DE ]
-    xdg-utils          # cli [for all Desktop Environment]
-    maim               # cli scriptable screenshot [full/region] [all DE and protocol]
-    xclip              # cli scriptable clipboard for ss [all DE and protocol]
+unknown=()
+shrink unknown_dialog unknown
+
+core_gui_dialog=(
+    blueman             "Bluetooth device manager GUI (blueman-manager)" on
+    network-manager     "Network connection manager (wired/wireless)" on
+    kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
+    thunar              "Lightweight file manager (XFCE)" on
+    mousepad            "Simple GUI text editor (Notepad-like)" on
+    mpv                 "Media player for audio/video (CLI+GUI)" on
+    zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
+    obs-studio          "Screen recorder and streamer (open-source)" on
+    shotcut             "Non-linear video editor (free)" off
+    xdg-desktop-portal  "Desktop integration/screen share service (required by DEs)" on
+    xdg-utils           "CLI desktop tools (xdg-open, mime handling, etc.)" on
+    maim                "CLI screenshot utility (full/region)" on
+    xclip               "CLI clipboard manager (X11/Wayland)" on
 )
-hypr_utils=(
-    xdg-desktop-portal-hyprland
-    hyprpaper
-    hyprcursor
-    waybar             # taskbar type thing
-    rofi               # menu type displayer
-    grim               # cli scriptable screenshot [full]  [wayland based]
-    slurp              # [region select for grim] [wayland based]
-    wl-copy            # cli scriptable clipboard for ss [wayland based]
+core_gui=()
+shrink core_gui_dialog core_gui
+
+hypr_utils_dialog=(
+    xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
+    hyprpaper                   "Wallpaper daemon for Hyprland" on
+    hyprcursor                  "Cursor theme manager for Hyprland" on
+    waybar                      "Customizable status/task bar for Wayland" on
+    rofi                        "Launcher and window switcher (X11/Wayland)" on
+    grim                        "Screenshot tool for Wayland" on
+    slurp                       "Region selector for screenshots (Wayland)" on
+    wl-copy                     "Clipboard manager for Wayland" on
 )
-github_apps=(   # this section will be constructed later
-                # cause these need special fetching from repo [custom]
-    oh-my-posh
-    auto-cpufreq
+hypr_utils=()
+shrink hypr_utils_dialog hypr_utils
+
+github_apps_dialog=(
+    oh-my-posh   "Shell prompt theming engine (cross-shell)" on
+    auto-cpufreq "CPU frequency optimizer and power saver" on
 )
-firmware_intel=(
-    firmware-misc-nonfree
-    firmware-linux-nonfree
-    firmware-sof-signed
-    firmware-iwlwifi
+github_apps=()
+shrink github_apps_dialog github_apps
+
+
+
+firmware_intel_dialog=(
+    firmware-misc-nonfree "Misc Intel firmware (Wi-Fi, Bluetooth, etc.)" on
+    firmware-linux-nonfree "General non-free Linux firmware" on
+    firmware-sof-signed    "Intel Sound Open Firmware (audio DSP)" on
+    firmware-iwlwifi       "Intel Wi-Fi firmware" on
 )
-firmware_amd=(
-    firmware-amd-graphics
+firmware_intel=()
+shrink firmware_intel_dialog firmware_intel
+
+firmware_amd_dialog=(
+    firmware-amd-graphics "AMD GPU firmware (for display acceleration)" on
 )
-firmware_nvidia=(
-    nvidia-driver
+firmware_amd=()
+shrink firmware_amd_dialog firmware_amd
+
+firmware_nvidia_dialog=(
+    nvidia-driver "Proprietary NVIDIA driver (GPU support)" on
 )
+firmware_nvidia=()
+shrink firmware_nvidia_dialog firmware_nvidia
 
 
 
