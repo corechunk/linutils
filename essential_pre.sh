@@ -27,12 +27,12 @@ shrink() {
 
     dest_ref=()  # clear destination array
 
-    echo ""
+    #echo ""
     for ((i=0; i<${#src_ref[@]}; i+=3)); do
         pkg="${src_ref[i]}"
         [[ $pkg == _HEADER_* ]] && continue   # skip headers
         dest_ref+=("$pkg")
-        echo "$pkg"
+        #echo "$pkg"
     done
 }
 
@@ -52,10 +52,10 @@ dev_cli_dialog=(
 dev_cli=()
 shrink dev_cli_dialog dev_cli
 
-echo ""
-for pkg in ${dev_cli[@]};do
-    echo $pkg
-done
+#echo ""
+#for pkg in ${dev_cli[@]};do
+#    echo $pkg
+#done
 
 #for ((i=0; i<${#dev_cli_dialog[@]}; i+=3)); do
 #    pkg="${dev_cli_dialog[i]}"

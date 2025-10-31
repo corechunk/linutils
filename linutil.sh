@@ -6,27 +6,9 @@
 # dependency ( git, !dialog[in-future]  )
 
 #clear
-# Set some colors for output messages 
-OK="$(tput setaf 2)[OK]$(tput sgr0)"
-ERROR="$(tput setaf 1)[ERROR]$(tput sgr0)"
-NOTE="$(tput setaf 3)[NOTE]$(tput sgr0)"
-INFO="$(tput setaf 4)[INFO]$(tput sgr0)"
-WARN="$(tput setaf 1)[WARN]$(tput sgr0)"
-CAT="$(tput setaf 6)[ACTION]$(tput sgr0)"
-MAGENTA="$(tput setaf 5)"
-ORANGE="$(tput setaf 214)"
-WARNING="$(tput setaf 1)"
-RED="$(tput setaf 1)"
-YELLOW="$(tput setaf 3)"
-GREEN="$(tput setaf 2)"
-BLUE="$(tput setaf 4)"
-SKY_BLUE="$(tput setaf 6)"
-RESET="$(tput sgr0)"
-log_start="$GREEN ----------$BLUE  ----------$RESET"
-log_end="$BLUE ----------$GREEN  ----------$RESET"
-divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
 
-echo "loading data from online ..."
+
+
 
 # these are loaded from the same repo that contained this script itself
 # https://github.com/corechunk/linutils
@@ -44,16 +26,40 @@ dep=(
     security.sh
 )
 
-for depp in "${dep[@]}";do
-    source <(curl -fsSL "$main/$depp")
-done
+#if [[ $1 == local ]];then
+#    echo "Sourcing Dependencies Locally ..."
+#    for file in "${dep[@]}";do
+#        source ./$file
+#    done
+#else
+#    echo "Sourcing Dependencies remotely (from internet) ..."
+#    for depp in "${dep[@]}";do
+#        source <(curl -fsSL "$main/$depp")
+#    done
+#fi
 
-#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/base.sh)
-#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/apt-source.sh)
-#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/essential_pre.sh)
-#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/essential.sh)
-#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/auto-cpufreq.sh)
-#source <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/security.sh)
+if [[ $1 == local ]]; then
+    echo "Sourcing dependencies locally..."
+    for file in "${dep[@]}"; do
+        if [[ -f ./$file ]]; then
+            source "./$file"
+        else
+            echo "⚠️  Local file $file not found!"
+        fi
+    done
+else
+    echo "Sourcing dependencies remotely..."
+    for file in "${dep[@]}"; do
+        content=$(curl -fsSL "$main/$file")
+        if [[ $? -eq 0 && -n "$content" ]]; then
+            source <(echo "$content")
+        else
+            echo "⚠️  Failed to fetch $file from remote."
+        fi
+    done
+fi
+
+
 
 main_menu (){
     #clear
