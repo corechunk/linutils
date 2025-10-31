@@ -196,7 +196,7 @@ menu_info(){
 ============================================================
 
 ==============================================================
-                        INFO SECTION
+                       $GREEN INFO SECTION$RESET
 ==============================================================
 ========================= Navigation =========================
  Use ↑ ↓ / PgUp / PgDn to scroll vertically
@@ -204,7 +204,7 @@ menu_info(){
  Press 'q' to exit viewer
 ==============================================================
 ** AI generated so please check official doc first **
-───────────────────────────────[ Development CLI Packages ]───────────────────────────────
+───────────────────────────────$MAGENTA[ Development CLI Packages ]$RESET───────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 git                   | Version control system                         | CLI (All)                | Essential for dev work            | git
@@ -218,7 +218,7 @@ openjdk-25-jdk        | Java Development Kit (includes JRE)            | CLI/GUI
 python3               | Python programming language                    | CLI/GUI (All)            | Modern scripting language         | python3
 python3-pip           | Python package manager                         | CLI (All)                | For installing Python modules     | pip3
 
-────────────────────────────────[ Core CLI Packages ]───────────────────────────────────
+────────────────────────────────$BLUE[ Core CLI Packages ]$RESET───────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 gawk                  | Text processing and scripting tool             | CLI (All)                | Dependency for ble.sh             | gawk
@@ -236,14 +236,14 @@ fzf                   | Fuzzy finder                                   | CLI (Al
 ripgrep               | Fast text searcher                             | CLI (All)                | Modern grep alternative           | rg
 fonts-firacode        | Monospace developer font                       | GUI/Desktop only         | No glyphs included                | N/A
 
-───────────────────────────────[ Network Tools CLI ]────────────────────────────────────
+───────────────────────────────$ORANGE[ Network Tools CLI ]$RESET────────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 wget                  | Command-line downloader                        | CLI (All)                | Supports HTTP, HTTPS, FTP         | wget
 ufw                   | Simple firewall manager                        | CLI (All)                | Frontend for iptables             | ufw
 fail2ban              | Intrusion prevention tool                      | CLI (Server/Desktop)     | Protects SSH/services             | fail2ban-client
 
-────────────────────────────────[ Core GUI Packages ]───────────────────────────────────
+────────────────────────────────$GREEN[ Core GUI Packages ]$RESET───────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 blueman               | Bluetooth device manager (GUI)                 | Desktop (X11/Wayland)    | GUI frontend for bluetoothctl     | blueman-manager
@@ -260,7 +260,7 @@ xdg-utils             | Desktop integration utilities                  | Desktop
 maim                  | Screenshot tool                                | Desktop (X11/Wayland)    | Region and full capture support   | maim
 xclip                 | Clipboard tool                                 | Desktop (X11/Wayland)    | Scriptable clipboard access       | xclip
 
-───────────────────────────────[ Hyprland Utilities ]────────────────────────────────────
+───────────────────────────────$SKY_BLUE[ Hyprland Utilities ]$RESET────────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 xdg-desktop-portal-hyprland | Hyprland portal backend                 | Wayland (Hyprland)       | Enables screenshots/sharing       | N/A
@@ -272,13 +272,13 @@ grim                  | Screenshot tool                                | Wayland
 slurp                 | Region selector for screenshots                | Wayland only             | Used with grim                   | slurp
 wl-copy               | Clipboard utility                              | Wayland only             | Works like xclip alternative      | wl-copy
 
-───────────────────────────────[ GitHub Apps (Custom Install) ]───────────────────────────
+───────────────────────────────$YELLOW[ GitHub Apps (Custom Install) ]$RESET───────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 oh-my-posh            | Shell prompt theme engine                      | CLI (All)                | Adds themes and status segments   | oh-my-posh
 auto-cpufreq          | CPU frequency optimizer                        | CLI (All)                | Power saving tool                 | auto-cpufreq
 
-────────────────────────────────[ Firmware Packages ]────────────────────────────────────
+────────────────────────────────$ORANGE[ Firmware Packages ]$RESET────────────────────────────────────
 Chipset               | Packages                                       | Compatibility            | Remarks
 ---------------------------------------------------------------------------------------------------------------
 INTEL                 | firmware-misc-nonfree,firmware-linux-nonfree,  | x86_64 | Enables Intel Wi-Fi, audio, GPU firmware
@@ -286,11 +286,11 @@ INTEL                 | firmware-misc-nonfree,firmware-linux-nonfree,  | x86_64 
 AMD                   | firmware-amd-graphics                          | x86_64 | Required for AMD GPUs
 NVIDIA                | nvidia-driver                                  | x86_64 | Proprietary NVIDIA driver
 
-==================================[[ END ]]==================================
+==================================$RED[[ END ]]$RESET==================================
 "
 
     # Use less for scrollable output
-    echo "$info_text" | less -RS
+    echo -e "$info_text" | less -RS
 }
 
 
