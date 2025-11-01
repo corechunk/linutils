@@ -6,7 +6,8 @@
 dev_sign=" [ unavailable right now ] "
 menu_essential(){
     while true;do
-        local cho
+        local cho_2=""
+
         if [[ $mode == cli ]];then
             echo ""
             echo "$divider"
@@ -25,29 +26,30 @@ menu_essential(){
             echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
             echo "$RED x.$RED EXIT$RESET"
             echo "$divider"
-            read -p "Select Your Preferred Option : " cho
+            read -p "Select Your Preferred Option : " cho_2
             echo ""
-        elif [[ $mode == cli ]];then
-            cho=$(dialog --title " ##### ##### Essential Packages ##### ##### "\
+        elif [[ $mode == tui ]];then
+            cho_2=$(dialog --title " ##### ##### Essential Packages ##### ##### " \
             --menu "Select Option : " 30 90 25\
-            01 "[INTEL] Firmware packages"\
-            02 "[AMD] Firmware packages"\
-            03 "[NVIDIA] Firmware packages"\
-            1 "Core CLI Dev packages [e.g. compiler or build tools]"\
-            2 "Core CLI packages"\
-            3 "Core GUI packages"\
-            4 "Hyprland Echosystem packages"\
-            5 "Core Network related packages[e.g.firewall,network-manager]"\
-            6 "github software packages"\
-            7 "INFO PAGE [navigation with up/down arrow]"\
-            all "install all packages$RESET shown here"\
-            all_f "install [1-5] [force]"\
-            x "EXIT"\
+            01 "[INTEL] Firmware packages" \
+            02 "[AMD] Firmware packages" \
+            03 "[NVIDIA] Firmware packages" \
+            1 "Core CLI Dev packages [e.g. compiler or build tools]" \
+            2 "Core CLI packages" \
+            3 "Core GUI packages" \
+            4 "Hyprland Echosystem packages" \
+            5 "Core Network related packages[e.g.firewall,network-manager]" \
+            6 "github software packages" \
+            7 "INFO PAGE [navigation with up/down arrow]" \
+            all "install all packages$RESET shown here" \
+            all_f "install [1-5] [force]" \
+            x "EXIT" \
             2>&1 >/dev/tty)
         fi
 
+
         if [[ $mode == cli ]];then
-            case $cho in
+            case $cho_2 in
             00)install_pkg_dynamic dialog ;;
             01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
             02)for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
@@ -67,10 +69,16 @@ menu_essential(){
                 echo "invalid choice !"
                 echo "you need to type the text shown before the dots as option" ;;
             esac
-        elif [[ $mode == tui ]];then
-            case $cho in
-            01) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "Intel Firmwares" --checklist "Select/toggle preffered options : " "${firmware_intel[@]}" 2>&1 >/dev/tty); pkgs=(); for (( i=0; i<${#raw_pkgs[@]}; i++ ));do [[ ${raw_pkgs[$i]} == ::* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done
-            
+        elif [[ $mode == tui ]];then   # [to future me] make the cli portion proccess like this one; im lazy right now
+            echo ""
+            case $cho_2 in
+            01) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "Intel Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_intel_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == ::* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            02) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "AMD Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_amd_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == ::* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            03) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "NVIDIA Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_nvidia_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == ::* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            1) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "dev_cli" --checklist "Select/toggle preffered options : " 20 60 15 "${dev_cli_dialog[@]}" 2>&1 >/dev/tty);read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for (( i=0; i<${#raw_pkgs[@]}; i++ ));do [[ ${raw_pkgs[$i]} == ::* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done ;prompt_install_type  "${pkgs[@]}" ;;
+            2)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "core_cli" --checklist "Select/toggle preffered options : " 30 90 25 "${core_cli_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == ::* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            3)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "core_gui" --checklist "Select/toggle preffered options : " 30 90 25 "${core_gui_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == ::* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            x) tput reset;clear;break ;;
             esac
         fi
     done

@@ -122,10 +122,11 @@ prompt_install_type(){
             echo "6. uninstall without prompt [force]"
             echo "7. purge with prompt"
             echo "8. purge without prompt [force]"
+            echo "x. EXIT"
             echo ""
             read -p "Choose preferred option : " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "" --menu "Choose preferred option : " 30 90 25\
+            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " 30 90 25\
             1 "install with prompt"\
             2 "install without prompt [force]"\
             3 "re-install with prompt"\
@@ -134,19 +135,21 @@ prompt_install_type(){
             6 "uninstall without prompt [force]"\
             7 "purge with prompt"\
             8 "purge without prompt [force]"\
+            x "EXIT"\
             2>&1 >/dev/tty)
         fi
     
 
         case $cho in
-        1) install_pkgs_dynamic default ${pkgs[@]};break ;;
-        2) install_pkgs_dynamic install-force ${pkgs[@]};break ;;
-        3) install_pkgs_dynamic re-install ${pkgs[@]};break ;;
-        4) install_pkgs_dynamic re-install-force ${pkgs[@]};break ;;
-        5) install_pkgs_dynamic remove ${pkgs[@]};break ;;
-        6) install_pkgs_dynamic remove-force ${pkgs[@]};break ;;
-        7) install_pkgs_dynamic purge ${pkgs[@]};break ;;
-        8) install_pkgs_dynamic purge-force ${pkgs[@]};break ;;
+        1) install_pkgs_dynamic default "${pkgs[@]}";return 0 ;;
+        2) install_pkgs_dynamic install-force "${pkgs[@]}";return 0 ;;
+        3) install_pkgs_dynamic re-install "${pkgs[@]}";return 0 ;;
+        4) install_pkgs_dynamic re-install-force "${pkgs[@]}";return 0 ;;
+        5) install_pkgs_dynamic remove "${pkgs[@]}";return 0 ;;
+        6) install_pkgs_dynamic remove-force "${pkgs[@]}";return 0 ;;
+        7) install_pkgs_dynamic purge "${pkgs[@]}";return 0 ;;
+        8) install_pkgs_dynamic purge-force "${pkgs[@]}";return 0 ;;
+        x|X) clear;tput reset;return 1 ;;
         *) tput reset;clear;echo -e "invalid option ! \n" ;;
         esac
     done

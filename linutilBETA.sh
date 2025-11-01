@@ -118,8 +118,9 @@ main_menu (){
     if command_exists auto-cpufreq; then acf_stat="$y"; else acf_stat="$n"; fi
 
     while true; do
+    local cho
         if [[ $mode == tui ]];then
-            cho_1=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" 20 60 15 \
+            cho=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" 20 60 15 \
             00 "Edit apt source" \
             01 "Download Desktop Environment (via tasksel) $tasksel_stat" \
             1  "essential softwares (not made yet)" \
@@ -129,7 +130,7 @@ main_menu (){
             x  "EXIT" \
             2>&1 >/dev/tty)
             #sleep 1;clear;reset
-            tput reset
+            #tput reset
         elif [[ $mode == cli ]];then
             echo "$WARNING 00.$RESET edit apt source"
             echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
@@ -141,13 +142,13 @@ main_menu (){
             echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
             echo "$RED x. EXIT $RESET"
             echo ""
-            read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho_1
+            read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho
             clear
         #else
         #    echo "invalid option mode"
         fi
 
-        case $cho_1 in
+        case $cho in
             00) clear;apt_menu ;;
             01) clear;
                 if command_exists tasksel; then

@@ -75,12 +75,12 @@ core_cli_dialog=(
     fastfetch          "System information fetcher (like neofetch)" on
     zip                "File compression utility" on
     unzip              "File decompression utility" on
-    bat                "Modern cat alternative with syntax highlighting" on
-    lsd                "Modern ls alternative with icons and colors" on
-    zoxide             "Smarter cd command that learns directory usage" on
+    bat                "Modern cat alternative with syntax highlighting" off
+    lsd                "Modern ls alternative with icons and colors" off
+    zoxide             "Smarter cd command that learns directory usage" off
     fzf                "Fuzzy finder for fast search" on
     ripgrep            "Fast grep alternative for searching text" on
-    fonts-firacode     "Monospace developer font (no glyphs)" off
+    fonts-firacode     "Monospace developer font (no glyphs)" on
 )
 core_cli=()
 shrink core_cli_dialog core_cli
@@ -97,7 +97,7 @@ network_tools_cli=()
 shrink network_tools_cli_dialog network_tools_cli
 
 unknown_dialog=(
-    pipewire                       "Modern audio/video server (PulseAudio/Jack replacement)" on
+    pipewire                        "Modern audio/video server (PulseAudio/Jack replacement)" on
     pipewire-audio-client-libraries "Audio client libraries for PipeWire" on
 )
 unknown=()
@@ -112,7 +112,7 @@ core_gui_dialog=(
     mpv                 "Media player for audio/video (CLI+GUI)" on
     zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
     obs-studio          "Screen recorder and streamer (open-source)" on
-    shotcut             "Non-linear video editor (free)" off
+    shotcut             "Non-linear video editor (free)" on
     xdg-desktop-portal  "Desktop integration/screen share service (required by DEs)" on
     xdg-utils           "CLI desktop tools (xdg-open, mime handling, etc.)" on
     maim                "CLI screenshot utility (full/region)" on
@@ -142,7 +142,7 @@ github_apps=()
 shrink github_apps_dialog github_apps
 
 
-
+#################################################
 firmware_intel_dialog=(
     firmware-misc-nonfree "Misc Intel firmware (Wi-Fi, Bluetooth, etc.)" on
     firmware-linux-nonfree "General non-free Linux firmware" on
@@ -151,19 +151,19 @@ firmware_intel_dialog=(
 )
 firmware_intel=()
 shrink firmware_intel_dialog firmware_intel
-
+#################################################
 firmware_amd_dialog=(
     firmware-amd-graphics "AMD GPU firmware (for display acceleration)" on
 )
 firmware_amd=()
 shrink firmware_amd_dialog firmware_amd
-
+#################################################
 firmware_nvidia_dialog=(
     nvidia-driver "Proprietary NVIDIA driver (GPU support)" on
 )
 firmware_nvidia=()
 shrink firmware_nvidia_dialog firmware_nvidia
-
+#################################################
 
 
 
@@ -266,12 +266,12 @@ Package               | Description                                    | Compati
 ---------------------------------------------------------------------------------------------------------------
 xdg-desktop-portal-hyprland | Hyprland portal backend                 | Wayland (Hyprland)       | Enables screenshots/sharing       | N/A
 hyprpaper             | Wallpaper daemon for Hyprland                  | Wayland (Hyprland)       | Lightweight wallpaper manager     | hyprpaper
-hyprcursor            | Cursor theme manager for Hyprland              | Wayland (Hyprland)       | Controls custom cursor themes     | N/A
+hyprcursor-util       | Cursor theme manager for Hyprland              | Wayland (Hyprland)       | Controls custom cursor themes     | N/A
 waybar                | Customizable status/task bar                   | Wayland (All)            | System info and tray bar          | waybar
 rofi                  | Launcher and window switcher                   | X11/Wayland              | Similar to dmenu, very extensible | rofi
 grim                  | Screenshot tool                                | Wayland only             | Works with slurp for region grab  | grim
 slurp                 | Region selector for screenshots                | Wayland only             | Used with grim                   | slurp
-wl-copy               | Clipboard utility                              | Wayland only             | Works like xclip alternative      | wl-copy
+wl-clipboard          | Clipboard utility                              | Wayland only             | Works like xclip alternative      | wl-copy
 
 ───────────────────────────────$YELLOW[ GitHub Apps (Custom Install) ]$RESET───────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
