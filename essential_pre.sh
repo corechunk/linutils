@@ -128,7 +128,7 @@ hypr_utils_dialog=(
     rofi                        "Launcher and window switcher (X11/Wayland)" on
     grim                        "Screenshot tool for Wayland" on
     slurp                       "Region selector for screenshots (Wayland)" on
-    wl-copy                     "Clipboard manager for Wayland" on
+    wl-clipboard                "Clipboard manager for Wayland" on
 )
 hypr_utils=()
 shrink hypr_utils_dialog hypr_utils
