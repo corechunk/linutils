@@ -5,7 +5,7 @@ sid_prompt(){
     clear
     while true;do
         local cho
-        if [[ mode == cli ]];then
+        if [[ $mode == cli ]];then
             echo ""
             echo "$log_start"
             echo "Are you sure you want to change your apt source to$RED unstable/sid."
@@ -16,7 +16,7 @@ sid_prompt(){
             echo "$log_end"
             echo ""
             read -p "Are you sure ? (confirm or no) :" cho
-        elif [[ mode == tui ]];then
+        elif [[ $mode == tui ]];then
             dialog --title "Package manager source list : Operations" --yesno \
             "Are you sure you want to change your apt source to$RED unstable/sid.$RESET\nThese two lines bellow will be added to$MAGENTA /etc/apt/sources.list$RESET\
             \n\n$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET\n$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET\
@@ -42,9 +42,9 @@ sid_prompt(){
             break
             ;;
         *)
-            if [[ mode == cli ]];then
+            if [[ $mode == cli ]];then
                 echo "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET"
-            elif [[ mode == tui ]];then
+            elif [[ $mode == tui ]];then
                 dialog --title "notification" --msgbox "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET" 4 80
             fi
         esac
@@ -57,16 +57,18 @@ apt_menu(){
     clear
     local cho
     while true;do
-        if [[ mode == cli ]];then
+        if [[ $mode == cli ]];then
             echo "$BLUE edit.$RESET edit '/etc/apt/sources.list' manually "
             echo "$RED sid.$RESET Pre-configured template [sid/unstable]"
             echo "$ORANGE x. EXIT $RESET "
             read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
-        elif [[ mode == tui ]];then
-            cho=$(dialog --title "sid configuration" --checklist \
-            edit "edit '/etc/apt/sources.list' manually"\
-            sid "Pre-configured template [sid/unstable]"\
-            x EXIT)
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "sid configuration" --menu "Choose option : " 20 60 15 \
+            edit "edit '/etc/apt/sources.list' manually" \
+            sid "Pre-configured template [sid/unstable]" \
+            x EXIT \
+            2>&1)
+        fi
 
 
         case $cho in 
@@ -77,16 +79,33 @@ apt_menu(){
             sid)
                 sid_prompt
                 if (($?==0));then
-                    echo "$log_start"
-                    echo "you apt source is perfectly altered. The pre-configured sid/unstable template has been installed."
-                    echo "$GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET"
-                    echo "$log_end"
+                    if [[ $mode == cli ]];then
+                        echo "$log_start"
+                        echo "you apt source is perfectly altered. The pre-configured sid/unstable template has been installed."
+                        echo "$GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET"
+                        echo "$log_end"
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox \
+                        "$log_start \
+                        you apt source is perfectly altered. The pre-configured sid/unstable template has been installed. \
+                        $GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET \
+                        $log_end" \
+                        10 60
+                    fi
                 elif (($?==1));then
-                    echo ""
-                    echo "$log_start"
-                    echo "$ORANGE the task is aborted "
-                    echo "$log_end"
-                    echo 
+                    if [[ $mode == cli ]];then
+                        echo ""
+                        echo "$log_start"
+                        echo "$ORANGE the task is aborted "
+                        echo "$log_end"
+                        echo 
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox \
+                        "$log_start \
+                        $ORANGE the task is aborted \
+                        $log_end" \
+                        10 40
+                    fi
                 fi
                 ;;
             x|X)
