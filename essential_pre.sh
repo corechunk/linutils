@@ -30,7 +30,7 @@ shrink() {
     #echo ""
     for ((i=0; i<${#src_ref[@]}; i+=3)); do
         pkg="${src_ref[i]}"
-        [[ $pkg == _HEADER_* ]] && continue   # skip headers
+        [[ $pkg == ::* ]] && continue   # skip headers
         dest_ref+=("$pkg")
         #echo "$pkg"
     done
@@ -38,16 +38,17 @@ shrink() {
 
 # Now define the array using the variables
 dev_cli_dialog=(
-    git                     "Version control system" on
-    "$build_essential_pkg"  "Essential build tools (gcc, g++, make)" on
-    gdb                     "Debugging tools for C/C++" on
-    "$manpages_pkg"         "Developer manual pages" on
-    make                    "GNU build utility" on
-    ninja-build             "Fast alternative build system" on
-    cmake                   "Cross-platform C++ build tool" on
-    "$openjdk_pkg"          "Java Development Kit (includes JRE)" on
-    python3                 "Python programming language" off
-    python3-pip             "Python package manager" off
+    ":::::::::: CLI Dev Tools ::::::::::" "__________ Catagory Description [below] __________" off
+    git                                   "Version control system" on
+    "$build_essential_pkg"                "Essential build tools (gcc, g++, make)" on
+    gdb                                   "Debugging tools for C/C++" on
+    "$manpages_pkg"                       "Developer manual pages" on
+    make                                  "GNU build utility" on
+    ninja-build                           "Fast alternative build system" on
+    cmake                                 "Cross-platform C++ build tool" on
+    "$openjdk_pkg"                        "Java Development Kit (includes JRE)" on
+    python3                               "Python programming language" off
+    python3-pip                           "Python package manager" off
 )
 dev_cli=()
 shrink dev_cli_dialog dev_cli

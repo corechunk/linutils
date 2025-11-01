@@ -45,41 +45,84 @@ install_pkg(){
 }
 
 install_pkg_dynamic(){
-    if   [[ $2 == default || -z $2 ]];then
+    if   [[ $2 == default || -z $2 ]];then #1. Install if needed with prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1"
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -S "$1" --needed
         fi
-    elif [[ $2 == install-force ]];then
+    elif [[ $2 == install-force ]];then #2. Install by force without prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1" -y
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -S "$1" --noconfirm
         fi
-    elif [[ $2 == re-install ]];then
+    elif [[ $2 == re-install ]];then #3. Re-Install with prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1" --reinstall
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -S "$1"
         fi
-    elif [[ $2 == remove ]];then
+    elif [[ $2 == re-install-force ]];then #4. Re-Install by force without prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1" -y --reinstall
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1" --noconfirm
+        fi
+    elif [[ $2 == remove ]];then #5. Uninstall with prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt remove "$1"
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -R "$1"
         fi
-    elif [[ $2 == remove-force ]];then
+    elif [[ $2 == remove-force ]];then #6 Uninstall without prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt remove "$1" -y
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -R "$1" --noconfirm
+        fi
+    elif [[ $2 == purge-force ]];then #7 Purge without prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt purge "$1" -y
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -Rns "$1" --noconfirm
         fi
     else
         echo "invalid option for installation, ..."
         return;
     fi
 
+}
+install_pkg_dynamic_choice(){  #for multi pkg
+}
+prompt_install_type(){
+    local pkgs=("$@")
+    
+    local cho
+    if [[ $mode == cli ]];then   # this is not used yet
+        echo "nothing"
+        read -p "dange for your pc" $cho
+    elif [[ $mode == tui ]];then
+        cho=$(dialog --title "" --menu "Choose prefered option : " 30 90 25\
+        1 "install with prompt"\
+        2 "install without prompt [force]"\
+        3 "re-install with prompt"\
+        4 "install without prompt [force]"\
+        5 "uninstall with prompt"\
+        6 "uninstall without prompt [force]"\
+        7 "purge without prompt [force]"\
+        2>&1 >/dev/tty)
+    fi
+
+    case $cho in
+    1) install_pkgs_dynamic  ;;
+    2) install_pkgs_dynamic  ;;
+    3) install_pkgs_dynamic  ;;
+    4) install_pkgs_dynamic  ;;
+    5) install_pkgs_dynamic  ;;
+    6) install_pkgs_dynamic  ;;
+    7) install_pkgs_dynamic  ;;
+    esac
 }
 
 #install_pkg yazi

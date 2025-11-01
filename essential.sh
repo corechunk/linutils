@@ -7,70 +7,71 @@ dev_sign=" [ unavailable right now ] "
 menu_essential(){
     while true;do
         local cho
-        echo ""
-        echo "$divider"
-        echo "$BLUE 01.$BLUE [INTEL]$ORANGE Firmware packages$RESET"
-        echo "$BLUE 02.$RED [AMD]$ORANGE Firmware packages$RESET"
-        echo "$BLUE 03.$GREEN [NVIDIA]$ORANGE Firmware packages$RESET"
-        echo "$divider"
-        echo "$BLUE 1.$RESET Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
-        echo "$BLUE 2.$RESET Core$BLUE CLI$RESET packages"
-        echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
-        echo "$BLUE 4.$RESET$SKY_BLUE Hyprland$RESET Echosystem packages"
-        echo "$BLUE 5.$RESET Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
-        echo "$BLUE 6.$RESET github software packages"
-        echo "$BLUE 7.$RESET INFO PAGE [navigation with up/down arrow]"
-        echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
-        echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
-        echo "$RED x.$RED EXIT$RESET"
-        echo "$divider"
-        read -p "Select Your Preferred Option : " cho
-        echo ""
+        if [[ $mode == cli ]];then
+            echo ""
+            echo "$divider"
+            echo "$BLUE 01.$BLUE [INTEL]$ORANGE Firmware packages$RESET"
+            echo "$BLUE 02.$RED [AMD]$ORANGE Firmware packages$RESET"
+            echo "$BLUE 03.$GREEN [NVIDIA]$ORANGE Firmware packages$RESET"
+            echo "$divider"
+            echo "$BLUE 1.$RESET Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
+            echo "$BLUE 2.$RESET Core$BLUE CLI$RESET packages"
+            echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
+            echo "$BLUE 4.$RESET$SKY_BLUE Hyprland$RESET Echosystem packages"
+            echo "$BLUE 5.$RESET Core Network related packages [ e.g. security(un-enabled),downloaded or network manager  ]"
+            echo "$BLUE 6.$RESET github software packages"
+            echo "$BLUE 7.$RESET INFO PAGE [navigation with up/down arrow]"
+            echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
+            echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
+            echo "$RED x.$RED EXIT$RESET"
+            echo "$divider"
+            read -p "Select Your Preferred Option : " cho
+            echo ""
+        elif [[ $mode == cli ]];then
+            cho=$(dialog --title " ##### ##### Essential Packages ##### ##### "\
+            --menu "Select Option : " 30 90 25\
+            01 "[INTEL] Firmware packages"\
+            02 "[AMD] Firmware packages"\
+            03 "[NVIDIA] Firmware packages"\
+            1 "Core CLI Dev packages [e.g. compiler or build tools]"\
+            2 "Core CLI packages"\
+            3 "Core GUI packages"\
+            4 "Hyprland Echosystem packages"\
+            5 "Core Network related packages[e.g.firewall,network-manager]"\
+            6 "github software packages"\
+            7 "INFO PAGE [navigation with up/down arrow]"\
+            all "install all packages$RESET shown here"\
+            all_f "install [1-5] [force]"\
+            x "EXIT"\
+            2>&1 >/dev/tty)
+        fi
 
-        case $cho in
-        00)
-            install_pkg_dynamic dialog
-            ;;
-        01)
-            for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        02)
-            for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        03)
-            for pkg in "${firmware_nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        1)
-            for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        2)
-            for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        3)
-            for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        4)
-            for pkg in "${hypr_utils[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        5)
-            for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            ;;
-        7)
-            menu_info
-            ;;
-        all_f|ALL_F)
-            for grps in dev_cli core_cli core_gui hypr_utils network_tools_cli;do
-                for pkg in "${grps[@]}";do install_pkg_dynamic "$pkg" install-force; done
-            done
-            ;;
-        x|X)
-            clear
-            break;
-            ;;
-        *)
-            echo "invalid choice !"
-            echo "you need to type the text shown before the dots as option"
-            ;;
-        esac
+        if [[ $mode == cli ]];then
+            case $cho in
+            00)install_pkg_dynamic dialog ;;
+            01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            02)for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            03)for pkg in "${firmware_nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            1)for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            2)for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            3)for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            4)for pkg in "${hypr_utils[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            5)for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            7)menu_info ;;
+            all_f|ALL_F)
+                for grps in dev_cli core_cli core_gui hypr_utils network_tools_cli;do
+                    for pkg in "${grps[@]}";do install_pkg_dynamic "$pkg" install-force; done
+                done ;;
+            x|X)clear;break ;;
+            *)
+                echo "invalid choice !"
+                echo "you need to type the text shown before the dots as option" ;;
+            esac
+        elif [[ $mode == tui ]];then
+            case $cho in
+            01) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "Intel Firmwares" --checklist "Select/toggle preffered options : " "${firmware_intel[@]}" 2>&1 >/dev/tty); pkgs=(); for (( i=0; i<${#raw_pkgs[@]}; i++ ));do [[ ${raw_pkgs[$i]} == ::* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done
+            
+            esac
+        fi
     done
 }
