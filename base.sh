@@ -40,7 +40,7 @@ install_pkg(){
     if [ $package_manager="apt" ];then
         sudo apt install "$1"
     elif [ $package_manager="pacman" ];then
-        sudo pacman -Sy "$1"
+        sudo pacman -Sy "$1" --needed
     fi
 }
 
@@ -81,7 +81,13 @@ install_pkg_dynamic(){
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -R "$1" --noconfirm
         fi
-    elif [[ $2 == purge-force ]];then #7 Purge without prompt
+    elif [[ $2 == purge ]];then #7 Purge with prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt purge "$1"
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -Rns "$1"
+        fi
+    elif [[ $2 == purge-force ]];then #8 Purge without prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt purge "$1" -y
         elif [[ $(package_manager) == "pacman" ]];then
@@ -89,40 +95,61 @@ install_pkg_dynamic(){
         fi
     else
         echo "invalid option for installation, ..."
-        return;
+        return 1;
     fi
-
+    return 0;
 }
-install_pkg_dynamic_choice(){  #for multi pkg
+install_pkgs_dynamic(){  #for multi pkg
+    local type=$1        # 1st arg as installation type
+    shift                # excluding 1st arg from $@ to include rest of elements as pkgs
+    local pkgs=("$@")    # included as pkgs
+
+    for pkg in "${pkgs[@]}";do
+        install_pkg_dynamic "$pkg" "$type"
+    done
 }
 prompt_install_type(){
     local pkgs=("$@")
-    
     local cho
-    if [[ $mode == cli ]];then   # this is not used yet
-        echo "nothing"
-        read -p "dange for your pc" $cho
-    elif [[ $mode == tui ]];then
-        cho=$(dialog --title "" --menu "Choose prefered option : " 30 90 25\
-        1 "install with prompt"\
-        2 "install without prompt [force]"\
-        3 "re-install with prompt"\
-        4 "install without prompt [force]"\
-        5 "uninstall with prompt"\
-        6 "uninstall without prompt [force]"\
-        7 "purge without prompt [force]"\
-        2>&1 >/dev/tty)
-    fi
+    while true;do
+        if [[ $mode == cli ]];then   # this is not used yet
+            echo ""
+            echo "1. install with prompt"
+            echo "2. install without prompt [force]"
+            echo "3. re-install with prompt"
+            echo "4. re-install without prompt [force]"
+            echo "5. uninstall with prompt"
+            echo "6. uninstall without prompt [force]"
+            echo "7. purge with prompt"
+            echo "8. purge without prompt [force]"
+            echo ""
+            read -p "Choose preferred option : " cho
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "" --menu "Choose preferred option : " 30 90 25\
+            1 "install with prompt"\
+            2 "install without prompt [force]"\
+            3 "re-install with prompt"\
+            4 "re-install without prompt [force]"\
+            5 "uninstall with prompt"\
+            6 "uninstall without prompt [force]"\
+            7 "purge with prompt"\
+            8 "purge without prompt [force]"\
+            2>&1 >/dev/tty)
+        fi
+    
 
-    case $cho in
-    1) install_pkgs_dynamic  ;;
-    2) install_pkgs_dynamic  ;;
-    3) install_pkgs_dynamic  ;;
-    4) install_pkgs_dynamic  ;;
-    5) install_pkgs_dynamic  ;;
-    6) install_pkgs_dynamic  ;;
-    7) install_pkgs_dynamic  ;;
-    esac
+        case $cho in
+        1) install_pkgs_dynamic default ${pkgs[@]};break ;;
+        2) install_pkgs_dynamic install-force ${pkgs[@]};break ;;
+        3) install_pkgs_dynamic re-install ${pkgs[@]};break ;;
+        4) install_pkgs_dynamic re-install-force ${pkgs[@]};break ;;
+        5) install_pkgs_dynamic remove ${pkgs[@]};break ;;
+        6) install_pkgs_dynamic remove-force ${pkgs[@]};break ;;
+        7) install_pkgs_dynamic purge ${pkgs[@]};break ;;
+        8) install_pkgs_dynamic purge-force ${pkgs[@]};break ;;
+        *) tput reset;clear;echo -e "invalid option ! \n" ;;
+        esac
+    done
 }
 
 #install_pkg yazi
