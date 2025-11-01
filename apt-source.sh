@@ -4,17 +4,30 @@
 sid_prompt(){
     clear
     while true;do
-        echo ""
-        echo "$log_start"
-        echo "Are you sure you want to change your apt source to$RED unstable/sid."
-        echo "These two lines bellow will be added to$MAGENTA /etc/apt/sources.list$RESET"
-        echo ""
-        echo "$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
-        echo "$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
-        echo "$log_end"
-        echo ""
         local cho
-        read -p "Are you sure ? (confirm or no) :" cho
+        if [[ mode == cli ]];then
+            echo ""
+            echo "$log_start"
+            echo "Are you sure you want to change your apt source to$RED unstable/sid."
+            echo "These two lines bellow will be added to$MAGENTA /etc/apt/sources.list$RESET"
+            echo ""
+            echo "$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
+            echo "$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
+            echo "$log_end"
+            echo ""
+            read -p "Are you sure ? (confirm or no) :" cho
+        elif [[ mode == tui ]];then
+            dialog --title "Package manager source list : Operations" --yesno \
+            "Are you sure you want to change your apt source to$RED unstable/sid.$RESET\nThese two lines bellow will be added to$MAGENTA /etc/apt/sources.list$RESET\
+            \n\n$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET\n$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET\
+            \n\nAre you sure ? (confirm or no) :" 10 80
+            if [[ $? == 0 ]];then
+                cho=confirm
+            elif [[ $? == 1 || $? == 255 ]];then    # 255 is when pressed esc
+                cho=no
+            fi
+        fi
+
         case $cho in
         confirm)
             clear
@@ -29,7 +42,11 @@ sid_prompt(){
             break
             ;;
         *)
-            echo "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET"
+            if [[ mode == cli ]];then
+                echo "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET"
+            elif [[ mode == tui ]];then
+                dialog --title "notification" --msgbox "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET" 4 80
+            fi
         esac
 
     done
@@ -38,13 +55,21 @@ sid_prompt(){
 
 apt_menu(){
     clear
+    local cho
     while true;do
-        echo "$BLUE edit.$RESET edit '/etc/apt/sources.list' manually "
-        echo "$RED sid.$RESET Pre-configured template [sid/unstable]"
-        echo "$ORANGE x. EXIT $RESET "
-        read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho_1
+        if [[ mode == cli ]];then
+            echo "$BLUE edit.$RESET edit '/etc/apt/sources.list' manually "
+            echo "$RED sid.$RESET Pre-configured template [sid/unstable]"
+            echo "$ORANGE x. EXIT $RESET "
+            read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
+        elif [[ mode == tui ]];then
+            cho=$(dialog --title "sid configuration" --checklist \
+            edit "edit '/etc/apt/sources.list' manually"\
+            sid "Pre-configured template [sid/unstable]"\
+            x EXIT)
 
-        case $cho_1 in 
+
+        case $cho in 
             edit)
                 sudo nano /etc/apt/sources.list
                 clear

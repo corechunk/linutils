@@ -21,7 +21,29 @@ dep=(
 bar_length=50
 total=${#dep[@]}
 
-# ========= Load Dependencies =========
+
+                # ========= Choose Operation Mode =========
+if [[ $2 == tui ]];then                                        # will become default after all dialog menu's are implemented
+
+    if ! command_exists dialog;then
+        echo -e "TUI mode requires package 'dialog'\ncan't continue without 'dialog'"
+        if prompt_user "wanna install 'dialog' ? [ y/N ] : ";then
+            echo "installing$ORANGE 'dialog'$RESET ..."
+            install_pkg_dynamic dialog install-force
+        else
+            echo "$ORANGE aborting installing dialog and the program ...$RESET"
+            exit 1
+        fi
+    fi
+
+    echo "Running$YELLOW TUI$RESET Mode ..."
+    mode=$2
+else                                                           #============ DEFAULT MODE : CLI ============
+    echo "Running$BLUE CLI$RESET Mode ..."
+    mode=cli
+fi
+
+                # ========= Load Dependencies =========
 if [[ $1 == local ]]; then
     echo "Sourcing dependencies locally with progress bar..."
     for i in "${!dep[@]}"; do
@@ -46,8 +68,8 @@ if [[ $1 == local ]]; then
         printf "\r\033[2K%s" "$line"
         sleep 0.05
     done
-else
-    echo "Sourcing dependencies remotely with progress bar..."
+elif [[ $1 == remote || $1 == * ]]; then
+    echo "Sourcing dependencies remotely with progress bar..." #============ DEFAULT SOURCING MODE : REMOTE ============
     for i in "${!dep[@]}"; do
         file="${dep[i]}"
         tmpfile=$(mktemp)
@@ -73,10 +95,19 @@ else
         sleep 0.05
     done
 fi
+echo "" # echo for moving the cursor from loading bar
 
-echo -e "\n✅ All dependencies loaded!"
-read -n1 -r -p "Press any key to continue..." key
-clear
+
+                # ========= ALL Loaded msg =========
+if   [[ $2 == tui ]];then
+    dialog  --title "notification" --msgbox "\n✅ All dependencies loaded!" 6 40
+    tput reset
+elif [[ $2 == cli || $2 == * ]];then
+    echo -e "\n✅ All dependencies loaded!"
+    read -n1 -r -p "Press any key to continue..." key
+    clear
+fi
+
 
 # ================= Main Menu =================
 main_menu (){
@@ -87,43 +118,35 @@ main_menu (){
     if command_exists auto-cpufreq; then acf_stat="$y"; else acf_stat="$n"; fi
 
     while true; do
-        cho_1=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" \
-        20 60 15 \
-        00 "Edit apt source" \
-        01 "Download Desktop Environment (via tasksel) $tasksel_stat" \
-        1  "essential softwares (not made yet)" \
-        2  "Enable firewall (via ufw & fail2ban)" \
-        3  "Enable efficient battery optimization (via auto-cpufreq) $acf_stat" \
-        4  "dotfiles and wallpapers (not made yet)" \
-        x  "EXIT" \
-        2>&1 >/dev/tty)
-        #sleep 1;clear;reset
-        tput reset
-
-        #cho_1=$(dialog \
-        #--backtitle "https://github.com/corechunk/linutils.git" \
-        #--title "Main Menu" \
-        #--menu "Select the Preferred Option :" 20 60 15 \
-        #00 "$WARNING 00.$RESET edit apt source" \
-        #01 "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat" \
-        #1  "$BLUE 1.$RESET essential softwares (not made yet)" \
-        #2  "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)" \
-        #3  "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat" \
-        #4  "$MAGENTA 4. dotfiles and wallpapers$RESET (not made yet)" \
-        #x  "$RED x. EXIT $RESET" \
-        #2>&1 >/dev/tty)
-
-        #echo "$WARNING 00.$RESET edit apt source"
-        #echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
-        #echo "$divider"
-        #echo "$BLUE 1.$RESET essential softwares (not made yet)"
-        #echo "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)"
-        #echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
-        #echo "$divider"
-        #echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
-        #echo "$RED x. EXIT $RESET"
-        #echo ""
-        #read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho_1
+        if [[ $mode == tui ]];then
+            cho_1=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" \
+            20 60 15 \
+            00 "Edit apt source" \
+            01 "Download Desktop Environment (via tasksel) $tasksel_stat" \
+            1  "essential softwares (not made yet)" \
+            2  "Enable firewall (via ufw & fail2ban)" \
+            3  "Enable efficient battery optimization (via auto-cpufreq) $acf_stat" \
+            4  "dotfiles and wallpapers (not made yet)" \
+            x  "EXIT" \
+            2>&1 >/dev/tty)
+            #sleep 1;clear;reset
+            tput reset
+        elif [[ $mode == cli ]];then
+            echo "$WARNING 00.$RESET edit apt source"
+            echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
+            echo "$divider"
+            echo "$BLUE 1.$RESET essential softwares (not made yet)"
+            echo "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)"
+            echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
+            echo "$divider"
+            echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
+            echo "$RED x. EXIT $RESET"
+            echo ""
+            read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho_1
+            clear
+        #else
+        #    echo "invalid option mode"
+        fi
 
         case $cho_1 in
             00) clear;apt_menu ;;
@@ -147,13 +170,11 @@ main_menu (){
                     rm -rf auto-cpufreq
                 fi
                 ;;
-            x|X) clear;
-                #clear
-                break
-                ;;
+            x|X) clear;break;;
             *) clear;echo "invalid choice" ;;
         esac
     done
 }
 
 main_menu
+exit 0
