@@ -123,7 +123,7 @@ shrink core_gui_dialog core_gui
 hypr_utils_dialog=(
     xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
     hyprpaper                   "Wallpaper daemon for Hyprland" on
-    hyprcursor                  "Cursor theme manager for Hyprland" on
+    hyprcursor-util             "Cursor theme manager for Hyprland" on
     waybar                      "Customizable status/task bar for Wayland" on
     rofi                        "Launcher and window switcher (X11/Wayland)" on
     grim                        "Screenshot tool for Wayland" on
