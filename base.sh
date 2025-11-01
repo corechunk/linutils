@@ -17,6 +17,9 @@ RESET="$(tput sgr0)"
 log_start="$GREEN ----------$BLUE  ----------$RESET"
 log_end="$BLUE ----------$GREEN  ----------$RESET"
 divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
+clean(){
+    tput reset;clear
+}
 
 command_exists(){
     command -v "$1" >/dev/null 2>&1

@@ -92,18 +92,18 @@ if [[ $2 == tui ]];then                                        # will become def
         fi
     fi
 
-    echo "Running$YELLOW TUI$RESET Mode ..."
+    mode_msg="Running TUI Mode ..."
     mode=$2
 else                                                           #============ DEFAULT MODE : CLI ============
-    echo "Running$BLUE CLI$RESET Mode ..."
+    mode_msg="Running$BLUE CLI$RESET Mode ..."
     mode=cli
 fi
                 # ========= ALL Loaded msg =========
 if   [[ $2 == tui ]];then
-    dialog  --title "notification" --msgbox "\n✅ All dependencies loaded!" 6 40
-    tput reset
+    dialog  --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
+    clean
 elif [[ $2 == cli || $2 == * ]];then
-    echo -e "\n✅ All dependencies loaded!"
+    echo -e "\n✅ All dependencies loaded!\n✅$mode_msg"
     read -n1 -r -p "Press any key to continue..." key
     clear
 fi
@@ -129,8 +129,7 @@ main_menu (){
             4  "dotfiles and wallpapers (not made yet)" \
             x  "EXIT" \
             2>&1 >/dev/tty)
-            #sleep 1;clear;reset
-            #tput reset
+            clean
         elif [[ $mode == cli ]];then
             echo "$WARNING 00.$RESET edit apt source"
             echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"

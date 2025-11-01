@@ -16,11 +16,13 @@ sid_prompt(){
             echo "$log_end"
             echo ""
             read -p "Are you sure ? (confirm or no) :" cho
+            clear
         elif [[ $mode == tui ]];then
             dialog --title "Package manager source list : Operations" --yesno \
-            "Are you sure you want to change your apt source to$RED unstable/sid.$RESET\nThese two lines bellow will be added to$MAGENTA /etc/apt/sources.list$RESET\
-            \n\n$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET\n$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET\
-            \n\nAre you sure ? (confirm or no) :" 10 80
+            "Are you sure you want to change your apt source to unstable/sid.\nThese two lines bellow will be added to /etc/apt/sources.list\
+            \n\ndeb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware \ndeb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware\
+            \n\nAre you sure ? (confirm or no) :" 10 90
+            clean
             if [[ $? == 0 ]];then
                 cho=confirm
             elif [[ $? == 1 || $? == 255 ]];then    # 255 is when pressed esc
@@ -37,7 +39,11 @@ sid_prompt(){
             ;;
         no|x|X)
             clear
-            echo "aborting ...."
+            if [[ $mode == cli ]];then
+                echo "$RED Aborting Operation ...$RESET"
+            elif [[ $mode == tui ]];then
+                dialog --title "notification" --msgbox "Aborting Operation ..." 4 80
+            fi
             return 1
             break
             ;;
@@ -45,7 +51,7 @@ sid_prompt(){
             if [[ $mode == cli ]];then
                 echo "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET"
             elif [[ $mode == tui ]];then
-                dialog --title "notification" --msgbox "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET" 4 80
+                dialog --title "notification" --msgbox " Invalid Choice. you have to type 'confirm' to accept or 'no' to decline" 4 80
             fi
         esac
 
