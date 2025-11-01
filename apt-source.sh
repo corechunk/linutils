@@ -18,16 +18,19 @@ sid_prompt(){
             read -p "Are you sure ? (confirm or no) :" cho
             clear
         elif [[ $mode == tui ]];then
-            dialog --title "Package manager source list : Operations" --yesno \
+            cho=$(dialog --title "Package manager source list : Operations" --menu \
             "Are you sure you want to change your apt source to unstable/sid.\nThese two lines bellow will be added to /etc/apt/sources.list\
             \n\ndeb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware \ndeb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware\
-            \n\nAre you sure ? (confirm or no) :" 10 90
+            \n\nAre you sure ? (confirm or no) :" 15 90 10\
+            confirm "agree" \
+            no "decline" \
+            2>&1 >/dev/tty)
             clean
-            if [[ $? == 0 ]];then
-                cho=confirm
-            elif [[ $? == 1 || $? == 255 ]];then    # 255 is when pressed esc
-                cho=no
-            fi
+            #if [[ "$?" -eq "0" ]];then
+            #    cho=confirm
+            #elif [[ "$?" -ne "1" || "$?" -eq "255" ]];then    # 255 is when pressed esc
+            #    cho=no
+            #fi
         fi
 
         case $cho in
@@ -37,7 +40,7 @@ sid_prompt(){
             echo "deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
             return 0
             ;;
-        no|x|X)
+        no|x|NO)
             clear
             if [[ $mode == cli ]];then
                 echo "$RED Aborting Operation ...$RESET"
@@ -94,23 +97,16 @@ apt_menu(){
                         dialog --title "notification" --msgbox \
                         "$log_start \
                         you apt source is perfectly altered. The pre-configured sid/unstable template has been installed. \
-                        $GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET \
-                        $log_end" \
+                        Now, you just have to update full-upgrade your linux" \
                         10 60
                     fi
                 elif (($?==1));then
                     if [[ $mode == cli ]];then
                         echo ""
-                        echo "$log_start"
-                        echo "$ORANGE the task is aborted "
-                        echo "$log_end"
-                        echo 
+                        echo -e "$log_start\n$ORANGE the task is aborted $log_end"
+                        echo ""
                     elif [[ $mode == tui ]];then
-                        dialog --title "notification" --msgbox \
-                        "$log_start \
-                        $ORANGE the task is aborted \
-                        $log_end" \
-                        10 40
+                        dialog --title "notification" --msgbox "the task is aborted" 10 40
                     fi
                 fi
                 ;;

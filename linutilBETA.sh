@@ -120,12 +120,12 @@ main_menu (){
     while true; do
     local cho
         if [[ $mode == tui ]];then
-            cho=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" 20 60 15 \
+            cho=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" 30 90 15 \
             00 "Edit apt source" \
-            01 "Download Desktop Environment (via tasksel) $tasksel_stat" \
+            01 "Download Desktop Environment (via tasksel)" \
             1  "essential softwares (not made yet)" \
             2  "Enable firewall (via ufw & fail2ban)" \
-            3  "Enable efficient battery optimization (via auto-cpufreq) $acf_stat" \
+            3  "Enable efficient battery optimization (via auto-cpufreq)" \
             4  "dotfiles and wallpapers (not made yet)" \
             x  "EXIT" \
             2>&1 >/dev/tty)
