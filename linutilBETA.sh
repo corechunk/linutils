@@ -22,26 +22,6 @@ bar_length=50
 total=${#dep[@]}
 
 
-                # ========= Choose Operation Mode =========
-if [[ $2 == tui ]];then                                        # will become default after all dialog menu's are implemented
-
-    if ! command_exists dialog;then
-        echo -e "TUI mode requires package 'dialog'\ncan't continue without 'dialog'"
-        if prompt_user "wanna install 'dialog' ? [ y/N ] : ";then
-            echo "installing$ORANGE 'dialog'$RESET ..."
-            install_pkg_dynamic dialog install-force
-        else
-            echo "$ORANGE aborting installing dialog and the program ...$RESET"
-            exit 1
-        fi
-    fi
-
-    echo "Running$YELLOW TUI$RESET Mode ..."
-    mode=$2
-else                                                           #============ DEFAULT MODE : CLI ============
-    echo "Running$BLUE CLI$RESET Mode ..."
-    mode=cli
-fi
 
                 # ========= Load Dependencies =========
 if [[ $1 == local ]]; then
@@ -98,6 +78,26 @@ fi
 echo "" # echo for moving the cursor from loading bar
 
 
+                # ========= Choose Operation Mode =========
+if [[ $2 == tui ]];then                                        # will become default after all dialog menu's are implemented
+
+    if ! command_exists dialog;then
+        echo -e "TUI mode requires package 'dialog'\ncan't continue without 'dialog'"
+        if prompt_user "wanna install 'dialog' ? [ y/N ] : ";then
+            echo "installing$ORANGE 'dialog'$RESET ..."
+            install_pkg_dynamic dialog install-force
+        else
+            echo "$ORANGE aborting installing dialog and the program ...$RESET"
+            exit 1
+        fi
+    fi
+
+    echo "Running$YELLOW TUI$RESET Mode ..."
+    mode=$2
+else                                                           #============ DEFAULT MODE : CLI ============
+    echo "Running$BLUE CLI$RESET Mode ..."
+    mode=cli
+fi
                 # ========= ALL Loaded msg =========
 if   [[ $2 == tui ]];then
     dialog  --title "notification" --msgbox "\n✅ All dependencies loaded!" 6 40
@@ -119,8 +119,7 @@ main_menu (){
 
     while true; do
         if [[ $mode == tui ]];then
-            cho_1=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" \
-            20 60 15 \
+            cho_1=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" 20 60 15 \
             00 "Edit apt source" \
             01 "Download Desktop Environment (via tasksel) $tasksel_stat" \
             1  "essential softwares (not made yet)" \

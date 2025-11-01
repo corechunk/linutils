@@ -67,7 +67,7 @@ apt_menu(){
             edit "edit '/etc/apt/sources.list' manually" \
             sid "Pre-configured template [sid/unstable]" \
             x EXIT \
-            2>&1)
+            2>&1 >/dev/tty)
         fi
 
 

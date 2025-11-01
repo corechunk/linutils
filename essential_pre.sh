@@ -195,10 +195,10 @@ menu_info(){
 ==============================================================
                        $GREEN INFO SECTION$RESET
 ==============================================================
-========================= Navigation =========================
- Use ↑ ↓ / PgUp / PgDn to scroll vertically
+=========================$YELLOW Navigation$RESET =========================
+$YELLOW Use ↑ ↓ / PgUp / PgDn to scroll vertically
  Use ← → to scroll horizontally (with -S mode)
- Press 'q' to exit viewer
+ Press 'q' to exit viewer$RESET
 ==============================================================
 ** AI generated so please check official doc first **
 ───────────────────────────────$MAGENTA[ Development CLI Packages ]$RESET───────────────────────────────

@@ -8,44 +8,86 @@ Works on **Debian/Ubuntu-based** systems and partially on **Arch-based** systems
 
 ## 🚀 **Usage**
 
-This script supports two main usage modes: **online** (run directly from GitHub) or **local** (run from a cloned repository).  
+This script supports **two sourcing modes** — `remote` *(default)* and `local` — and **two interfaces** — `tui` *(dialog-based)* and `cli` *(text-based)*.
+
+- **Sourcing mode:** controls **where** dependency scripts are loaded from  
+- **Interface mode:** controls **how** the user interacts (TUI or CLI)
 
 > ⚠️ **Important:** If using locally, always run the script from its **own directory**; otherwise dependency sourcing will fail.
-
 ---
 You can follow Quick Start : [[ visit page ]](./quick.md)
+ 
+---
+
+### 🟢 **Option 1: Run Directly from GitHub (Remote Sourcing)**
+Automatically downloads and runs the latest stable version of all dependency scripts.
+
+**TUI Mode (recommended):**
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh) remote tui
+```
+
+**CLI Mode:**
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh) remote cli
+```
+
+If you omit the second argument (`cli` or `tui`), it defaults to **CLI** mode.
 
 ---
 
-### 🟢 **Option 1: Run Directly from GitHub (Online)**
-Automatically downloads and runs the latest stable scripts:
-```
-bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutil.sh)
-```
-- All required scripts will be fetched and sourced automatically.
-- No cloning required.
-- Ideal for quick setups or testing.
+### 🟡 **Option 2: Run Locally (Offline / Cloned Repository)**
 
----
+If you’ve cloned the repository, you can run it locally to use offline dependency sourcing.
 
-### 🟡 **Option 2: Run Locally (Cloned Repository)**
-Use this if you cloned the repo and want offline/local execution:
+**TUI Mode:**
 ```
 git clone https://github.com/corechunk/linutils.git
 cd linutils
-bash linutil.sh local
+bash linutils.sh local tui
 ```
-- The `local` argument tells the script to source dependencies from the local directory instead of downloading them.
-- **Must** be run from the repo root directory (`linutils/`), otherwise dependencies like `base.sh`, `essential.sh`, etc., won't be found.
+
+**CLI Mode:**
+```
+git clone https://github.com/corechunk/linutils.git
+cd linutils
+bash linutils.sh local cli
+```
+
+> 💡 **Note:** You must run it from the **repo root directory** (`linutils/`) so it can find all required `.sh` dependency files.
 
 ---
 
-### 🧪 **Beta Version**
-For testing the latest features and improvements:
+### 🔁 **Mode Summary**
+
+| Argument 1 | Description |
+|:------------|:------------|
+| `remote` *(default)* | Fetch dependencies from GitHub |
+| `local` | Source dependencies from local files |
+
+| Argument 2 | Description |
+|:------------|:------------|
+| `tui` | Launches the dialog-based interface |
+| `cli` *(default)* | Runs in standard terminal mode |
+
+**Examples:**
 ```
-bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutilBETA.sh)
+bash linutils.sh          # remote sourcing + CLI (default)
+bash linutils.sh remote tui
+bash linutils.sh local tui
+bash linutils.sh local cli
 ```
-> Works the same way as above (`local` argument supported if cloned).
+
+---
+
+### 🧪 **Beta Version [nothing new in beta right now]**
+For testing the latest experimental features:
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutilsBETA.sh) remote tui
+```
+
+> Works the same as above — supports both `local` and `remote`, and both `tui` or `cli`.
+
 
 ---
 
