@@ -56,6 +56,16 @@ bash linutils.sh local cli
 
 > 💡 **Note:** You must run it from the **repo root directory** (`linutils/`) so it can find all required `.sh` dependency files.
 
+### Default Way
+without additional arguments the default mode is "remote:tui". Also you can keep any single one off or you can keep both off. whatever option you keep off, the default for that will be chosen automatically.
+
+- Sourcing Default : `remote`
+- Interface Default : `cli`
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh)
+```
+
 ---
 
 ### 🔁 **Mode Summary**
