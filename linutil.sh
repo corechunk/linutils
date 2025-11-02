@@ -39,7 +39,31 @@ total=${#dep[@]}
 
 
                 # ========= Load Dependencies =========
-if [[ $1 == remote || $1 == * ]]; then
+if [[ $1 == local ]]; then
+    echo "Sourcing dependencies locally with progress bar..."
+    for i in "${!dep[@]}"; do
+        file="${dep[i]}"
+        if [[ -f ./$file ]]; then
+            source "./$file"
+        else
+            echo "⚠️  Local file $file not found!"
+        fi
+
+        # progress bar
+        progress=$(( (i+1) * 100 / total ))
+        filled=$(( (i+1) * bar_length / total ))
+        empty=$(( bar_length - filled ))
+        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
+        #printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "$file"
+        # build the bar
+        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
+        # construct the line
+        line="[$bar] $progress% Loaded: $file"
+        # move cursor to start, clear entire line, then print
+        printf "\r\033[2K%s" "$line"
+        sleep 0.05
+    done
+elif [[ $1 == remote || $1 == * ]]; then
     echo "Sourcing dependencies remotely with progress bar..." #============ DEFAULT SOURCING MODE : REMOTE ============
     for i in "${!dep[@]}"; do
         file="${dep[i]}"
@@ -65,30 +89,6 @@ if [[ $1 == remote || $1 == * ]]; then
         printf "\r\033[2K%s" "$line"
         sleep 0.05
     done
-elif [[ $1 == local ]]; then
-    echo "Sourcing dependencies locally with progress bar..."
-    for i in "${!dep[@]}"; do
-        file="${dep[i]}"
-        if [[ -f ./$file ]]; then
-            source "./$file"
-        else
-            echo "⚠️  Local file $file not found!"
-        fi
-
-        # progress bar
-        progress=$(( (i+1) * 100 / total ))
-        filled=$(( (i+1) * bar_length / total ))
-        empty=$(( bar_length - filled ))
-        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
-        #printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "$file"
-        # build the bar
-        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
-        # construct the line
-        line="[$bar] $progress% Loaded: $file"
-        # move cursor to start, clear entire line, then print
-        printf "\r\033[2K%s" "$line"
-        sleep 0.05
-    done
 fi
 echo "" # echo for moving the cursor from loading bar
 
@@ -97,8 +97,7 @@ echo "" # echo for moving the cursor from loading bar
 if [[ $2 == cli ]];then
     mode_msg="Running$BLUE CLI$RESET Mode ..."
     mode=cli
-
-elif [[ $2 == tui || $2 == * ]]       #============ DEFAULT MODE : TUI ============   #  added * cause we dont have other mode and i dont want it to fail execution anyways
+elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ============   #  added * cause we dont have other mode and i dont want it to fail execution anyways
     if ! command_exists dialog;then
         echo -e "TUI mode requires package 'dialog'\ncan't continue without 'dialog'"
         if prompt_user "wanna install 'dialog' ? [ y/N ] : ";then
@@ -111,7 +110,7 @@ elif [[ $2 == tui || $2 == * ]]       #============ DEFAULT MODE : TUI =========
     fi
 
     mode_msg="Running TUI Mode ..."
-    mode=$2
+    mode=tui
 fi
                 # ========= ALL Loaded msg =========
 if   [[ $2 == tui ]];then
