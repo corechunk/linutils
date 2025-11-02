@@ -114,6 +114,24 @@ fi
 
     return 0;
 }
+
+halt_msg(){
+    # ========= hault for user to check what has downloaded =========
+
+    echo -e "\n\n"
+    #read -n1 -r -p "$YELLOW Press any key if you are finished checking the logs above..." key
+    local tmp="$1"
+    local tmp2="$2"
+    local diff=$(( ${#tmp} - ${#tmp2} ))
+    echo -e "$tmp"
+    echo -e "\n\n\n"
+    # Move the cursor back up to the message line
+    tput cuu 5   # moves cursor up 3 lines
+    tput cuf ${diff}
+    #tput el      # clears the line where cursor is (optional)
+    read -n1 -r -p "" key
+}
+
 install_pkgs_dynamic(){  #for multi pkg
     local type=$1        # 1st arg as installation type
     shift                # excluding 1st arg from $@ to include rest of elements as pkgs
@@ -123,23 +141,24 @@ install_pkgs_dynamic(){  #for multi pkg
         install_pkg_dynamic "$pkg" "$type"
     done
 
-        # ========= hault for user to check what has downloaded =========
-        #echo -e "\n✅ All dependencies loaded!"
-        echo -e "\n\n"
-        #read -n1 -r -p "$YELLOW Press any key if you are finished checking the logs above..." key
-        local tmp="$YELLOW Press any key if you are finished checking the logs above ... $RESET"
-        local tmp2="$YELLOW$RESET"
-        local diff=$(( ${#tmp} - ${#tmp2} ))
-        echo -e "$tmp"
+        ## ========= hault for user to check what has downloaded =========
+        ##echo -e "\n✅ All dependencies loaded!"
+        #echo -e "\n\n"
+        ##read -n1 -r -p "$YELLOW Press any key if you are finished checking the logs above..." key
+        #local tmp="$YELLOW Press any key if you are finished checking the logs above ... $RESET"
+        #local tmp2="$YELLOW$RESET"
+        #local diff=$(( ${#tmp} - ${#tmp2} ))
+        #echo -e "$tmp"
 
-        echo -e "\n\n\n"
+        #echo -e "\n\n\n"
 
-        # Move the cursor back up to the message line
-        tput cuu 5   # moves cursor up 3 lines
-        tput cuf ${diff}
-        #tput el      # clears the line where cursor is (optional)
-        read -n1 -r -p "" key
-        clean
+        ## Move the cursor back up to the message line
+        #tput cuu 5   # moves cursor up 3 lines
+        #tput cuf ${diff}
+        ##tput el      # clears the line where cursor is (optional)
+        #read -n1 -r -p "" key
+    halt_msg "$YELLOW Press any key if you are finished checking the logs above ... $RESET" "$YELLOW $RESET"
+    clean
 }
 prompt_install_type(){
     local pkgs=("$@")

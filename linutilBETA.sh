@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# Almost identical to linutil.sh functionality,
-  # i might have added something that i dont understand
-# plus more ++
+# Almost identical to linutil.sh functionality plus more ++
 
 # some functions/variable called here are available on other file
 # and they are need to be sourced in order to run properly
@@ -32,6 +30,7 @@ dep=(
     base.sh
     apt-source.sh
     essential_pre.sh
+    essential_pre_info.sh
     essential.sh
     auto-cpufreq.sh
     security.sh
@@ -117,10 +116,10 @@ elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ====
     mode=tui
 fi
                 # ========= ALL Loaded msg =========
-if   [[ $2 == tui ]];then
-    dialog  --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
+if   [[ $mode == tui ]];then
+    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
     clean
-elif [[ $2 == cli || $2 == * ]];then
+elif [[ $mode == cli || $2 == * ]];then
     echo -e "\n✅ All dependencies loaded!\n✅$mode_msg"
     read -n1 -r -p "Press any key to continue..." key
     clear
@@ -138,7 +137,7 @@ main_menu (){
     while true; do
     local cho
         if [[ $mode == tui ]];then
-            cho=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" 30 90 15 \
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu" --menu "Select the Preferred Option :" 30 90 15 \
             00 "Edit apt source" \
             01 "Download Desktop Environment (via tasksel)" \
             1  "essential softwares (not made yet)" \
