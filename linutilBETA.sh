@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# linutilBETA.sh — Beta version with loading bar
-# Almost identical to linutil.sh functionality, but with progress bar for dependencies
-  # its just something ai generated, i understand how it works but didnt read the loading logic but it works, so i added it as BETA
+# Almost identical to linutil.sh functionality,
+  # i might have added something that i dont understand
 # plus more ++
+
+# some functions/variable called here are available on other file
+# and they are need to be sourced in order to run properly
+
+
 
 
 clear
@@ -39,31 +43,7 @@ total=${#dep[@]}
 
 
                 # ========= Load Dependencies =========
-if [[ $1 == local ]]; then
-    echo "Sourcing dependencies locally with progress bar..."
-    for i in "${!dep[@]}"; do
-        file="${dep[i]}"
-        if [[ -f ./$file ]]; then
-            source "./$file"
-        else
-            echo "⚠️  Local file $file not found!"
-        fi
-
-        # progress bar
-        progress=$(( (i+1) * 100 / total ))
-        filled=$(( (i+1) * bar_length / total ))
-        empty=$(( bar_length - filled ))
-        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
-        #printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "$file"
-        # build the bar
-        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
-        # construct the line
-        line="[$bar] $progress% Loaded: $file"
-        # move cursor to start, clear entire line, then print
-        printf "\r\033[2K%s" "$line"
-        sleep 0.05
-    done
-elif [[ $1 == remote || $1 == * ]]; then
+if [[ $1 == remote || $1 == * ]]; then
     echo "Sourcing dependencies remotely with progress bar..." #============ DEFAULT SOURCING MODE : REMOTE ============
     for i in "${!dep[@]}"; do
         file="${dep[i]}"
@@ -89,13 +69,40 @@ elif [[ $1 == remote || $1 == * ]]; then
         printf "\r\033[2K%s" "$line"
         sleep 0.05
     done
+elif [[ $1 == local ]]; then
+    echo "Sourcing dependencies locally with progress bar..."
+    for i in "${!dep[@]}"; do
+        file="${dep[i]}"
+        if [[ -f ./$file ]]; then
+            source "./$file"
+        else
+            echo "⚠️  Local file $file not found!"
+        fi
+
+        # progress bar
+        progress=$(( (i+1) * 100 / total ))
+        filled=$(( (i+1) * bar_length / total ))
+        empty=$(( bar_length - filled ))
+        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
+        #printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "$file"
+        # build the bar
+        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
+        # construct the line
+        line="[$bar] $progress% Loaded: $file"
+        # move cursor to start, clear entire line, then print
+        printf "\r\033[2K%s" "$line"
+        sleep 0.05
+    done
 fi
 echo "" # echo for moving the cursor from loading bar
 
 
                 # ========= Choose Operation Mode =========
-if [[ $2 == tui ]];then                                        # will become default after all dialog menu's are implemented
+if [[ $2 == cli ]];then
+    mode_msg="Running$BLUE CLI$RESET Mode ..."
+    mode=cli
 
+elif [[ $2 == tui || $2 == * ]]       #============ DEFAULT MODE : TUI ============   #  added * cause we dont have other mode and i dont want it to fail execution anyways
     if ! command_exists dialog;then
         echo -e "TUI mode requires package 'dialog'\ncan't continue without 'dialog'"
         if prompt_user "wanna install 'dialog' ? [ y/N ] : ";then
@@ -109,9 +116,6 @@ if [[ $2 == tui ]];then                                        # will become def
 
     mode_msg="Running TUI Mode ..."
     mode=$2
-else                                                           #============ DEFAULT MODE : CLI ============
-    mode_msg="Running$BLUE CLI$RESET Mode ..."
-    mode=cli
 fi
                 # ========= ALL Loaded msg =========
 if   [[ $2 == tui ]];then

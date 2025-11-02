@@ -7,6 +7,22 @@
 
 
 clear
+# Check if the current user can run sudo without a password prompt
+check_sudo(){
+    if sudo -n true 2>/dev/null; then
+        has_sudo=1
+    else
+        has_sudo=0
+    fi
+}
+check_sudo
+
+#if [[ $has_sudo -eq 1 ]]; then
+#    echo "You have sudo privileges."
+#else
+#    echo "You do NOT have sudo privileges."
+#fi
+
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(
     base.sh
@@ -16,9 +32,6 @@ dep=(
     auto-cpufreq.sh
     security.sh
 )
-# these are loaded from the same repo that contained this script itself
-# https://github.com/corechunk/linutils
-# inside this link you will find all of these scripts that are sourced bellow
 
 bar_length=50
 total=${#dep[@]}
@@ -26,31 +39,7 @@ total=${#dep[@]}
 
 
                 # ========= Load Dependencies =========
-if [[ $1 == local ]]; then
-    echo "Sourcing dependencies locally with progress bar..."
-    for i in "${!dep[@]}"; do
-        file="${dep[i]}"
-        if [[ -f ./$file ]]; then
-            source "./$file"
-        else
-            echo "⚠️  Local file $file not found!"
-        fi
-
-        # progress bar
-        progress=$(( (i+1) * 100 / total ))
-        filled=$(( (i+1) * bar_length / total ))
-        empty=$(( bar_length - filled ))
-        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
-        #printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "$file"
-        # build the bar
-        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
-        # construct the line
-        line="[$bar] $progress% Loaded: $file"
-        # move cursor to start, clear entire line, then print
-        printf "\r\033[2K%s" "$line"
-        sleep 0.05
-    done
-elif [[ $1 == remote || $1 == * ]]; then
+if [[ $1 == remote || $1 == * ]]; then
     echo "Sourcing dependencies remotely with progress bar..." #============ DEFAULT SOURCING MODE : REMOTE ============
     for i in "${!dep[@]}"; do
         file="${dep[i]}"
@@ -76,13 +65,40 @@ elif [[ $1 == remote || $1 == * ]]; then
         printf "\r\033[2K%s" "$line"
         sleep 0.05
     done
+elif [[ $1 == local ]]; then
+    echo "Sourcing dependencies locally with progress bar..."
+    for i in "${!dep[@]}"; do
+        file="${dep[i]}"
+        if [[ -f ./$file ]]; then
+            source "./$file"
+        else
+            echo "⚠️  Local file $file not found!"
+        fi
+
+        # progress bar
+        progress=$(( (i+1) * 100 / total ))
+        filled=$(( (i+1) * bar_length / total ))
+        empty=$(( bar_length - filled ))
+        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
+        #printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "$file"
+        # build the bar
+        bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
+        # construct the line
+        line="[$bar] $progress% Loaded: $file"
+        # move cursor to start, clear entire line, then print
+        printf "\r\033[2K%s" "$line"
+        sleep 0.05
+    done
 fi
 echo "" # echo for moving the cursor from loading bar
 
 
                 # ========= Choose Operation Mode =========
-if [[ $2 == tui ]];then                                        # will become default after all dialog menu's are implemented
+if [[ $2 == cli ]];then
+    mode_msg="Running$BLUE CLI$RESET Mode ..."
+    mode=cli
 
+elif [[ $2 == tui || $2 == * ]]       #============ DEFAULT MODE : TUI ============   #  added * cause we dont have other mode and i dont want it to fail execution anyways
     if ! command_exists dialog;then
         echo -e "TUI mode requires package 'dialog'\ncan't continue without 'dialog'"
         if prompt_user "wanna install 'dialog' ? [ y/N ] : ";then
@@ -94,18 +110,15 @@ if [[ $2 == tui ]];then                                        # will become def
         fi
     fi
 
-    echo "Running$YELLOW TUI$RESET Mode ..."
+    mode_msg="Running TUI Mode ..."
     mode=$2
-else                                                           #============ DEFAULT MODE : CLI ============
-    echo "Running$BLUE CLI$RESET Mode ..."
-    mode=cli
 fi
                 # ========= ALL Loaded msg =========
 if   [[ $2 == tui ]];then
-    dialog  --title "notification" --msgbox "\n✅ All dependencies loaded!" 6 40
-    tput reset
+    dialog  --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
+    clean
 elif [[ $2 == cli || $2 == * ]];then
-    echo -e "\n✅ All dependencies loaded!"
+    echo -e "\n✅ All dependencies loaded!\n✅$mode_msg"
     read -n1 -r -p "Press any key to continue..." key
     clear
 fi
@@ -120,18 +133,18 @@ main_menu (){
     if command_exists auto-cpufreq; then acf_stat="$y"; else acf_stat="$n"; fi
 
     while true; do
+    local cho
         if [[ $mode == tui ]];then
-            cho_1=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" 20 60 15 \
+            cho=$(dialog --backtitle "https://github.com/corechunk/linutils.git" --title "Main Menu" --menu "Select the Preferred Option :" 30 90 15 \
             00 "Edit apt source" \
-            01 "Download Desktop Environment (via tasksel) $tasksel_stat" \
+            01 "Download Desktop Environment (via tasksel)" \
             1  "essential softwares (not made yet)" \
             2  "Enable firewall (via ufw & fail2ban)" \
-            3  "Enable efficient battery optimization (via auto-cpufreq) $acf_stat" \
+            3  "Enable efficient battery optimization (via auto-cpufreq)" \
             4  "dotfiles and wallpapers (not made yet)" \
             x  "EXIT" \
             2>&1 >/dev/tty)
-            #sleep 1;clear;reset
-            tput reset
+            clean
         elif [[ $mode == cli ]];then
             echo "$WARNING 00.$RESET edit apt source"
             echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
@@ -143,13 +156,13 @@ main_menu (){
             echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
             echo "$RED x. EXIT $RESET"
             echo ""
-            read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho_1
+            read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho
             clear
         #else
         #    echo "invalid option mode"
         fi
 
-        case $cho_1 in
+        case $cho in
             00) clear;apt_menu ;;
             01) clear;
                 if command_exists tasksel; then
