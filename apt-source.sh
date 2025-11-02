@@ -17,46 +17,53 @@ sid_prompt(){
             echo ""
             read -p "Are you sure ? (confirm or no) :" cho
             clear
-        elif [[ $mode == tui ]];then
-            cho=$(dialog --title "Package manager source list : Operations" --menu \
-            "Are you sure you want to change your apt source to unstable/sid.\nThese two lines bellow will be added to /etc/apt/sources.list\
-            \n\ndeb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware \ndeb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware\
-            \n\nAre you sure ? (confirm or no) :" 15 90 10\
-            confirm "agree" \
-            no "decline" \
-            2>&1 >/dev/tty)
-            clean
-            #if [[ "$?" -eq "0" ]];then
-            #    cho=confirm
-            #elif [[ "$?" -ne "1" || "$?" -eq "255" ]];then    # 255 is when pressed esc
-            #    cho=no
-            #fi
+        elif [[ $mode == tui ]]; then
+            cho=$(dialog --title "APT Source Change Confirmation" \
+                --backtitle "Package manager source list : Operations" \
+                --inputbox "Are you sure you want to change your apt source to unstable/sid?
+
+These two lines below will be added to /etc/apt/sources.list:
+
+deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware
+
+Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
+                2>&1 >/dev/tty)
+
+            clear
         fi
 
         case $cho in
         confirm)
             clear
-            echo "deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" | sudo tee /etc/apt/sources.list
-            echo "deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+            echo "deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" | sudo tee /etc/apt/sources.list >/dev/null
+            echo "deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list >/dev/null
+            if [[ $mode == cli ]]; then
+                echo -e "\n$GREEN✔ Source list successfully updated to unstable/sid.$RESET\n"
+            elif [[ $mode == tui ]]; then
+                dialog --title "Success" --msgbox "\n✔ Source list successfully updated to unstable/sid." 6 80
+            fi
             return 0
             ;;
         no|x|NO)
             clear
-            if [[ $mode == cli ]];then
-                echo "$RED Aborting Operation ...$RESET"
-            elif [[ $mode == tui ]];then
-                dialog --title "notification" --msgbox "Aborting Operation ..." 4 80
+            if [[ $mode == cli ]]; then
+                echo -e "\n$RED✖ Aborting Operation...$RESET\n"
+            elif [[ $mode == tui ]]; then
+                dialog --title "Notification" --msgbox "\n✖ Aborting Operation..." 5 80
             fi
             return 1
-            break
             ;;
         *)
-            if [[ $mode == cli ]];then
-                echo "$RED Invalid Choice. you have to type 'confirm' to accept or 'no' to decline$RESET"
-            elif [[ $mode == tui ]];then
-                dialog --title "notification" --msgbox " Invalid Choice. you have to type 'confirm' to accept or 'no' to decline" 4 80
+            if [[ $mode == cli ]]; then
+                echo -e "\n$RED⚠ Invalid choice.$RESET You must type 'confirm' to accept or 'no' to decline.\n"
+            elif [[ $mode == tui ]]; then
+                dialog --title "Invalid Choice" \
+                       --msgbox "\n⚠ Invalid choice.\n\nYou must select 'confirm' to accept or 'no' to decline." 7 80
             fi
+            ;;
         esac
+
 
     done
 
@@ -95,8 +102,7 @@ apt_menu(){
                         echo "$log_end"
                     elif [[ $mode == tui ]];then
                         dialog --title "notification" --msgbox \
-                        "$log_start \
-                        you apt source is perfectly altered. The pre-configured sid/unstable template has been installed. \
+                        "you apt source is perfectly altered. The pre-configured sid/unstable template has been installed. \
                         Now, you just have to update full-upgrade your linux" \
                         10 60
                     fi
