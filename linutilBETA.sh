@@ -7,6 +7,21 @@
 
 
 clear
+# Check if the current user can run sudo without a password prompt
+check_sudo(){
+    if sudo -n true 2>/dev/null; then
+        has_sudo=1
+    else
+        has_sudo=0
+    fi
+}
+check_sudo
+
+#if [[ $has_sudo -eq 1 ]]; then
+#    echo "You have sudo privileges."
+#else
+#    echo "You do NOT have sudo privileges."
+#fi
 
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(

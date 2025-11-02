@@ -50,15 +50,24 @@ menu_essential(){
 
         if [[ $mode == cli ]];then
             case $cho_2 in
-            00)install_pkg_dynamic dialog ;;
-            01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
-            02)for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
-            03)for pkg in "${firmware_nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
-            1)for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
-            2)for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
-            3)for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
-            4)for pkg in "${hypr_utils[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
-            5)for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            00) prompt_install_type dialog ;;
+            01) prompt_install_type "${firmware_intel[@]}" ;;
+            02) prompt_install_type "${firmware_amd[@]}" ;;
+            03) prompt_install_type "${firmware_nvidia[@]}" ;;
+            1)  prompt_install_type "${dev_cli[@]}" ;;
+            2)  prompt_install_type "${core_cli[@]}" ;;
+            3)  prompt_install_type "${core_gui[@]}" ;;
+            4)  prompt_install_type "${hypr_utils[@]}" ;;
+            5)  prompt_install_type "${network_tools_cli[@]}" ;;
+            #00)install_pkg_dynamic dialog ;;
+            #01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            #02)for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            #03)for pkg in "${firmware_nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            #1)for pkg in "${dev_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            #2)for pkg in "${core_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            #3)for pkg in "${core_gui[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            #4)for pkg in "${hypr_utils[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            #5)for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
             7)menu_info ;;
             all_f|ALL_F)
                 for grps in dev_cli core_cli core_gui hypr_utils network_tools_cli;do

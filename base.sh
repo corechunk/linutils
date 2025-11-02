@@ -2,8 +2,6 @@
 OK="$(tput setaf 2)[OK]$(tput sgr0)"
 ERROR="$(tput setaf 1)[ERROR]$(tput sgr0)"
 NOTE="$(tput setaf 3)[NOTE]$(tput sgr0)"
-INFO="$(tput setaf 4)[INFO]$(tput sgr0)"
-WARN="$(tput setaf 1)[WARN]$(tput sgr0)"
 CAT="$(tput setaf 6)[ACTION]$(tput sgr0)"
 MAGENTA="$(tput setaf 5)"
 ORANGE="$(tput setaf 214)"
@@ -14,6 +12,10 @@ GREEN="$(tput setaf 2)"
 BLUE="$(tput setaf 4)"
 SKY_BLUE="$(tput setaf 6)"
 RESET="$(tput sgr0)"
+
+INFO="$(tput setaf 4)[INFO]$(tput sgr0)"
+WARN="$(tput setaf 214)[WARN]$(tput sgr0)"
+
 log_start="$GREEN ----------$BLUE  ----------$RESET"
 log_end="$BLUE ----------$GREEN  ----------$RESET"
 divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
@@ -48,6 +50,15 @@ install_pkg(){
 }
 
 install_pkg_dynamic(){
+
+check_sudo
+
+echo -e "\n$BLUE[Package] : $GREEN$1$RESET\n"
+if [[ $has_sudo -eq 0 ]]; then
+echo -e "You do NOT have sudo privileges. So, you are prompted for sudo password.\n$NOTE You'll not be asked for other packages if you use password correctly now"
+
+fi
+
     if   [[ $2 == default || -z $2 ]];then #1. Install if needed with prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1"
@@ -100,6 +111,7 @@ install_pkg_dynamic(){
         echo "invalid option for installation, ..."
         return 1;
     fi
+
     return 0;
 }
 install_pkgs_dynamic(){  #for multi pkg
@@ -110,6 +122,24 @@ install_pkgs_dynamic(){  #for multi pkg
     for pkg in "${pkgs[@]}";do
         install_pkg_dynamic "$pkg" "$type"
     done
+
+        # ========= hault for user to check what has downloaded =========
+        #echo -e "\n✅ All dependencies loaded!"
+        echo -e "\n\n"
+        #read -n1 -r -p "$YELLOW Press any key if you are finished checking the logs above..." key
+        local tmp="$YELLOW Press any key if you are finished checking the logs above ... $RESET"
+        local tmp2="$YELLOW$RESET"
+        local diff=$(( ${#tmp} - ${#tmp2} ))
+        echo -e "$tmp"
+
+        echo -e "\n\n\n"
+
+        # Move the cursor back up to the message line
+        tput cuu 5   # moves cursor up 3 lines
+        tput cuf ${diff}
+        #tput el      # clears the line where cursor is (optional)
+        read -n1 -r -p "" key
+        clean
 }
 prompt_install_type(){
     local pkgs=("$@")
