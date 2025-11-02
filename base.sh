@@ -113,6 +113,12 @@ fi
     fi
 
     return 0;
+
+
+    # For Arch: tries pacman -S, if not found tries yay -S or paru -S (check existence); if not, fall back to AUR build via git & makepkg.
+    # For Debian: tries apt install; if not found tries snap install (if snap is available); else fallback to upstream installer (curl + executable) or git installer.
+        # to implement these i have to know what pacman and apt returns when a package is not found
+        # otherwise searching for every pkgs in pkg manager is resource intensive when i wanna find if i should try snap/aur for distros
 }
 
 halt_msg(){

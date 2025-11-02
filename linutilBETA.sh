@@ -30,6 +30,7 @@ dep=(
     base.sh
     apt-source.sh
     essential_pre.sh
+    essential_pre_pkgs.sh
     essential_pre_info.sh
     essential.sh
     auto-cpufreq.sh
