@@ -30,7 +30,7 @@ shrink() {
     #echo ""
     for ((i=0; i<${#src_ref[@]}; i+=3)); do
         pkg="${src_ref[i]}"
-        [[ $pkg == ::* ]] && continue   # skip headers
+        [[ $pkg == *#* ]] && continue   # skip headers
         dest_ref+=("$pkg")
         #echo "$pkg"
     done
@@ -38,7 +38,7 @@ shrink() {
 
 # Now define the array using the variables
 dev_cli_dialog=(
-    ":::::::::: CLI Dev Tools ::::::::::" "__________ Catagory Description [below] __________" off
+    "##########_CLI_Dev_Tools_##########" "__________ Catagory Description [below] __________" off
     git                                   "Version control system" on
     "$build_essential_pkg"                "Essential build tools (gcc, g++, make)" on
     gdb                                   "Debugging tools for C/C++" on
@@ -66,6 +66,7 @@ shrink dev_cli_dialog dev_cli
 #done
 
 core_cli_dialog=(
+    "##########_Core_CLI_Tools_##########" "__________ Category Description [below] __________" off
     gawk               "Needed for ble.sh (core dependency)" on
     tmux               "Terminal multiplexer (split panes, sessions)" on
     neovim             "Modern Vim-based text editor" on
@@ -86,6 +87,7 @@ core_cli=()
 shrink core_cli_dialog core_cli
 
 network_tools_cli_dialog=(
+    "##########_Network_Tools_CLI_##########" "__________ Category Description [below] __________" off
     wget          "Command-line downloader (HTTP, HTTPS, FTP)" on
     # net-tools  # ill add when i understand each
     # nmap
@@ -104,6 +106,7 @@ unknown=()
 shrink unknown_dialog unknown
 
 core_gui_dialog=(
+    "##########_Core_GUI_Tools_##########" "__________ Category Description [below] __________" off
     blueman             "Bluetooth device manager GUI (blueman-manager)" on
     network-manager     "Network connection manager (wired/wireless)" on
     kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
@@ -122,6 +125,7 @@ core_gui=()
 shrink core_gui_dialog core_gui
 
 hypr_utils_dialog=(
+    "##########_Hyprland_Utils_##########" "__________ Category Description [below] __________" off
     xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
     hyprpaper                   "Wallpaper daemon for Hyprland" on
     hyprcursor-util             "Cursor theme manager for Hyprland" on

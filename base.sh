@@ -141,6 +141,7 @@ prompt_install_type(){
             x "EXIT"\
             2>&1 >/dev/tty)
         fi
+        clean
     
 
         case $cho in
