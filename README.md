@@ -162,6 +162,8 @@ Firmware packaging differs across distros; the script treats firmware carefully 
 - You can add or edit package arrays to customize the default installation sets.
 - Future improvements planned:
   - now (fix/change all menu appearences and fix_flickering)
+  - add (hyprland+sddm) in DE section, make tasksel like equivalent for arch-based distro.
+    - the script default will be tasksel like custom function for both arch/debian but tasksel option will be optionally selectable
   - Full `--flag` style CLI options (instead of positional args).
   - Better AUR handling for Arch (auto-detect and use `paru`/`yay` or build from source).
   - More robust detection and handling of non-Debian/Arch distros.
