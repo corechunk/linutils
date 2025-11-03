@@ -1,256 +1,214 @@
-# ==========[[ Under Major Construction ]]==========
-# 💻 **linutils — A Linux Setup Automation Script**
+# linutils — A Linux Setup Automation Script
 
-A modular Linux setup utility that automatically fetches, sources, and runs configuration scripts for essential tools, development environments, and system optimizations.  
-Works on **Debian/Ubuntu-based** systems and partially on **Arch-based** systems (under development).
 
+
+## Introduction
+
+**linutils** is a modular **Bash-based** setup utility for automating essential Linux configuration and package installation.  
+It’s designed for **GNU/Linux systems** — primarily **Debian/Ubuntu** and **Arch** — but runs on any distro with GNU tools and Bash available.
+
+### It automates post-install setup tasks such as : 
+- `developer tool installation`
+- `CLI/GUI essentials`
+- `firmware setup`
+- `firewall configuration`
+- `power optimization.  `
+- plus more
+
+Because it’s written entirely in **Bash**, it works anywhere Bash does — no extra dependencies or frameworks required [ except curl to run it first time ].
+
+> **Note about GNU / Bash:**  
+> `linutils` is written in **Bash** and built on **GNU core utilities**, making it compatible with most **GNU/Linux** systems by default.  
+> It targets **Debian/Ubuntu** and **Arch**, but should run on any distro with `bash`, a supported package manager (`apt` or `pacman`), and standard GNU tools available.  
+> On minimal systems or containers using `sh`, `dash`, or `ash`, simply run it explicitly with:  
+> ```
+> bash linutils.sh   . . .
+> ```
+
+<!--
+---
+###### will add gallery here  
+-->
 ---
 
-## 🚀 **Usage**
+## Usage (Default)
 
-This script supports **two sourcing modes** — `remote` *(default)* and `local` — and **two interfaces** — `tui` *(dialog-based)* and `cli` *(text-based)*.
-
-- **Sourcing mode:** controls **where** dependency scripts are loaded from  
-- **Interface mode:** controls **how** the user interacts (TUI or CLI)
-
-> ⚠️ **Important:** If using locally, always run the script from its **own directory**; otherwise dependency sourcing will fail.
----
-You can follow Quick Start : [[ visit page ]](./quick.md)
- 
----
-
-### 🟢 **Option 1: Run Directly from GitHub (Remote Sourcing)**
-Automatically downloads and runs the latest stable version of all dependency scripts.
-
-**TUI Mode (recommended):**
-```
-bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh) remote tui
-```
-
-**CLI Mode:**
-```
-bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh) remote cli
-```
-
-If you omit the second argument (`cli` or `tui`), it defaults to **CLI** mode.
-
----
-
-### 🟡 **Option 2: Run Locally (Offline / Cloned Repository)**
-
-If you’ve cloned the repository, you can run it locally to use offline dependency sourcing.
-
-**TUI Mode:**
-```
-git clone https://github.com/corechunk/linutils.git
-cd linutils
-bash linutils.sh local tui
-```
-
-**CLI Mode:**
-```
-git clone https://github.com/corechunk/linutils.git
-cd linutils
-bash linutils.sh local cli
-```
-
-> 💡 **Note:** You must run it from the **repo root directory** (`linutils/`) so it can find all required `.sh` dependency files.
-
-### Default Way
-without additional arguments the default mode is "remote:tui". Also you can keep any single one off or you can keep both off. whatever option you keep off, the default for that will be chosen automatically.
-
-- Sourcing Default : `remote`
-- Interface Default : `cli`
+By default, `linutils` runs in **remote + TUI** mode when invoked with no arguments (this is the recommended quick path).
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh)
 ```
 
+This default invocation does the following:
+- sources dependency scripts remotely from the project repo (the `remote` sourcing mode),
+- launches the **TUI** (dialog) menu for interactive selection,
+- shows a progress bar while fetching dependencies.
+
+> **Default behavior summary:** `remote` sourcing + `tui` interface.
+
 ---
 
-### 🔁 **Mode Summary**
+## CLI args
 
-| Argument 1 | Description |
-|:------------|:------------|
-| `remote` *(default)* | Fetch dependencies from GitHub |
-| `local` | Source dependencies from local files |
+linutils uses **positional** CLI arguments for now. In future versions we will support `--long-args` style flags.
 
-| Argument 2 | Description |
-|:------------|:------------|
-| `tui` | Launches the dialog-based interface |
-| `cli` *(default)* | Runs in standard terminal mode |
+**Current positional arguments:**
 
-**Examples:**
-```
-bash linutils.sh          # remote sourcing + CLI (default)
-bash linutils.sh remote tui
+1. **Sourcing mode** (first positional arg)
+   - `remote` (default): fetch and source dependency scripts from GitHub.
+   - `local`: source dependency scripts from the current directory (use when you cloned the repo).
+
+2. **Interface mode** (second positional arg)
+   - `tui`: launch the `dialog` based text UI (recommended).
+   - `cli` (default): plain CLI prompts and textual menus.
+
+**Examples**
+
+```bash
+# Default (remote + TUI)
+bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh)
+
+# Remote + CLI
+bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh) remote cli
+
+# Local + TUI (run from repo root)
+git clone https://github.com/corechunk/linutils.git
+cd linutils
 bash linutils.sh local tui
-bash linutils.sh local cli
+```
+
+**Notes**
+- If you omit the second argument, the script will use `cli` as the default for the interface.
+- If you omit the first argument, the script will assume `remote`.
+- Future versions: plan to add `--remote/--local`, `--tui/--cli`, and other `--` flags for clearer, non-positional invocation and better scripting.
+
+---
+
+## Features (at-a-glance)
+
+- #### Loading The Script :
+  - Modular dependency sourcing (remote or local) with a progress bar.
+  - Dual interface: TUI (`dialog`) and CLI.
+- #### Post Loading Functionalities :
+  - Package group installer with cross-distro package-name mapping (Debian ↔ Arch).
+  - Firmware install groups (Intel / AMD / NVIDIA / generic).
+  - **Developer toolchain** group (build-essential/base-devel, compilers, debuggers).
+  - Essential **Server** and **Desktop** packages (editors, terminals, screenshot tools, media tools).
+  - **Firewall and security menu (UFW, Fail2Ban).**
+  - **Battery and power optimizations (auto-cpufreq installer).**
+  - Helpful UX: colorized messages, pauses/halt for user review, and clean terminal resets.
+>- #### Purpose kept in mind when making
+>  - Desktop packages section might contain cli tools that needs Desktop environment cause the section is meant for post Desktop environment setup so packages don't pull desktop environment with itself.
+>  - Extendable repo that can be modified by beginner coders/programmers.
+
+---
+
+## Menu overview
+
+When launched, the main menu exposes options like:
+
+- `00` __ Edit APT source (Debian-only)
+- `01` __ Install Desktop Environment (via `tasksel`)
+- `1`  ___ Essential CLI/Dev tools
+- `2`  ___ Core CLI tools
+- `3`  ___ Core GUI tools
+- `4`  ___ Hyprland / Wayland ecosystem helpers
+- `9`  ___ Info page (detailed package list and notes)
+- `x`  ___ Exit
+
+Each menu leads to a checklist (TUI) or a batch-selection (CLI). then it will should all packages to choose(except cli mode). then lets users pick method ( install / force / remove / purge, etc.).
+
+---
+
+## How package mapping works (cross-distro)
+
+The script detects the package manager with `package_manager()` and maps names where necessary. Examples:
+
+- `build-essential` (Debian) ↔ `base-devel` (Arch)
+- `openjdk-25-jdk` (Debian) ↔ `jdk-openjdk` (Arch)
+- Firmware: Debian often splits firmware into `firmware-*` packages (and may require `non-free-firmware`), while Arch bundles most firmware in `linux-firmware`.
+
+You’ll find per-category arrays in the code like `essentials_dev_dialog`, `firmware_intel_dialog`, etc. The script uses a `shrink` helper to produce clean package arrays from the dialog-format arrays to use the same array with CLI-interface usage and then installs via `install_pkg_dynamic()` which handles apt/pacman differences.
+
+---
+
+## UX & safety behavior
+
+- The script performs **sanity checks** (detect `dialog`, prompt to install it if missing).
+- When installing packages the script checks whether the current user can run `sudo` without a password and informs the user — the sudo password prompt will appear at the first privileged operation when needed.
+- After large install batches the script halts so the user can inspect output logs before continuing.
+- Color-coded messages (`[OK]`, `[ERROR]`, `[NOTE]`, and `[ACTION]`) help with readability.
+
+---
+
+## Firmware & driver handling notes
+
+Firmware packaging differs across distros; the script treats firmware carefully and asks for user consent:
+
+- **Intel firmware (Debian names):** `firmware-intel-graphics`, `firmware-intel-misc`, `firmware-intel-sound`, `firmware-sof-signed`, `firmware-iwlwifi`  
+  (On Arch these are usually present within `linux-firmware` or corresponding community packages.)
+
+- **AMD:** `firmware-amd-graphics` on Debian; on Arch use `linux-firmware` + `mesa` + `vulkan-radeon`.
+
+- **NVIDIA:** On Debian there are `nvidia-driver`, `nvidia-driver-full`, and `firmware-nvidia-graphics`. On Arch use `nvidia`, `nvidia-utils`, `lib32-nvidia-utils`, and rely on `linux-firmware` for firmware.
+
+> **Important:** many firmware packages are `non-free` on Debian. The script warns users and will not force non-free firmware installs without consent. Infact the user choose non-free-firmware packages and they will install via the installation type they choose and the firmware will only be found if they have edited their package-manager-source-list to include non-free/non-free-firmware.
+
+---
+
+## Extensibility & development notes
+
+- The script is intentionally modular: dependency files (e.g. `base.sh`, `apt-source.sh`, `essential_pre.sh`, `essential.sh`, `auto-cpufreq.sh`, `security.sh`) are sourced. Add new modules to the repo and list them in the main script to expand functionality.
+- You can add or edit package arrays to customize the default installation sets.
+- Future improvements planned:
+  - now (fix/change all menu appearences and fix_flickering)
+  - Full `--flag` style CLI options (instead of positional args).
+  - Better AUR handling for Arch (auto-detect and use `paru`/`yay` or build from source).
+  - More robust detection and handling of non-Debian/Arch distros.
+  - Optional dry-run mode and verbose logging.
+  - add gaming dependency pkgs
+  - sub-catagorize the existing arrays to let users find a specific packages when they wanna install just a few pkgs. (instead of deselecting everything from big-pkg-catagories for 1 application)
+    - Cause [Chris's](https://github.com/ChrisTitusTech) linutil kinda lacks the [winutil](https://github.com/ChrisTitusTech/winutil) like behaviour where you can choose from large numbers of softwares by toggling/select_all/deselect_all.
+
+---
+
+## 🤝 Contribution Guidelines
+
+If you want to help:
+- for improved package mappings per-distro.
+- Add modules for distro-specific installers.
+- Improve detection for non-interactive environments (CI / containers).
+
+If you’d like to contribute improvements (package mappings, distro-specific modules, or CI/container support), please contact me first via DM, message, or issue comment before creating a PR. This ensures your ideas are discussed and aligned with the project’s direction.
+
+All contributions will go through review to maintain quality, and any changes are merged by the maintainer.
+
+When contributing, please:
+- Keep code POSIX-friendly where possible.
+- Keep `dialog` UI friendly for 90w×30h or larger terminals.
+- Document new arrays and their purpose.
+
+---
+
+## Example: quick local run (if you cloned repo)
+
+```bash
+git clone https://github.com/corechunk/linutils.git
+cd linutils
+# Run with local sourcing + dialog TUI
+bash linutils.sh local tui
 ```
 
 ---
 
-### 🧪 **Beta Version [nothing new in beta right now]**
-For testing the latest experimental features:
-```
-bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutilsBETA.sh) remote tui
-```
+## Final notes
 
-> Works the same as above — supports both `local` and `remote`, and both `tui` or `cli`.
-
+- This README was updated to reflect the current code structure and UX choices. If you contribute for changes, then update the behavior/changes in this README accordingly.  
+- The project aims to balance **safe defaults** (ask before changing system firmware or critical settings) with **convenience** (bulk install groups and helpful prompts).
 
 ---
 
-### 🔹 Notes
-- Dependencies are modular; missing or outdated scripts will be fetched automatically when running online.
-- Local execution ensures reproducibility without needing internet.
-- If you encounter issues with missing packages or scripts, check that you are in the repo root directory.
-
----
-
-## 📦 **Features**
-
-- 🌐 Auto-downloads and sources required scripts from the main repository.  
-- ⚙️ Provides a simple interactive menu for managing:
-  - APT sources  
-  - Tasksel-based desktop environment installation  
-  - Firewall setup (UFW, Fail2Ban)  
-  - Battery optimization (auto-cpufreq)  
-  - Essential CLI/GUI packages  
-  - Developer tools (C++, Java, Python, etc.)
-- 🧰 Supports modular dependency files:
-  - `base.sh`  
-  - `apt-source.sh`  
-  - `essential.sh`  
-  - `auto-cpufreq.sh`  
-  - `security.sh`
-
----
-
-## 🧩 **Menu Overview**
-
-| Option | Description |
-|:--|:--|
-| **00** | Edit APT source list *(Debian only)* |
-| **01** | Download & install Desktop Environment *(via tasksel)* |
-| **1** | Essential CLI/GUI/Dev tools *(modular installer)* |
-| **2** | Enable firewall (UFW + Fail2Ban) |
-| **3** | Enable battery optimization *(auto-cpufreq)* |
-| **4** | Dotfiles and wallpapers *(coming soon)* |
-| **x** | Exit script |
-
----
-
-## 🧰 **Package Groups**
-
-### 🧑‍💻 **Developer Tools (CLI)**
-Includes compilers, debuggers, and build systems.
-- `git`
-- `build-essential` *(Debian)* / `base-devel` *(Arch)*
-- `gdb`
-- `manpages-dev` *(Debian)* / `man-pages` *(Arch)*
-- `make`, `ninja-build`, `cmake`
-- `openjdk-25-jdk` *(Debian)* / `jdk-openjdk` *(Arch)*
-- `python3`, `python3-pip`
-
----
-
-### 🧱 **Core CLI Tools**
-Essential system and productivity utilities.
-- `tmux`
-- `neovim`, `nano`
-- `mpv`
-- `btop`
-- `fastfetch`
-- `zip`, `unzip`
-- `bat`, `lsd`, `zoxide`, `fzf`, `ripgrep`
-- `fonts-firacode`
-
----
-
-### 🖥️ **Core GUI Tools**
-GUI-based essentials for desktop systems.
-- `kitty`
-- `thunar`, `mousepad`
-- `mpv`, `zathura`
-- `obs-studio`, `shotcut`
-- `waybar`, `rofi`
-- `xdg-utils`, `xdg-desktop-portal`
-- `maim`, `xclip` (for screenshots & clipboard management)
-
----
-
-### 🌐 **Network & Security Tools**
-Network management, firewall, and system security.
-- `wget`
-- `ufw`
-- `fail2ban`
-- *(Optional / future)*: `net-tools`, `nmap`, `iwd`
-
----
-
-### 🧭 **GitHub Projects**
-Third-party tools automatically cloned and installed:
-- `oh-my-posh`  
-- `auto-cpufreq`
-
----
-
-### 💾 **Firmware Packages**
-- **Intel**: `firmware-misc-nonfree`, `firmware-linux-nonfree`, `firmware-sof-signed`, `firmware-iwlwifi`  
-- **AMD**: `firmware-amd-graphics`  
-- **NVIDIA**: `nvidia-driver`
-
----
-
-## 🧠 **Development Notes**
-
-### ⚠️ **Current Issues**
-- Option **00. edit apt source** — not yet Arch compatible.  
-- Option **01. Download Desktop Environment (via tasksel)** — not yet Arch compatible.  
-- Firewall detection (UFW + Fail2Ban) may be unstable on some setups.
-
----
-
-### 💡 **Future Development Ideas**
-- Add support to source dependencies **locally** if the repo is cloned.  
-- Implement a **tasksel-like system for Arch**.  
-- Add support for **dialog-based menus**.  
-- Improve **Arch compatibility** (AUR integration via `paru` or `yay`).  
-
----
-
-### 🔄 **Packages Requiring Manual Update**
-These package names may change over time:
-- **Debian:** `openjdk-25-jdk` *(currently required because `default-jdk` is still version 21 even in Sid)*  
-
----
-
-## 🧰 **Third-Party Repository (for Yazi on Debian)**
-
-To add Yazi’s repository (not available in APT by default):
-
-```
-curl -sS https://debian.griffo.io/EA0F721D231FDD3A0A17B9AC7808B4DD62C41256.asc | \
-sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/debian.griffo.io.gpg
-```
-
-Then add the source:
-
-```
-echo "deb https://debian.griffo.io/apt $(lsb_release -sc 2>/dev/null) main" | \
-sudo tee /etc/apt/sources.list.d/debian.griffo.io.list
-```
-
----
-
-## 🧾 **Developer Info**
-
-- **Repo:** [corechunk/linutils](https://github.com/corechunk/linutils)  
-- **License:** MIT  
-- **Author:** [corechunk](https://github.com/corechunk)  
-- **Compatible Systems:** Debian / Ubuntu / Arch *(partial)*  
-
----
-
-🌀 *“Automate the boring setup, so you can focus on creation.”*
+## License - MIT
+<!--
+ — see the repository for details.
+-->

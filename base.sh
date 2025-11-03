@@ -59,17 +59,17 @@ echo -e "You do NOT have sudo privileges. So, you are prompted for sudo password
 
 fi
 
-    if   [[ $2 == default || -z $2 ]];then #1. Install if needed with prompt
+    if   [[ $2 == default || -z $2 ]];then #1. Install if needed with prompt (no reinstall/default/safe)
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1"
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -S "$1" --needed
         fi
-    elif [[ $2 == install-force ]];then #2. Install by force without prompt
+    elif [[ $2 == install-force ]];then #2. Install by force without prompt (no reinstall/default/safe)
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1" -y
         elif [[ $(package_manager) == "pacman" ]];then
-            sudo pacman -S "$1" --noconfirm
+            sudo pacman -S "$1" --needed --noconfirm
         fi
     elif [[ $2 == re-install ]];then #3. Re-Install with prompt
         if   [[ $(package_manager) == "apt" ]];then
@@ -121,7 +121,7 @@ fi
         # otherwise searching for every pkgs in pkg manager is resource intensive when i wanna find if i should try snap/aur for distros
 }
 
-halt_msg(){
+halt_msg(){          
     # ========= hault for user to check what has downloaded =========
 
     echo -e "\n\n"
@@ -138,7 +138,7 @@ halt_msg(){
     read -n1 -r -p "" key
 }
 
-install_pkgs_dynamic(){  #for multi pkg
+install_pkgs_dynamic(){  #for multi pkg       # used install_pkg_dynamic()  <------------
     local type=$1        # 1st arg as installation type
     shift                # excluding 1st arg from $@ to include rest of elements as pkgs
     local pkgs=("$@")    # included as pkgs
@@ -166,8 +166,8 @@ install_pkgs_dynamic(){  #for multi pkg
     halt_msg "$YELLOW Press any key if you are finished checking the logs above ... $RESET" "$YELLOW $RESET"
     clean
 }
-prompt_install_type(){
-    local pkgs=("$@")
+prompt_install_type(){       # used install_pkgs_dynamic()  <------------
+    local pkgs=("$@")           # can be used to prompt user about installation mathods with a large set of pkgs
     local cho
     while true;do
         if [[ $mode == cli ]];then   # this is not used yet

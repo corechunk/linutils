@@ -19,7 +19,7 @@ essentials_dev_dialog=(
 	gdb                                   "Debugging tools for C/C++" on
 	"$manpages_pkg"                       "Developer manual pages" on
 	make                                  "GNU build utility" on
-	ninja-build                           "Fast alternative build system" on
+	"$ninja_pkg"                           "Fast alternative build system" on
 	cmake                                 "Cross-platform C++ build tool" on
 	"$openjdk_pkg"                        "Java Development Kit (includes JRE)" on
 	python3                               "Python programming language" off
@@ -86,8 +86,8 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
 	maim                "CLI screenshot utility (full/region)" on
 	xclip               "CLI clipboard manager (X11/Wayland)" on
 	
-	speech-dispatcher  "Needed by softwares that relay on text-to-speech" #  for TTS (i.e. text-to-speech for firefox and many)
-	fonts-firacode     "Monospace developer font (no glyphs)" on
+	speech-dispatcher  "Needed by softwares that relay on text-to-speech" off #  for TTS (i.e. text-to-speech for firefox and many)
+	fonts-firacode     "Monospace developer font (no glyphs)" off
 )
 shrink essentials_desktop_dialog essentials_desktop
 
