@@ -13,13 +13,18 @@ shrink DE_cho_dialog DE_cho  # shrink also excluded catagory headers
 tasksel_custom_menu(){
     local cho
     pkgs=();
-    while true;do
         if [[ $mode == tui ]];then
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                     --title "Download Desktop Environment with default DM" \
                     --checklist "Select/toggle preffered options : " 30 90 25 \
                     "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
-                    
+
+            # Handle cancel/esc
+            if [[ $? == 1 || $? == 255 ]]; then
+                echo "Cancelled by user. Returning..."
+                return 2
+            fi        
+            
             # Filtering cho into pkgs
             read -ra cho <<< "$cho"
             for ((i=0;i<${#cho[@]};i++));do 
@@ -28,6 +33,7 @@ tasksel_custom_menu(){
             done
             prompt_install_type "${pkgs[@]}"
         elif [[ $mode == cli ]];then
+            while true;do # cli traps until exit but tui doesn't [cause they differ in design]
                 echo "##########################################################"
                 echo "#### Download Desktop Environment with default DM     ####"
                 echo "##########################################################"
@@ -54,7 +60,7 @@ tasksel_custom_menu(){
                 #esac
                 
                 [[ $cho =~ ^[xX]$ ]] && echo "Exiting..." && break
-                
+
                 # Check if numeric and valid
                 if [[ "$cho" =~ ^[0-9]+$ ]] && (( cho >= 1 && cho <= ${#DE_cho[@]} )); then
                     index=$((cho - 1))
@@ -63,9 +69,9 @@ tasksel_custom_menu(){
                 else
                     echo "Invalid choice. Please enter a number between 1 and ${#DE_cho[@]}, or 'x' to exit."
                 fi
+            done
             
         fi
-    done
 }
 
 DE_DM_menu(){
