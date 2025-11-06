@@ -29,6 +29,7 @@ main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(
     base.sh
     apt-source.sh
+    tasksel_custom.sh
     essential_pre.sh
     essential_pre_pkgs.sh
     essential_pre_info.sh
@@ -132,7 +133,7 @@ main_menu (){
     local y="[$GREEN installed$RESET ]"
     local n="[$RED not installed$RESET ]"
 
-    if command_exists tasksel; then tasksel_stat="$y"; else tasksel_stat="$n"; fi
+    #if command_exists tasksel; then tasksel_stat="$y"; else tasksel_stat="$n"; fi
     if command_exists auto-cpufreq; then acf_stat="$y"; else acf_stat="$n"; fi
 
     while true; do
@@ -140,7 +141,7 @@ main_menu (){
         if [[ $mode == tui ]];then
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu" --menu "Select the Preferred Option :" 30 90 15 \
             00 "Edit apt source" \
-            01 "Download Desktop Environment (via tasksel)" \
+            01 "Download Desktop Environment & more" \
             1  "essential softwares (not made yet)" \
             2  "Enable firewall (via ufw & fail2ban)" \
             3  "Enable efficient battery optimization (via auto-cpufreq)" \
@@ -150,7 +151,7 @@ main_menu (){
             clean
         elif [[ $mode == cli ]];then
             echo "$WARNING 00.$RESET edit apt source"
-            echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
+            echo "$WARNING 01.$RESET Download Desktop Environment & more"
             echo "$divider"
             echo "$BLUE 1.$RESET essential softwares (not made yet)"
             echo "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)"
@@ -167,13 +168,7 @@ main_menu (){
 
         case $cho in
             00) clear;apt_menu ;;
-            01) clear;
-                if command_exists tasksel; then
-                    sudo tasksel
-                else
-                    install_pkg tasksel
-                fi
-                ;;
+            01) DE_DM_menu ;;
             1) clear;menu_essential ;;
             2) clear;ufw_menu ;;
             3) clear;

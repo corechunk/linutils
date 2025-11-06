@@ -19,23 +19,6 @@ else
 	exit 1
 fi
 
-shrink() {
-	local src="$1"   # name of source array
-	local dest="$2"  # name of destination array
-
-	# make src a nameref (reference to original array)
-	declare -n src_ref="$src"
-	declare -n dest_ref="$dest"
-
-	dest_ref=()  # clear destination array
-
-	#echo ""
-	for ((i=0; i<${#src_ref[@]}; i+=3)); do
-		pkg="${src_ref[i]}"
-		[[ $pkg == *#* ]] && continue   # skip headers
-		dest_ref+=("$pkg")
-		#echo "$pkg"
-	done
-}
+## shrink function was here
 
 
