@@ -83,8 +83,11 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
 	xdg-desktop-portal  "Desktop integration/screen share service (required by DEs)" on
 	xdg-utils           "CLI desktop tools (xdg-open, mime handling, etc.)" on
 	
-	maim                "CLI screenshot utility (full/region)" on
-	xclip               "CLI clipboard manager (X11/Wayland)" on
+	maim                "CLI screenshot utility (full/region)(X11 only)" on
+	xclip               "CLI clipboard manager (X11 only)" on
+
+    spectacle           "A widely supported ss app" off
+    flameshot           "A widely supported ss app" off
 	
 	speech-dispatcher  "Needed by softwares that relay on text-to-speech" off #  for TTS (i.e. text-to-speech for firefox and many)
 	fonts-firacode     "Monospace developer font (no glyphs)" off
@@ -101,9 +104,10 @@ essentials_hyprland_dialog=(
 	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
 	hyprcursor-util             "Cursor theme manager for Hyprland" on
 	
-	grim                        "Screenshot tool for Wayland" on
-	slurp                       "Region selector for screenshots (Wayland)" on
-	wl-clipboard                "Clipboard manager for Wayland" on
+	grim                        "Screenshot tool (Wayland only)" on
+	slurp                       "Region selector for screenshot (Wayland only)" on
+	wl-clipboard                "Clipboard manager (Wayland only)" on
+    swappy                      "Post SS tool (in short)" on
 )
 shrink essentials_hyprland_dialog essentials_hyprland
 
