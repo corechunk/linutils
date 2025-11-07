@@ -48,7 +48,7 @@ if [[ $1 == local ]]; then
     echo "Sourcing dependencies locally with progress bar..."
     for i in "${!dep[@]}"; do
         file="${dep[i]}"
-        echo "file:$file"
+        #echo "file:$file"
         if [[ -f ./$file ]]; then
             source "./$file"
         else
@@ -60,10 +60,10 @@ if [[ $1 == local ]]; then
         filled=$(( (i+1) * bar_length / total ))
         empty=$(( bar_length - filled ))
         bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
-        echo "i:$i"
-        echo "progress:$progress"
-        echo "filled:$filled"
-        echo "empty:$empty"
+        #echo "i:$i"
+        #echo "progress:$progress"
+        #echo "filled:$filled"
+        #echo "empty:$empty"
         #printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "$file"
         # build the bar
         bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
@@ -72,8 +72,6 @@ if [[ $1 == local ]]; then
         # move cursor to start, clear entire line, then print
         printf "\r\033[2K%s" "$line"
         sleep 0.05
-        #halt
-        read -n1 -r -p "Press any key to continue..." key
     done
 elif [[ $1 == remote || $1 == * ]]; then
     echo "Sourcing dependencies remotely with progress bar..." #============ DEFAULT SOURCING MODE : REMOTE ============
@@ -100,8 +98,6 @@ elif [[ $1 == remote || $1 == * ]]; then
         # move cursor to start, clear entire line, then print
         printf "\r\033[2K%s" "$line"
         sleep 0.05
-        #halt
-        read -n1 -r -p "Press any key to continue..." key
     done
 fi
 echo "" # echo for moving the cursor from loading bar
