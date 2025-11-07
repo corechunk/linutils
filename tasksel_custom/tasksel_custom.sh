@@ -7,6 +7,9 @@ DE_cho_dialog=(
     gnome                 "a android like looking nice desktop environment" off
     cinnamon-desktop-environment "A very light weight Desktop Environment" off
     xfce4                 "Another super light weight Desktop Environment" off	
+    "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
+    hyprland              "a tiling window manager" off
+    i3                    "another tiling window manager" off
 )
 shrink DE_cho_dialog DE_cho  # shrink also excluded catagory headers
 
@@ -27,9 +30,10 @@ tasksel_custom_menu(){
             
             # Filtering cho into pkgs
             read -ra cho <<< "$cho"
-            for ((i=0;i<${#cho[@]};i++));do 
-                [[ ${cho[$i]} == *#* ]] && continue
-                pkgs+=("${cho[$i]}")
+            local j
+            for ((j=0;j<${#cho[@]};j++));do 
+                [[ ${cho[$j]} == *#* ]] && continue
+                pkgs+=("${cho[$j]}")
             done
             prompt_install_type "${pkgs[@]}"
         elif [[ $mode == cli ]];then
@@ -44,6 +48,8 @@ tasksel_custom_menu(){
                 echo "4. Gnome"
                 echo "5. Cinnamon"
                 echo "6. xfce"
+                echo "7. hyprland"
+                echo "8. i3 standard"
                 echo "x. Exit"
                 echo -e "$log_end\n"
                 read -p "Select/type your preferred option : " cho

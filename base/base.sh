@@ -252,8 +252,8 @@ shrink() {
 	dest_ref=()  # clear destination array
 
 	#echo ""
-	for ((i=0; i<${#src_ref[@]}; i+=3)); do
-		pkg="${src_ref[i]}"
+	for ((s=0; s<${#src_ref[@]}; s+=3)); do
+		pkg="${src_ref[s]}"
 		[[ $pkg == *#* ]] && continue   # skip headers
 		dest_ref+=("$pkg")
 		#echo "$pkg"
