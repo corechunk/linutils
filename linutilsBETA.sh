@@ -27,15 +27,15 @@ check_sudo
 
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(
-    base.sh
-    apt-source.sh
-    tasksel_custom.sh
-    essential_pre.sh
-    essential_pre_pkgs.sh
-    essential_pre_info.sh
-    essential.sh
-    auto-cpufreq.sh
-    security.sh
+    base/base.sh
+    base/apt-source.sh
+    tasksel_custom/tasksel_custom.sh
+    essential/essential_pre.sh
+    essential/essential_pre_pkgs.sh
+    essential/essential_pre_info.sh
+    essential/essential.sh
+    github_pkgs/auto-cpufreq.sh
+    github_pkgs/security.sh
 )
 
 bar_length=50
