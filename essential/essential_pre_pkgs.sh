@@ -76,6 +76,7 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
 
 	blueman             "Bluetooth device manager GUI (blueman-manager)" on
 	network-manager     "Network connection manager (wired/wireless)" on
+    network-manager-applet "Network connection manager GUI applet" on
 	
 	pipewire                        "Modern audio/video server (PulseAudio/Jack replacement)" on
 	pipewire-audio-client-libraries "Audio client libraries for PipeWire" on
@@ -103,11 +104,15 @@ essentials_hyprland_dialog=(
 	
 	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
 	hyprcursor-util             "Cursor theme manager for Hyprland" on
+
+    network-manager     "Network connection manager (wired/wireless)" on
+    network-manager-applet "Network connection manager GUI applet" on
 	
 	grim                        "Screenshot tool (Wayland only)" on
 	slurp                       "Region selector for screenshot (Wayland only)" on
 	wl-clipboard                "Clipboard manager (Wayland only)" on
     swappy                      "Post SS tool (in short)" on
+    cliphist                    "clipboard meneger" on
 )
 shrink essentials_hyprland_dialog essentials_hyprland
 
