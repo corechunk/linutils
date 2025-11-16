@@ -1,16 +1,31 @@
 DE_cho=()
-DE_cho_dialog=(
-	"######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
-    kde-full              "Plasma setups with all utilities that KDE provides" off
-    kde-standard          "Plasma setups with standard KDE utilities" off
-    kde-plasma-desktop    "Plasma setups with minimal KDE utilities" off
-    gnome                 "a android like looking nice desktop environment" off
-    cinnamon-desktop-environment "A very light weight Desktop Environment" off
-    xfce4                 "Another super light weight Desktop Environment" off	
-    "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
-    hyprland              "a tiling window manager" off
-    i3                    "another tiling window manager" off
-)
+if [[ $(package_manager) == "apt" ]]; then
+    DE_cho_dialog=(
+        "######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
+        kde-full              "Plasma setups with all utilities that KDE provides" off
+        kde-standard          "Plasma setups with standard KDE utilities" off
+        kde-plasma-desktop    "Plasma setups with minimal KDE utilities" off
+        gnome                 "a android like looking nice desktop environment" off
+        cinnamon-desktop-environment "A very light weight Desktop Environment" off
+        xfce4                 "Another super light weight Desktop Environment" off	
+        "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
+        hyprland              "a tiling window manager" off
+        i3                    "another tiling window manager" off
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+    DE_cho_dialog=(
+        "######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
+        plasma-meta           "Plasma setups with all utilities that KDE provides" off
+        plasma                "Plasma setups with standard KDE utilities" off
+        plasma-desktop        "Plasma setups with minimal KDE utilities" off
+        gnome                 "a android like looking nice desktop environment" off
+        cinnamon              "A very light weight Desktop Environment" off
+        xfce4                 "Another super light weight Desktop Environment" off	
+        "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
+        hyprland              "a tiling window manager" off
+        i3-wm                 "another tiling window manager" off
+    )
+fi
 shrink DE_cho_dialog DE_cho  # shrink also excluded catagory headers
 
 tasksel_custom_menu(){
@@ -42,14 +57,25 @@ tasksel_custom_menu(){
                 echo "#### Download Desktop Environment with default DM     ####"
                 echo "##########################################################"
                 echo ""
-                echo "1. Plasma full (by KDE)"
-                echo "2. Plasma standard (by KDE)"
-                echo "3. Plasma minimal (by KDE)"
-                echo "4. Gnome"
-                echo "5. Cinnamon"
-                echo "6. xfce"
-                echo "7. hyprland"
-                echo "8. i3 standard"
+                if [[ $(package_manager) == "apt" ]]; then
+                    echo "1. Plasma full (by KDE)"
+                    echo "2. Plasma standard (by KDE)"
+                    echo "3. Plasma minimal (by KDE)"
+                    echo "4. Gnome"
+                    echo "5. Cinnamon"
+                    echo "6. xfce"
+                    echo "7. hyprland"
+                    echo "8. i3 standard"
+                elif [[ $(package_manager) == "pacman" ]]; then
+                    echo "1. plasma-meta (KDE Plasma Full)"
+                    echo "2. plasma (KDE Plasma Standard)"
+                    echo "3. plasma-desktop (KDE Plasma Minimal)"
+                    echo "4. gnome (Gnome Desktop)"
+                    echo "5. cinnamon (Cinnamon Desktop)"
+                    echo "6. xfce4 (XFCE Desktop)"
+                    echo "7. hyprland (Hyprland WM)"
+                    echo "8. i3-wm (i3 Window Manager)"
+                fi
                 echo "x. Exit"
                 echo -e "$log_end\n"
                 read -p "Select/type your preferred option : " cho
