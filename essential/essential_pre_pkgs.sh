@@ -183,46 +183,99 @@ shrink essentials_extra_dialog essentials_extra
 ##################[ Generic ]####################
 #################################################  haven't check this part for arch
 firmware_generic=()
-firmware_generic_dialog=(
-	firmware-linux "Binary firmware for various drivers in the Linux kernel (metapackage)" on
-	firmware-linux-free "Binary firmware for various drivers in the Linux kernel" on
-	firmware-linux-nonfree "Binary firmware for various drivers in the Linux kernel (metapackage)" on
-)
+if [[ $(package_manager) == "apt" ]]; then
+	# Debian/Ubuntu/Sid  [ or debian based ]
+    firmware_generic_dialog=(
+        firmware-linux "Binary firmware for various drivers in the Linux kernel (metapackage)" on
+        firmware-linux-free "Binary firmware for various drivers in the Linux kernel" on
+        firmware-linux-nonfree "Binary firmware for various drivers in the Linux kernel (metapackage)" on
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+	# Arch [ or arch based ]
+    firmware_generic_dialog=(
+        "linux-firmware" "Firmware files for Linux" on
+    )
+else
+	echo "Unsupported distro"
+	exit 1
+fi
 shrink firmware_generic_dialog firmware_generic
 #################################################
 ##################[ INTEL ]######################
 #################################################
 firmware_intel=()
-firmware_intel_dialog=(   # debian:sid confirmed
-	firmware-sof-signed    "Intel Sound Open Firmware firmware - signed" on
-	firmware-misc-nonfree "Binary firmware for various drivers in the Linux kernel" on
-	firmware-iwlwifi       "Intel Wi-Fi firmware" on
+if [[ $(package_manager) == "apt" ]]; then
+	# Debian/Ubuntu/Sid  [ or debian based ]
+    firmware_intel_dialog=(   # debian:sid confirmed
+        firmware-sof-signed    "Intel Sound Open Firmware firmware - signed" on
+        firmware-misc-nonfree  "Binary firmware for various drivers in the Linux kernel" on
+        firmware-iwlwifi       "Intel Wi-Fi firmware" on
 
-	firmware-intel-graphics "Binary firmware for Intel iGPUs and IPUs" on
-	firmware-intel-misc "Binary firmware for miscellaneous Intel devices and chips" on
-	firmware-intel-sound "Binary firmware for Intel sound DSPs" on
-
-)
+        firmware-intel-graphics "Binary firmware for Intel iGPUs and IPUs" on
+        firmware-intel-misc     "Binary firmware for miscellaneous Intel devices and chips" on
+        firmware-intel-sound    "Binary firmware for Intel sound DSPs" on
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+	# Arch [ or arch based ]
+    firmware_intel_dialog=(
+        "linux-firmware"     "Firmware files for Linux"     on
+        "sof-firmware"       "Sound Open Firmware"          on
+        "mesa"               "OpenGL implementation"        on
+        "vulkan-intel"       "Intel's Vulkan driver"        on
+        "intel-media-driver" "Intel Media Driver for VAAPI" on
+    )
+else
+	echo "Unsupported distro"
+	exit 1
+fi
 shrink firmware_intel_dialog firmware_intel
 #################################################
 #################[AMD-radeon]####################
 #################################################
-firmware_amd_dialog=(   # debian:sid confirmed
-	firmware-amd-graphics "Binary firmware for AMD/ATI graphics and NPU chips" on
-)
 firmware_amd=()
+if [[ $(package_manager) == "apt" ]]; then
+	# Debian/Ubuntu/Sid  [ or debian based ]
+    firmware_amd_dialog=(   # debian:sid confirmed
+        firmware-amd-graphics "Binary firmware for AMD/ATI graphics and NPU chips" on
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+	# Arch [ or arch based ]
+    firmware_amd_dialog=(
+        "linux-firmware" "Firmware files for Linux" on
+        "mesa"           "OpenGL implementation" on
+        "vulkan-radeon"  "Radeon's Vulkan driver" on
+    )
+else
+	echo "Unsupported distro"
+	exit 1
+fi
 shrink firmware_amd_dialog firmware_amd
 #################################################
 #################[ NVIDIA ]######################
 #################################################
-firmware_nvidia_dialog=(   # debian:sid confirmed
-	nvidia-driver-full "NVIDIA metapackage (all components)" on
-	firmware-nvidia-grphics "Binary firmware for Nvidia GPU chips" on
-)
 firmware_nvidia=()
+if [[ $(package_manager) == "apt" ]]; then
+	# Debian/Ubuntu/Sid  [ or debian based ]
+    firmware_nvidia_dialog=(   # debian:sid confirmed
+        nvidia-driver-full "NVIDIA metapackage (all components)" on
+        firmware-nvidia-grphics "Binary firmware for Nvidia GPU chips" on
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+	# Arch [ or arch based ]
+    firmware_nvidia_dialog=(
+        "nvidia" "NVIDIA driver" on
+        "nvidia-utils" "NVIDIA driver utilities" on
+        "lib32-nvidia-utils" "32-bit NVIDIA driver utilities" on
+        "linux-firmware" "Firmware files for Linux" on
+    )
+else
+	echo "Unsupported distro"
+	exit 1
+fi
 shrink firmware_nvidia_dialog firmware_nvidia
 #################################################
 
+##########################    recheck all added in the if/else above (feelin lazy)
 
 # research - linux-generic firmwares for arch
 #	linux-firmware

@@ -18,8 +18,9 @@ menu_essential(){
             echo "$BLUE 1.$RESET Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
             echo "$BLUE 2.$RESET Core$BLUE CLI$RESET packages"
             echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
-            echo "$BLUE 4.$RESET$SKY_BLUE Hyprland$RESET Echosystem packages"
-            echo "$BLUE 5.$RESET github software packages $RED(comming soon)$RESET "
+            echo "$BLUE 4.$SKY_BLUE Hyprland$RESET Echosystem packages"
+            echo "$BLUE 5.$MAGENTA corechunk's hyprland$RESET packages"
+            echo "$BLUE 6.$RESET github software packages $RED(comming soon)$RESET "
             echo "$BLUE 9.$RESET INFO PAGE [navigation with up/down arrow]"
             echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
             echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
@@ -37,7 +38,8 @@ menu_essential(){
             2 "Core CLI packages" \
             3 "Core GUI packages" \
             4 "Hyprland Echosystem packages" \
-            5 "github software packages (comming soon)" \
+            5 "corechunk's hyprland packages" \
+            6 "github software packages (comming soon)" \
             9 "INFO PAGE [navigation with up/down arrow]" \
             all "install all packages$RESET shown here" \
             all_f "install [1-5] [force]" \
@@ -56,6 +58,7 @@ menu_essential(){
             2)  prompt_install_type "${essentials_terminal[@]}" ;;
             3)  prompt_install_type "${essentials_desktop[@]}" ;;
             4)  prompt_install_type "${essentials_hyprland[@]}" ;;
+            5)  prompt_install_type "${corechunk_hyprland[@]}" ;;
                                                                         #00)install_pkg_dynamic dialog ;;
                                                                         #01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
                                                                         #02)for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
@@ -81,10 +84,11 @@ menu_essential(){
             01) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "Intel Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_intel_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             02) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "AMD Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_amd_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             03) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "NVIDIA Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_nvidia_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
-            1) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_dev" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_dev_dialog[@]}" 2>&1 >/dev/tty);read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for (( i=0; i<${#raw_pkgs[@]}; i++ ));do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done ;prompt_install_type  "${pkgs[@]}" ;;
+            1)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_dev" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_dev_dialog[@]}" 2>&1 >/dev/tty);read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for (( i=0; i<${#raw_pkgs[@]}; i++ ));do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done ;prompt_install_type  "${pkgs[@]}" ;;
             2)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_terminal" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_terminal_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             3)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_desktop" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_desktop_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
-            4)  raw_pkgs=$(dialog --backtitle "corechunk : lbacktitleinutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_hyprland" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            4)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_hyprland" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            5)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "corechunk's_hyprland_pkgs" --checklist "Select/toggle preffered options : " 30 90 25 "${corechunk_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             9) menu_info ;;
             x) tput reset;clear;break ;;
             esac
