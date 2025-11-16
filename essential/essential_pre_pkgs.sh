@@ -57,7 +57,7 @@ essentials_terminal_dialog=(     # meant to contain pkgs that will not pull desk
 	# nmap
 	# iwd
 	ufw           "Simple firewall manager (iptables frontend)" on
-	fail2ban      "Intrusion prevention tool for SSH and services" on
+	fail2ban      "Intrusion prevention tool for SSH and services" off
 )
 shrink essentials_terminal_dialog essentials_terminal
 
@@ -78,14 +78,15 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
 	network-manager     "Network connection manager (wired/wireless)" on
     network-manager-applet "Network connection manager GUI applet" on
 	
+	xdg-desktop-portal  "Desktop integration/screen share service (required by DEs)" on
+	xdg-utils           "CLI desktop tools (xdg-open, mime handling, etc.)" on
+
 	pipewire                        "Modern audio/video server (PulseAudio/Jack replacement)" on
 	pipewire-audio-client-libraries "Audio client libraries for PipeWire" on
 	
-	xdg-desktop-portal  "Desktop integration/screen share service (required by DEs)" on
-	xdg-utils           "CLI desktop tools (xdg-open, mime handling, etc.)" on
-	
-	maim                "CLI screenshot utility (full/region)(X11 only)" on
-	xclip               "CLI clipboard manager (X11 only)" on
+
+	maim                "CLI screenshot utility (full/region)(X11 only)" off
+	xclip               "CLI clipboard manager (X11 only)" off
 
     spectacle           "A widely supported ss app" off
     flameshot           "A widely supported ss app" off
@@ -102,19 +103,68 @@ essentials_hyprland_dialog=(
 	rofi                        "Launcher and window switcher (X11/Wayland)" on
 	hyprpaper                   "Wallpaper daemon for Hyprland" on
 	
+    "#_________#" "sub catagory" off
 	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
 	hyprcursor-util             "Cursor theme manager for Hyprland" on
 
+    "#_________#" "sub catagory" off
     network-manager     "Network connection manager (wired/wireless)" on
     network-manager-applet "Network connection manager GUI applet" on
 	
+    "#_________#" "sub catagory" off
+    cliphist                    "clipboard meneger" on
+	wl-clipboard                "Clipboard manager (Wayland only)" on
+
+    "#_________#" "sub catagory" off
 	grim                        "Screenshot tool (Wayland only)" on
 	slurp                       "Region selector for screenshot (Wayland only)" on
-	wl-clipboard                "Clipboard manager (Wayland only)" on
     swappy                      "Post SS tool (in short)" on
-    cliphist                    "clipboard meneger" on
 )
 shrink essentials_hyprland_dialog essentials_hyprland
+
+corechunk_hyprland=()
+corechunk_hyprland_dialog=(
+	"##########_Hyprland_Utils_##########" "__________ Category Description [below] __________" off
+
+	"#_________# Core Hyprland Utilities" "sub catagory" off
+	hyprpaper                   "Wallpaper daemon for Hyprland" on
+	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
+	hyprcursor-util             "Cursor theme manager for Hyprland" on
+
+	"#_________# Must for corechunk/hyprland" "sub catagory (used directly in the dots)" off
+    kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
+	thunar              "Lightweight file manager (XFCE)" on
+	firefox                     "A web browser" on
+
+	"#_____# Launchers & Bars" "subsub catagory" off
+	waybar                      "Customizable status/task bar for Wayland" on
+	rofi                        "Launcher and window switcher (X11/Wayland)" on
+	wofi                        "A Wayland native launcher" off
+
+	"#_____# Clipboard & Screenshot" "subsub catagory" off
+	cliphist                    "clipboard meneger" on
+	wl-clipboard                "Clipboard manager (Wayland only)" on
+	grim                        "Screenshot tool (Wayland only)" on
+	slurp                       "Region selector for screenshot (Wayland only)" on
+	swappy                      "Post SS tool (in short)" on
+
+    "#_________# Recommended cli" "sub catagory" off
+	ranger                      "A console file manager" on
+	neovim                      "Modern Vim-based text editor" on
+	gawk                        "Needed for ble.sh (core dependency)" on
+	tmux                        "Terminal multiplexer (split panes, sessions)" on
+	btop                        "System monitor (like Task Manager)" on
+	fastfetch                   "System information fetcher (like neofetch)" on
+	zip                         "File compression utility" on
+	unzip                       "File decompression utility" on
+
+    "#_________# Recommended GUI" "sub catagory" off
+	mousepad            "Simple GUI text editor (Notepad-like)" on
+	mpv                 "Media player for audio/video (CLI+GUI)" on
+	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
+	microsoft-edge-stable       "A web browser" off
+)
+shrink corechunk_hyprland_dialog corechunk_hyprland
 
 essentials_extra=()
 essentials_extra_dialog=(
