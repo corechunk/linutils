@@ -1,9 +1,9 @@
 #!/bin/bash
 
-
-
 # some functions/variable called here are available on other file
 # and they are need to be sourced in order to run properly
+
+
 
 
 
@@ -19,6 +19,14 @@ check_sudo(){
 }
 check_sudo
 
+# Detect distribution and export it to be available for all sourced scripts
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    export DISTRO_ID=$ID
+else
+    export DISTRO_ID=$(uname -s)
+fi
+
 #if [[ $has_sudo -eq 1 ]]; then
 #    echo "You have sudo privileges."
 #else
@@ -27,19 +35,24 @@ check_sudo
 
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(
-    base.sh
-    apt-source.sh
-    essential_pre.sh
-    essential_pre_pkgs.sh
-    essential_pre_info.sh
-    essential.sh
-    auto-cpufreq.sh
-    security.sh
+    base/base.sh
+    base/pkg_mng_debian.sh
+    base/pkg_mng_ubuntu.sh
+    base/pkg_mng_arch.sh
+    base/pkg_mng_fedora.sh
+    base/pkg_mng_util.sh
+    tasksel_custom/tasksel_custom.sh
+    essential/essential_pre.sh
+    essential/essential_pre_pkgs.sh
+    essential/essential_pre_info.sh
+    essential/essential.sh
+    github_pkgs/auto-cpufreq.sh
+    github_pkgs/security.sh
 )
 
 bar_length=50
 total=${#dep[@]}
-
+echo "total:$total"
 
 
                 # ========= Load Dependencies =========
@@ -47,6 +60,7 @@ if [[ $1 == local ]]; then
     echo "Sourcing dependencies locally with progress bar..."
     for i in "${!dep[@]}"; do
         file="${dep[i]}"
+        #echo "file:$file"
         if [[ -f ./$file ]]; then
             source "./$file"
         else
@@ -58,6 +72,10 @@ if [[ $1 == local ]]; then
         filled=$(( (i+1) * bar_length / total ))
         empty=$(( bar_length - filled ))
         bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
+        #echo "i:$i"
+        #echo "progress:$progress"
+        #echo "filled:$filled"
+        #echo "empty:$empty"
         #printf "\r[%s] %3d%% Loaded: %s" "$bar" "$progress" "$file"
         # build the bar
         bar="$(printf '█%.0s' $(seq 1 $filled))$(printf ' %.0s' $(seq 1 $empty))"
@@ -116,6 +134,7 @@ elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ====
     mode_msg="Running TUI Mode ..."
     mode=tui
 fi
+
                 # ========= ALL Loaded msg =========
 if   [[ $mode == tui ]];then
     dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
@@ -132,31 +151,31 @@ main_menu (){
     local y="[$GREEN installed$RESET ]"
     local n="[$RED not installed$RESET ]"
 
-    if command_exists tasksel; then tasksel_stat="$y"; else tasksel_stat="$n"; fi
+    #if command_exists tasksel; then tasksel_stat="$y"; else tasksel_stat="$n"; fi
     if command_exists auto-cpufreq; then acf_stat="$y"; else acf_stat="$n"; fi
 
     while true; do
     local cho
         if [[ $mode == tui ]];then
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu" --menu "Select the Preferred Option :" 30 90 15 \
-            00 "Edit apt source" \
-            01 "Download Desktop Environment (via tasksel)" \
-            1  "essential softwares (not made yet)" \
-            2  "Enable firewall (via ufw & fail2ban)" \
+            00 "Edit pakg manager source list" \
+            01 "Download Desktop Environment & more" \
+            1  "essential softwares" \
+            2  "Enable firewall" \
             3  "Enable efficient battery optimization (via auto-cpufreq)" \
-            4  "dotfiles and wallpapers (not made yet)" \
+            4  "dotfiles and wallpapers (coming soon)" \
             x  "EXIT" \
             2>&1 >/dev/tty)
             clean
         elif [[ $mode == cli ]];then
-            echo "$WARNING 00.$RESET edit apt source"
-            echo "$WARNING 01.$RESET Download Desktop Environment (via tasksel) $tasksel_stat"
+            echo "$WARNING 00.$RESET Edit pakg manager source list"
+            echo "$WARNING 01.$RESET Download Desktop Environment & more"
             echo "$divider"
-            echo "$BLUE 1.$RESET essential softwares (not made yet)"
-            echo "$BLUE 2.$RESET Enable firewall (via ufw & fail2ban)"
+            echo "$BLUE 1.$RESET essential softwares"
+            echo "$BLUE 2.$RESET Enable firewall"
             echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
+            echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (coming soon)"
             echo "$divider"
-            echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (not made yet)"
             echo "$RED x. EXIT $RESET"
             echo ""
             read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho
@@ -166,14 +185,8 @@ main_menu (){
         fi
 
         case $cho in
-            00) clear;apt_menu ;;
-            01) clear;
-                if command_exists tasksel; then
-                    sudo tasksel
-                else
-                    install_pkg tasksel
-                fi
-                ;;
+            00) clear;pkg_mng_menu ;;
+            01) DE_DM_menu ;;
             1) clear;menu_essential ;;
             2) clear;ufw_menu ;;
             3) clear;
@@ -192,6 +205,9 @@ main_menu (){
         esac
     done
 }
+
+# Verify system support before showing the main menu
+verify_support
 
 main_menu
 exit 0

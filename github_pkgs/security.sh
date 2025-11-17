@@ -38,7 +38,7 @@ ufw_menu(){
 
         case $cho in
         1)
-            install_pkg ufw
+            install_pkg_dynamic ufw default
             echo "$log_end"
             ;;
         2)
@@ -51,7 +51,7 @@ ufw_menu(){
             echo "$log_end"
             ;;
         3)
-            install_pkg fail2ban
+            install_pkg_dynamic fail2ban default
             echo "$log_end"
             ;;
         4)

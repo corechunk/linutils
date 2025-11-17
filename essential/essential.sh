@@ -70,7 +70,7 @@ menu_essential(){
                                                                         #5)for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
             9)menu_info ;;
             all_f|ALL_F)
-                for grps in essentials_dev essentials_terminal essentials_desktop essentials_hyprland network_tools_cli;do
+                for grps in essentials_dev essentials_terminal essentials_desktop essentials_hyprland;do
                     for pkg in "${grps[@]}";do install_pkg_dynamic "$pkg" install-force; done
                 done ;;
             x|X)clear;break ;;

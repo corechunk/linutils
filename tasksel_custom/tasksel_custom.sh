@@ -15,15 +15,25 @@ if [[ $(package_manager) == "apt" ]]; then
 elif [[ $(package_manager) == "pacman" ]]; then
     DE_cho_dialog=(
         "######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
-        plasma-meta           "Plasma setups with all utilities that KDE provides" off
-        plasma                "Plasma setups with standard KDE utilities" off
-        plasma-desktop        "Plasma setups with minimal KDE utilities" off
-        gnome                 "a android like looking nice desktop environment" off
-        cinnamon              "A very light weight Desktop Environment" off
-        xfce4                 "Another super light weight Desktop Environment" off	
+        plasma                "KDE Plasma (Standard/Full)" off
+        plasma-desktop        "KDE Plasma (Minimal)" off
+        gnome                 "GNOME Desktop Environment" off
+        cinnamon              "Cinnamon Desktop Environment" off
+        xfce4                 "XFCE Desktop Environment" off	
         "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
         hyprland              "a tiling window manager" off
         i3-wm                 "another tiling window manager" off
+    )
+elif [[ $(package_manager) == "dnf" ]]; then
+    DE_cho_dialog=(
+        "######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
+        "@kde-desktop"        "KDE Plasma Desktop Environment" off
+        "@gnome-desktop"      "GNOME Desktop Environment" off
+        "@cinnamon-desktop"   "Cinnamon Desktop Environment" off
+        "@xfce-desktop"       "XFCE Desktop Environment" off
+        "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
+        "hyprland"            "a tiling window manager" off
+        "i3"                  "another tiling window manager" off
     )
 fi
 shrink DE_cho_dialog DE_cho  # shrink also excluded catagory headers
@@ -52,57 +62,38 @@ tasksel_custom_menu(){
             done
             prompt_install_type "${pkgs[@]}"
         elif [[ $mode == cli ]];then
-            while true;do # cli traps until exit but tui doesn't [cause they differ in design]
+            while true;do
                 echo "##########################################################"
                 echo "#### Download Desktop Environment with default DM     ####"
                 echo "##########################################################"
                 echo ""
-                if [[ $(package_manager) == "apt" ]]; then
-                    echo "1. Plasma full (by KDE)"
-                    echo "2. Plasma standard (by KDE)"
-                    echo "3. Plasma minimal (by KDE)"
-                    echo "4. Gnome"
-                    echo "5. Cinnamon"
-                    echo "6. xfce"
-                    echo "7. hyprland"
-                    echo "8. i3 standard"
-                elif [[ $(package_manager) == "pacman" ]]; then
-                    echo "1. plasma-meta (KDE Plasma Full)"
-                    echo "2. plasma (KDE Plasma Standard)"
-                    echo "3. plasma-desktop (KDE Plasma Minimal)"
-                    echo "4. gnome (Gnome Desktop)"
-                    echo "5. cinnamon (Cinnamon Desktop)"
-                    echo "6. xfce4 (XFCE Desktop)"
-                    echo "7. hyprland (Hyprland WM)"
-                    echo "8. i3-wm (i3 Window Manager)"
-                fi
+                local i=1
+                local current_de_cho=()
+                for item in "${DE_cho[@]}"; do
+                    # Skip category headers
+                    if [[ "$item" == "######"* ]]; then
+                        echo "$item" # Print category headers
+                    else
+                        echo "$i. $item"
+                        current_de_cho+=("$item") # Store actual packages for selection
+                        ((i++))
+                    fi
+                done
                 echo "x. Exit"
                 echo -e "$log_end\n"
                 read -p "Select/type your preferred option : " cho
 
-                #case $cho in
-                #    1) index=0; prompt_install_type ${DE_cho[$index]} ;;
-                #    2) index=1; prompt_install_type ${DE_cho[$index]} ;;
-                #    3) index=2; prompt_install_type ${DE_cho[$index]} ;;
-                #    4) index=3; prompt_install_type ${DE_cho[$index]} ;;
-                #    5) index=4; prompt_install_type ${DE_cho[$index]} ;;
-                #    6) index=5; prompt_install_type ${DE_cho[$index]} ;;
-                #    x|X) echo "Exiting..."; break ;;
-                #    *) echo "Invalid choice" ;;
-                #esac
-                
-                [[ $cho =~ ^[xX]$ ]] && echo "Exiting..." && break
-
-                # Check if numeric and valid
-                if [[ "$cho" =~ ^[0-9]+$ ]] && (( cho >= 1 && cho <= ${#DE_cho[@]} )); then
-                    index=$((cho - 1))
-                    pkg="${DE_cho[$index]}"
+                if [[ "$cho" =~ ^[xX]$ ]]; then
+                    echo "Exiting...";
+                    break
+                elif [[ "$cho" =~ ^[0-9]+$ ]] && (( cho >= 1 && cho <= ${#current_de_cho[@]} )); then
+                    local index=$((cho - 1))
+                    local pkg="${current_de_cho[$index]}"
                     prompt_install_type "$pkg"
                 else
-                    echo "Invalid choice. Please enter a number between 1 and ${#DE_cho[@]}, or 'x' to exit."
+                    echo "Invalid choice. Please enter a number between 1 and ${#current_de_cho[@]}, or 'x' to exit."
                 fi
             done
-            
         fi
 }
 
@@ -136,6 +127,9 @@ DE_DM_menu(){
 
         case $cho in
         1) tasksel_custom_menu ;;
+        2) tasksel_custom_menu ;; # For now, same as option 1, can be refined later for DE only
+        3) echo "Display Manager Only (advanced) - Not yet implemented.";;
+        4) echo "sddm + hyprland (custom) - Not yet implemented.";;
         5) 
             if command_exists tasksel; then
                 sudo tasksel

@@ -36,18 +36,65 @@ package_manager(){
         echo "apt"
     elif command_exists pacman;then
         echo "pacman"
-    else 
+    elif command_exists dnf;then
+        echo "dnf"
+    else
         echo "none"
     fi
 }
 
-install_pkg(){
-    if [ $package_manager="apt" ];then
-        sudo apt install "$1"
-    elif [ $package_manager="pacman" ];then
-        sudo pacman -Sy "$1" --needed
+verify_support() {
+    # DISTRO_ID is a global variable set in the main script
+    
+    if [[ "$(package_manager)" == "apt" ]]; then
+        local supported_distros=("debian" "ubuntu" "linuxmint")
+        local is_supported=false
+        for distro in "${supported_distros[@]}"; do
+            if [[ "$DISTRO_ID" == "$distro" ]]; then
+                is_supported=true
+                break
+            fi
+        done
+        if ! $is_supported; then
+            echo -e "${ERROR} Your Debian-based distribution ($DISTRO_ID) is not explicitly supported." >&2
+            exit 1
+        fi
+    elif [[ "$(package_manager)" == "pacman" ]]; then
+        local supported_distros=("arch" "manjaro" "endeavouros")
+        local is_supported=false
+        for distro in "${supported_distros[@]}"; do
+            if [[ "$DISTRO_ID" == "$distro" ]]; then
+                is_supported=true
+                break
+            fi
+        done
+        if ! $is_supported; then
+            echo -e "${ERROR} Your Arch-based distribution ($DISTRO_ID) is not explicitly supported." >&2
+            exit 1
+        fi
+    elif [[ "$(package_manager)" == "dnf" ]]; then
+        local supported_distros=("fedora" "rhel" "centos")
+        local is_supported=false
+        for distro in "${supported_distros[@]}"; do
+            if [[ "$DISTRO_ID" == "$distro" ]]; then
+                is_supported=true
+                break
+            fi
+        done
+        if ! $is_supported; then
+            echo -e "${ERROR} Your DNF-based distribution ($DISTRO_ID) is not explicitly supported." >&2
+            exit 1
+        fi
+    else
+        echo -e "${ERROR} No supported package manager (apt, pacman, dnf) found on your system." >&2
+        exit 1
     fi
+
+    # If we reach here, everything is supported.
+    echo -e "$OK Distribution ($DISTRO_ID) and Package Manager ($(package_manager)) are supported."
 }
+
+
 
 install_pkg_dynamic(){
 
@@ -64,48 +111,64 @@ fi
             sudo apt install "$1"
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -S "$1" --needed
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf install "$1"
         fi
     elif [[ $2 == install-force ]];then #2. Install by force without prompt (no reinstall/default/safe)
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1" -y
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -S "$1" --needed --noconfirm
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf install "$1" -y
         fi
     elif [[ $2 == re-install ]];then #3. Re-Install with prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1" --reinstall
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -S "$1"
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf reinstall "$1"
         fi
     elif [[ $2 == re-install-force ]];then #4. Re-Install by force without prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt install "$1" -y --reinstall
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -S "$1" --noconfirm
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf reinstall "$1" -y
         fi
     elif [[ $2 == remove ]];then #5. Uninstall with prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt remove "$1"
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -R "$1"
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf remove "$1"
         fi
     elif [[ $2 == remove-force ]];then #6 Uninstall without prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt remove "$1" -y
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -R "$1" --noconfirm
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf remove "$1" -y
         fi
     elif [[ $2 == purge ]];then #7 Purge with prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt purge "$1"
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -Rns "$1"
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf remove "$1" # dnf doesn't have a direct purge equivalent
         fi
     elif [[ $2 == purge-force ]];then #8 Purge without prompt
         if   [[ $(package_manager) == "apt" ]];then
             sudo apt purge "$1" -y
         elif [[ $(package_manager) == "pacman" ]];then
             sudo pacman -Rns "$1" --noconfirm
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf remove "$1" -y # dnf doesn't have a direct purge equivalent
         fi
     else
         echo "invalid option for installation, ..."

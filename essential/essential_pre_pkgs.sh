@@ -22,8 +22,8 @@ essentials_dev_dialog=(
 	"$ninja_pkg"                           "Fast alternative build system" on
 	cmake                                 "Cross-platform C++ build tool" on
 	"$openjdk_pkg"                        "Java Development Kit (includes JRE)" on
-	python3                               "Python programming language" off
-	python3-pip                           "Python package manager" off
+	"$python_pkg"                         "Python programming language" off
+	"$pip_pkg"                            "Python package manager" off
 )
 shrink essentials_dev_dialog essentials_dev
 
@@ -66,7 +66,7 @@ essentials_desktop=()
 essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop environment with it, so safe to be installed by rookies when inside a Desktop environment
 	"##########_essentials_desktop_Tools_##########" "__________ Category Description [below] __________" off
 	kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
-	thunar              "Lightweight file manager (XFCE)" on
+	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
 	mousepad            "Simple GUI text editor (Notepad-like)" on
 	mpv                 "Media player for audio/video (CLI+GUI)" on
 	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
@@ -75,24 +75,24 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
 	shotcut             "Non-linear video editor (free)" on
 
 	blueman             "Bluetooth device manager GUI (blueman-manager)" on
-	network-manager     "Network connection manager (wired/wireless)" on
+	"$network_manager_pkg" "Network connection manager (wired/wireless)" on
     network-manager-applet "Network connection manager GUI applet" on
 	
 	xdg-desktop-portal  "Desktop integration/screen share service (required by DEs)" on
 	xdg-utils           "CLI desktop tools (xdg-open, mime handling, etc.)" on
 
 	pipewire                        "Modern audio/video server (PulseAudio/Jack replacement)" on
-	pipewire-audio-client-libraries "Audio client libraries for PipeWire" on
+	"$pipewire_libs_pkg" "Audio client libraries for PipeWire" on
 	
 
 	maim                "CLI screenshot utility (full/region)(X11 only)" off
 	xclip               "CLI clipboard manager (X11 only)" off
 
-    spectacle           "A widely supported ss app" off
+    "$spectacle_pkg"    "A widely supported ss app" off
     flameshot           "A widely supported ss app" off
 	
 	speech-dispatcher  "Needed by softwares that relay on text-to-speech" off #  for TTS (i.e. text-to-speech for firefox and many)
-	fonts-firacode     "Monospace developer font (no glyphs)" off
+	"$firacode_pkg"     "Monospace developer font (no glyphs)" off
 )
 shrink essentials_desktop_dialog essentials_desktop
 
@@ -105,10 +105,10 @@ essentials_hyprland_dialog=(
 	
     "#_________#" "sub catagory" off
 	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
-	hyprcursor-util             "Cursor theme manager for Hyprland" on
+	"$hyprcursor_pkg"           "Cursor theme manager for Hyprland" on
 
     "#_________#" "sub catagory" off
-    network-manager     "Network connection manager (wired/wireless)" on
+    "$network_manager_pkg" "Network connection manager (wired/wireless)" on
     network-manager-applet "Network connection manager GUI applet" on
 	
     "#_________#" "sub catagory" off
@@ -129,11 +129,11 @@ corechunk_hyprland_dialog=(
 	"#_________# Core Hyprland Utilities" "sub catagory" off
 	hyprpaper                   "Wallpaper daemon for Hyprland" on
 	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
-	hyprcursor-util             "Cursor theme manager for Hyprland" on
+	"$hyprcursor_pkg"           "Cursor theme manager for Hyprland" on
 
 	"#_________# Must for corechunk/hyprland" "sub catagory (used directly in the dots)" off
     kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
-	thunar              "Lightweight file manager (XFCE)" on
+	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
 	firefox                     "A web browser" on
 
 	"#_____# Launchers & Bars" "subsub catagory" off
@@ -162,7 +162,7 @@ corechunk_hyprland_dialog=(
 	mousepad            "Simple GUI text editor (Notepad-like)" on
 	mpv                 "Media player for audio/video (CLI+GUI)" on
 	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
-	microsoft-edge-stable       "A web browser" off
+	"$edge_pkg"                 "A web browser" off
 )
 shrink corechunk_hyprland_dialog corechunk_hyprland
 
@@ -181,23 +181,22 @@ shrink essentials_extra_dialog essentials_extra
 
 #################################################
 ##################[ Generic ]####################
-#################################################  haven't check this part for arch
+#################################################
 firmware_generic=()
 if [[ $(package_manager) == "apt" ]]; then
-	# Debian/Ubuntu/Sid  [ or debian based ]
     firmware_generic_dialog=(
         firmware-linux "Binary firmware for various drivers in the Linux kernel (metapackage)" on
         firmware-linux-free "Binary firmware for various drivers in the Linux kernel" on
         firmware-linux-nonfree "Binary firmware for various drivers in the Linux kernel (metapackage)" on
     )
 elif [[ $(package_manager) == "pacman" ]]; then
-	# Arch [ or arch based ]
     firmware_generic_dialog=(
         "linux-firmware" "Firmware files for Linux" on
     )
-else
-	echo "Unsupported distro"
-	exit 1
+elif [[ $(package_manager) == "dnf" ]]; then
+    firmware_generic_dialog=(
+        "linux-firmware" "Firmware files for Linux" on
+    )
 fi
 shrink firmware_generic_dialog firmware_generic
 #################################################
@@ -205,28 +204,32 @@ shrink firmware_generic_dialog firmware_generic
 #################################################
 firmware_intel=()
 if [[ $(package_manager) == "apt" ]]; then
-	# Debian/Ubuntu/Sid  [ or debian based ]
-    firmware_intel_dialog=(   # debian:sid confirmed
+    firmware_intel_dialog=(
+        "intel-microcode" "Processor microcode firmware for Intel CPUs" on
         firmware-sof-signed    "Intel Sound Open Firmware firmware - signed" on
         firmware-misc-nonfree  "Binary firmware for various drivers in the Linux kernel" on
         firmware-iwlwifi       "Intel Wi-Fi firmware" on
-
         firmware-intel-graphics "Binary firmware for Intel iGPUs and IPUs" on
         firmware-intel-misc     "Binary firmware for miscellaneous Intel devices and chips" on
         firmware-intel-sound    "Binary firmware for Intel sound DSPs" on
     )
 elif [[ $(package_manager) == "pacman" ]]; then
-	# Arch [ or arch based ]
     firmware_intel_dialog=(
+        "intel-ucode" "Processor microcode for Intel CPUs" on
         "linux-firmware"     "Firmware files for Linux"     on
         "sof-firmware"       "Sound Open Firmware"          on
         "mesa"               "OpenGL implementation"        on
         "vulkan-intel"       "Intel's Vulkan driver"        on
         "intel-media-driver" "Intel Media Driver for VAAPI" on
     )
-else
-	echo "Unsupported distro"
-	exit 1
+elif [[ $(package_manager) == "dnf" ]]; then
+    firmware_intel_dialog=(
+        "microcode_ctl" "Microcode update utility for Intel and AMD" on
+        "linux-firmware" "Firmware files for Linux" on
+        "alsa-sof-firmware" "Sound Open Firmware" on
+        "mesa-vulkan-drivers" "Mesa Vulkan drivers for Intel and AMD" on
+        "intel-media-driver" "Intel Media Driver for VAAPI (from RPM Fusion)" on
+    )
 fi
 shrink firmware_intel_dialog firmware_intel
 #################################################
@@ -234,20 +237,23 @@ shrink firmware_intel_dialog firmware_intel
 #################################################
 firmware_amd=()
 if [[ $(package_manager) == "apt" ]]; then
-	# Debian/Ubuntu/Sid  [ or debian based ]
-    firmware_amd_dialog=(   # debian:sid confirmed
+    firmware_amd_dialog=(
+        "amd64-microcode" "Processor microcode firmware for AMD CPUs" on
         firmware-amd-graphics "Binary firmware for AMD/ATI graphics and NPU chips" on
     )
 elif [[ $(package_manager) == "pacman" ]]; then
-	# Arch [ or arch based ]
     firmware_amd_dialog=(
+        "amd-ucode" "Processor microcode for AMD CPUs" on
         "linux-firmware" "Firmware files for Linux" on
         "mesa"           "OpenGL implementation" on
         "vulkan-radeon"  "Radeon's Vulkan driver" on
     )
-else
-	echo "Unsupported distro"
-	exit 1
+elif [[ $(package_manager) == "dnf" ]]; then
+    firmware_amd_dialog=(
+        "microcode_ctl" "Microcode update utility for Intel and AMD" on
+        "linux-firmware" "Firmware files for Linux" on
+        "mesa-vulkan-drivers" "Mesa Vulkan drivers for Intel and AMD" on
+    )
 fi
 shrink firmware_amd_dialog firmware_amd
 #################################################
@@ -255,22 +261,23 @@ shrink firmware_amd_dialog firmware_amd
 #################################################
 firmware_nvidia=()
 if [[ $(package_manager) == "apt" ]]; then
-	# Debian/Ubuntu/Sid  [ or debian based ]
-    firmware_nvidia_dialog=(   # debian:sid confirmed
-        nvidia-driver-full "NVIDIA metapackage (all components)" on
-        firmware-nvidia-grphics "Binary firmware for Nvidia GPU chips" on
+    firmware_nvidia_dialog=(
+        "nvidia-driver-full" "NVIDIA metapackage (all components)" on
+        "firmware-nvidia-graphics" "Binary firmware for Nvidia GPU chips" on
+        "nvidia-cuda-toolkit" "NVIDIA CUDA development toolkit" off
     )
 elif [[ $(package_manager) == "pacman" ]]; then
-	# Arch [ or arch based ]
     firmware_nvidia_dialog=(
         "nvidia" "NVIDIA driver" on
         "nvidia-utils" "NVIDIA driver utilities" on
         "lib32-nvidia-utils" "32-bit NVIDIA driver utilities" on
         "linux-firmware" "Firmware files for Linux" on
     )
-else
-	echo "Unsupported distro"
-	exit 1
+elif [[ $(package_manager) == "dnf" ]]; then
+    firmware_nvidia_dialog=(
+        "akmod-nvidia" "NVIDIA driver kernel module (from RPM Fusion)" on
+        "xorg-x11-drv-nvidia-cuda" "CUDA support for NVIDIA driver (from RPM Fusion)" on
+    )
 fi
 shrink firmware_nvidia_dialog firmware_nvidia
 #################################################

@@ -5,7 +5,7 @@
 ## Introduction
 
 **linutils** is a modular **Bash-based** setup utility for automating essential Linux configuration and package installation.  
-It’s designed for **GNU/Linux systems** — primarily **Debian/Ubuntu** and **Arch** — but runs on any distro with GNU tools and Bash available.
+It’s designed for **GNU/Linux systems** — primarily **Debian/Ubuntu**, **Arch**, and **Fedora**-based distributions — but runs on any distro with GNU tools and Bash available.
 
 ### It automates post-install setup tasks such as : 
 - `developer tool installation`
@@ -19,7 +19,7 @@ Because it’s written entirely in **Bash**, it works anywhere Bash does — no 
 
 > **Note about GNU / Bash:**  
 > `linutils` is written in **Bash** and built on **GNU core utilities**, making it compatible with most **GNU/Linux** systems by default.  
-> It targets **Debian/Ubuntu** and **Arch**, but should run on any distro with `bash`, a supported package manager (`apt` or `pacman`), and standard GNU tools available.  
+> It targets **Debian/Ubuntu**, **Arch**, and **Fedora**, but should run on any distro with `bash`, a supported package manager (`apt`, `pacman`, or `dnf`), and standard GNU tools available.  
 > On minimal systems or containers using `sh`, `dash`, or `ash`, simply run it explicitly with:  
 > ```
 > bash linutils.sh   . . .
@@ -90,7 +90,8 @@ bash linutils.sh local tui
   - Modular dependency sourcing (remote or local) with a progress bar.
   - Dual interface: TUI (`dialog`) and CLI.
 - #### Post Loading Functionalities :
-  - Package group installer with cross-distro package-name mapping (Debian ↔ Arch).
+  - Package group installer with cross-distro package-name mapping (Debian ↔ Arch ↔ Fedora).
+  - Distro-aware package manager menu with specific options (e.g., enable Sid for Debian, Multilib for Arch, RPM Fusion for Fedora).
   - Firmware install groups (Intel / AMD / NVIDIA / generic).
   - **Developer toolchain** group (build-essential/base-devel, compilers, debuggers).
   - Essential **Server** and **Desktop** packages (editors, terminals, screenshot tools, media tools).
@@ -107,7 +108,7 @@ bash linutils.sh local tui
 
 When launched, the main menu exposes options like:
 
-- `00` __ Edit APT source (Debian-only)
+- `00` __ Package Manager Utilities
 - `01` __ Install Desktop Environment (via `tasksel`)
 - `1`  ___ Essential CLI/Dev tools
 - `2`  ___ Core CLI tools
@@ -116,16 +117,23 @@ When launched, the main menu exposes options like:
 - `9`  ___ Info page (detailed package list and notes)
 - `x`  ___ Exit
 
-Each menu leads to a checklist (TUI) or a batch-selection (CLI). then it will should all packages to choose(except cli mode). then lets users pick method ( install / force / remove / purge, etc.).
+Each menu leads to a checklist (TUI) or a batch-selection (CLI). The **Package Manager Utilities** menu is now distro-aware, providing relevant options for your system:
+- **Debian:** Edit sources, switch to `sid` (unstable).
+- **Ubuntu:** Edit sources, enable `universe`/`multiverse`/`restricted` repos.
+- **Arch Linux:** Edit `pacman.conf`, enable `multilib` repository, rank mirrors.
+- **Fedora:** Edit `dnf.conf`, enable RPM Fusion repositories.
+
+The script then lets users pick an installation method (install / force / remove / purge, etc.).
 
 ---
 
 ## How package mapping works (cross-distro)
 
-The script detects the package manager with `package_manager()` and maps names where necessary. Examples:
+The script detects the package manager with `package_manager()` (`apt`, `pacman`, `dnf`) and maps names where necessary. Examples:
 
 - `build-essential` (Debian) ↔ `base-devel` (Arch)
 - `openjdk-25-jdk` (Debian) ↔ `jdk-openjdk` (Arch)
+- `@kde-desktop` (Fedora)
 - Firmware: Debian often splits firmware into `firmware-*` packages (and may require `non-free-firmware`), while Arch bundles most firmware in `linux-firmware`.
 
 You’ll find per-category arrays in the code like `essentials_dev_dialog`, `firmware_intel_dialog`, etc. The script uses a `shrink` helper to produce clean package arrays from the dialog-format arrays to use the same array with CLI-interface usage and then installs via `install_pkg_dynamic()` which handles apt/pacman differences.
@@ -158,7 +166,7 @@ Firmware packaging differs across distros; the script treats firmware carefully 
 
 ## Extensibility & development notes
 
-- The script is intentionally modular: dependency files (e.g. `base.sh`, `apt-source.sh`, `essential_pre.sh`, `essential.sh`, `auto-cpufreq.sh`, `security.sh`) are sourced. Add new modules to the repo and list them in the main script to expand functionality.
+- The script is intentionally modular: dependency files (e.g. `base.sh`, `pkg_mng_debian.sh`, `pkg_mng_arch.sh`, `pkg_mng_fedora.sh`, `essential.sh`, etc.) are sourced. Add new modules to the repo and list them in the main script to expand functionality.
 - You can add or edit package arrays to customize the default installation sets.
 - Future improvements planned:
   - now (fix/change all menu appearences and fix_flickering)
