@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 # Define the name of the combined script
-TARGET_SCRIPT := linutility.sh
+TARGET_SCRIPT := linutils
 
 # List all dependency files in the correct order for concatenation
 DEPENDENCY_FILES := \

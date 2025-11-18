@@ -359,8 +359,6 @@ shrink() {
 		#echo "$pkg"
 	done
 }
-
-
 # This file contains package manager utility functions specific to Debian-based systems.
 
 sid_prompt(){
