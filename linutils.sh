@@ -33,6 +33,8 @@ fi
 #    echo "You do NOT have sudo privileges."
 #fi
 
+##dep_mark##
+
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(
     base/base.sh
@@ -114,6 +116,7 @@ elif [[ $1 == remote || $1 == * ]]; then
 fi
 echo "" # echo for moving the cursor from loading bar
 
+##dep_mark_end##
 
                 # ========= Choose Operation Mode =========
 if [[ $2 == cli ]];then
@@ -135,7 +138,7 @@ elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ====
     mode=tui
 fi
 
-                # ========= ALL Loaded msg =========
+#=========ALL_Loaded_msg=========
 if   [[ $mode == tui ]];then
     dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
     clean
@@ -211,3 +214,5 @@ verify_support
 
 main_menu
 exit 0
+
+#core_end

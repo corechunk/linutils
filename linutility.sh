@@ -1,0 +1,1924 @@
+#!/bin/bash
+
+# some functions/variable called here are available on other file
+# and they are need to be sourced in order to run properly
+
+
+
+
+
+
+clear
+# Check if the current user can run sudo without a password prompt
+check_sudo(){
+    if sudo -n true 2>/dev/null; then
+        has_sudo=1
+    else
+        has_sudo=0
+    fi
+}
+check_sudo
+
+# Detect distribution and export it to be available for all sourced scripts
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    export DISTRO_ID=$ID
+else
+    export DISTRO_ID=$(uname -s)
+fi
+
+#if [[ $has_sudo -eq 1 ]]; then
+#    echo "You have sudo privileges."
+#else
+#    echo "You do NOT have sudo privileges."
+#fi
+
+##dep_mark##
+
+# Set some colors for output messages 
+OK="$(tput setaf 2)[OK]$(tput sgr0)"
+ERROR="$(tput setaf 1)[ERROR]$(tput sgr0)"
+NOTE="$(tput setaf 3)[NOTE]$(tput sgr0)"
+CAT="$(tput setaf 6)[ACTION]$(tput sgr0)"
+MAGENTA="$(tput setaf 5)"
+ORANGE="$(tput setaf 214)"
+WARNING="$(tput setaf 1)"
+RED="$(tput setaf 1)"
+YELLOW="$(tput setaf 3)"
+GREEN="$(tput setaf 2)"
+BLUE="$(tput setaf 4)"
+SKY_BLUE="$(tput setaf 6)"
+RESET="$(tput sgr0)"
+
+INFO="$(tput setaf 4)[INFO]$(tput sgr0)"
+WARN="$(tput setaf 214)[WARN]$(tput sgr0)"
+
+log_start="$GREEN ----------$BLUE  ----------$RESET"
+log_end="$BLUE ----------$GREEN  ----------$RESET"
+divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
+clean(){
+    tput reset;clear
+}
+
+command_exists(){
+    command -v "$1" >/dev/null 2>&1
+    return $?
+}
+sudo_command_exists(){
+    sudo bash -c command -v "$1" >/dev/null 2>&1
+    return $?
+}
+package_manager(){
+    if command_exists apt;then
+        echo "apt"
+    elif command_exists pacman;then
+        echo "pacman"
+    elif command_exists dnf;then
+        echo "dnf"
+    else
+        echo "none"
+    fi
+}
+
+verify_support() {
+    # DISTRO_ID is a global variable set in the main script
+    
+    if [[ "$(package_manager)" == "apt" ]]; then
+        local supported_distros=("debian" "ubuntu" "linuxmint")
+        local is_supported=false
+        for distro in "${supported_distros[@]}"; do
+            if [[ "$DISTRO_ID" == "$distro" ]]; then
+                is_supported=true
+                break
+            fi
+        done
+        if ! $is_supported; then
+            echo -e "${ERROR} Your Debian-based distribution ($DISTRO_ID) is not explicitly supported." >&2
+            exit 1
+        fi
+    elif [[ "$(package_manager)" == "pacman" ]]; then
+        local supported_distros=("arch" "manjaro" "endeavouros")
+        local is_supported=false
+        for distro in "${supported_distros[@]}"; do
+            if [[ "$DISTRO_ID" == "$distro" ]]; then
+                is_supported=true
+                break
+            fi
+        done
+        if ! $is_supported; then
+            echo -e "${ERROR} Your Arch-based distribution ($DISTRO_ID) is not explicitly supported." >&2
+            exit 1
+        fi
+    elif [[ "$(package_manager)" == "dnf" ]]; then
+        local supported_distros=("fedora" "rhel" "centos")
+        local is_supported=false
+        for distro in "${supported_distros[@]}"; do
+            if [[ "$DISTRO_ID" == "$distro" ]]; then
+                is_supported=true
+                break
+            fi
+        done
+        if ! $is_supported; then
+            echo -e "${ERROR} Your DNF-based distribution ($DISTRO_ID) is not explicitly supported." >&2
+            exit 1
+        fi
+    else
+        echo -e "${ERROR} No supported package manager (apt, pacman, dnf) found on your system." >&2
+        exit 1
+    fi
+
+    # If we reach here, everything is supported.
+    echo -e "$OK Distribution ($DISTRO_ID) and Package Manager ($(package_manager)) are supported."
+}
+
+
+
+install_pkg_dynamic(){
+
+check_sudo
+
+echo -e "\n$BLUE[Package] : $GREEN$1$RESET\n"
+if [[ $has_sudo -eq 0 ]]; then
+echo -e "You do NOT have sudo privileges. So, you are prompted for sudo password.\n$NOTE You'll not be asked for other packages if you use password correctly now"
+
+fi
+
+    if   [[ $2 == default || -z $2 ]];then #1. Install if needed with prompt (no reinstall/default/safe)
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1"
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1" --needed
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf install "$1"
+        fi
+    elif [[ $2 == install-force ]];then #2. Install by force without prompt (no reinstall/default/safe)
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1" -y
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1" --needed --noconfirm
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf install "$1" -y
+        fi
+    elif [[ $2 == re-install ]];then #3. Re-Install with prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1" --reinstall
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1"
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf reinstall "$1"
+        fi
+    elif [[ $2 == re-install-force ]];then #4. Re-Install by force without prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1" -y --reinstall
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1" --noconfirm
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf reinstall "$1" -y
+        fi
+    elif [[ $2 == remove ]];then #5. Uninstall with prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt remove "$1"
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -R "$1"
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf remove "$1"
+        fi
+    elif [[ $2 == remove-force ]];then #6 Uninstall without prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt remove "$1" -y
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -R "$1" --noconfirm
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf remove "$1" -y
+        fi
+    elif [[ $2 == purge ]];then #7 Purge with prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt purge "$1"
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -Rns "$1"
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf remove "$1" # dnf doesn't have a direct purge equivalent
+        fi
+    elif [[ $2 == purge-force ]];then #8 Purge without prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt purge "$1" -y
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -Rns "$1" --noconfirm
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf remove "$1" -y # dnf doesn't have a direct purge equivalent
+        fi
+    else
+        echo "invalid option for installation, ..."
+        return 1;
+    fi
+
+    return 0;
+
+
+    # For Arch: tries pacman -S, if not found tries yay -S or paru -S (check existence); if not, fall back to AUR build via git & makepkg.
+    # For Debian: tries apt install; if not found tries snap install (if snap is available); else fallback to upstream installer (curl + executable) or git installer.
+        # to implement these i have to know what pacman and apt returns when a package is not found
+        # otherwise searching for every pkgs in pkg manager is resource intensive when i wanna find if i should try snap/aur for distros
+}
+
+halt_msg(){          
+    # ========= hault for user to check what has downloaded =========
+
+    echo -e "\n\n"
+    #read -n1 -r -p "$YELLOW Press any key if you are finished checking the logs above..." key
+    local tmp="$1"
+    local tmp2="$2"
+    local diff=$(( ${#tmp} - ${#tmp2} ))
+    echo -e "$tmp"
+    echo -e "\n\n\n"
+    # Move the cursor back up to the message line
+    tput cuu 5   # moves cursor up 3 lines
+    tput cuf ${diff}
+    #tput el      # clears the line where cursor is (optional)
+    read -n1 -r -p "" key
+}
+
+install_pkgs_dynamic(){  #for multi pkg       # used install_pkg_dynamic()  <------------
+    local type=$1        # 1st arg as installation type
+    shift                # excluding 1st arg from $@ to include rest of elements as pkgs
+    local pkgs=("$@")    # included as pkgs
+
+    for pkg in "${pkgs[@]}";do
+        install_pkg_dynamic "$pkg" "$type"
+    done
+
+        ## ========= hault for user to check what has downloaded =========
+        ##echo -e "\n✅ All dependencies loaded!"
+        #echo -e "\n\n"
+        ##read -n1 -r -p "$YELLOW Press any key if you are finished checking the logs above..." key
+        #local tmp="$YELLOW Press any key if you are finished checking the logs above ... $RESET"
+        #local tmp2="$YELLOW$RESET"
+        #local diff=$(( ${#tmp} - ${#tmp2} ))
+        #echo -e "$tmp"
+
+        #echo -e "\n\n\n"
+
+        ## Move the cursor back up to the message line
+        #tput cuu 5   # moves cursor up 3 lines
+        #tput cuf ${diff}
+        ##tput el      # clears the line where cursor is (optional)
+        #read -n1 -r -p "" key
+    halt_msg "$YELLOW Press any key if you are finished checking the logs above ... $RESET" "$YELLOW $RESET"
+    clean
+}
+prompt_install_type(){       # used install_pkgs_dynamic()  <------------
+    local pkgs=("$@")           # can be used to prompt user about installation mathods with a large set of pkgs
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then   # this is not used yet
+            echo ""
+            echo "1. install with prompt"
+            echo "2. install without prompt [force]"
+            echo "3. re-install with prompt"
+            echo "4. re-install without prompt [force]"
+            echo "5. uninstall with prompt"
+            echo "6. uninstall without prompt [force]"
+            echo "7. purge with prompt"
+            echo "8. purge without prompt [force]"
+            echo "x. EXIT"
+            echo ""
+            read -p "Choose preferred option : " cho
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " 30 90 25\
+            1 "install with prompt"\
+            2 "install without prompt [force]"\
+            3 "re-install with prompt"\
+            4 "re-install without prompt [force]"\
+            5 "uninstall with prompt"\
+            6 "uninstall without prompt [force]"\
+            7 "purge with prompt"\
+            8 "purge without prompt [force]"\
+            x "EXIT"\
+            2>&1 >/dev/tty)
+        fi
+        clean
+    
+
+        case $cho in
+        1) install_pkgs_dynamic default "${pkgs[@]}";return 0 ;;
+        2) install_pkgs_dynamic install-force "${pkgs[@]}";return 0 ;;
+        3) install_pkgs_dynamic re-install "${pkgs[@]}";return 0 ;;
+        4) install_pkgs_dynamic re-install-force "${pkgs[@]}";return 0 ;;
+        5) install_pkgs_dynamic remove "${pkgs[@]}";return 0 ;;
+        6) install_pkgs_dynamic remove-force "${pkgs[@]}";return 0 ;;
+        7) install_pkgs_dynamic purge "${pkgs[@]}";return 0 ;;
+        8) install_pkgs_dynamic purge-force "${pkgs[@]}";return 0 ;;
+        x|X) clear;tput reset;return 1 ;;
+        *) tput reset;clear;echo -e "invalid option ! \n" ;;
+        esac
+    done
+}
+
+#install_pkg yazi
+prompt_user(){
+    local cho
+    local times=0
+    while true;do
+        read -p "$1 [y/n]; " cho
+        case $cho in
+        y|Y)
+            return 0
+            ;;
+        n|N)
+            return 1
+            ;;
+        *)
+            ((times++));
+            if ((times>2));then return 1; fi
+            echo "invalid choice !"
+        esac
+    done
+}
+#prompt_user "Do you agree ?"
+#if [[ $? == 0 ]];then
+#    echo yes
+#elif [[ $? == 1 ]];then
+#    echo no
+#fi
+
+shrink() {
+	local src="$1"   # name of source array
+	local dest="$2"  # name of destination array
+
+	# make src a nameref (reference to original array)
+	declare -n src_ref="$src"
+	declare -n dest_ref="$dest"
+
+	dest_ref=()  # clear destination array
+
+	#echo ""
+	for ((s=0; s<${#src_ref[@]}; s+=3)); do
+		pkg="${src_ref[s]}"
+		[[ $pkg == *#* ]] && continue   # skip headers
+		dest_ref+=("$pkg")
+		#echo "$pkg"
+	done
+}
+
+
+# This file contains package manager utility functions specific to Debian-based systems.
+
+sid_prompt(){
+    clear
+    while true;do
+        local cho
+
+        if [[ $mode == cli ]]; then
+
+            # ───────────────────────────────────────────────
+            # OLD APT FORMAT DETECTED
+            # /etc/apt/sources.list (legacy)
+            # ───────────────────────────────────────────────
+            if [[ -f "/etc/apt/sources.list" ]]; then
+                echo "old type source list detected :$YELLOW /etc/apt/sources.list$RESET"
+                echo ""
+                echo "$log_start"
+                echo "Are you sure you want to change your apt source to$RED unstable/sid.$RESET"
+                echo "These two lines below will be added to$MAGENTA /etc/apt/sources.list$RESET"
+                echo ""
+                echo "$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
+                echo "$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
+                echo "$log_end"
+                echo ""
+
+            # ───────────────────────────────────────────────
+            # MODERN APT FORMAT DETECTED
+            # /etc/apt/sources.list.d/debian.sources
+            # ───────────────────────────────────────────────
+            elif [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
+                echo "modern source list detected :$YELLOW /etc/apt/sources.list.d/debian.sources$RESET"
+                echo ""
+                echo "$log_start"
+                echo "Modern unified APT source detected (.sources format)."
+                echo "Your current file will be replaced with the Sid version:"
+                echo ""
+                echo "Types: deb deb-src"
+                echo "URIs: http://deb.debian.org/debian/"
+                echo "Suites: unstable"
+                echo "Components: main contrib non-free non-free-firmware"
+                echo "Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg"
+                echo ""
+                echo "$log_end"
+                echo ""
+            fi
+            read -p "Are you sure ? (confirm or no) :" cho
+            clear
+        elif [[ $mode == tui ]]; then
+
+            # ───────────────────────────────────────────────
+            # TUI DIALOG VERSION (OLD FORMAT)
+            # ───────────────────────────────────────────────
+            if [[ -f "/etc/apt/sources.list" ]]; then
+                cho=$(dialog --title "APT Source Change Confirmation" \
+                    --backtitle "Package manager source list : Operations" \
+                    --inputbox "Old-style sources list detected : '/etc/apt/sources.list'.
+
+Are you sure you want to change your apt source to unstable/sid?
+
+Your 'sources.list' file will be replaced with the Sid version:
+
+deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware
+
+Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
+                    2>&1 >/dev/tty)
+
+            # ───────────────────────────────────────────────
+            # TUI DIALOG VERSION (MODERN FORMAT)
+            # ───────────────────────────────────────────────
+            elif [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
+                cho=$(dialog --title "APT Source Change Confirmation" \
+                    --backtitle "Package manager source list : Operations" \
+                    --inputbox "Modern APT unified source detected '/etc/apt/sources.list.d/debian.sources'.
+
+Are you sure you want to change your apt source to unstable/sid?
+
+Your debian.sources file will be replaced with the Sid version:
+
+Types: deb deb-src
+URIs: http://deb.debian.org/debian/
+Suites: unstable
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
+                    2>&1 >/dev/tty)
+            fi
+
+            clear
+        fi
+
+        case $cho in
+        confirm)
+            clear
+            # ───────────────────────────────────────────────
+            # OLD FORMAT (sources.list)
+            # ───────────────────────────────────────────────
+            if [[ -f "/etc/apt/sources.list" ]]; then
+                echo "deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" \
+                    | sudo tee /etc/apt/sources.list >/dev/null
+                echo "deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" \
+                    | sudo tee -a /etc/apt/sources.list >/dev/null
+
+            # ───────────────────────────────────────────────
+            # MODERN FORMAT (.sources)
+            # ───────────────────────────────────────────────
+            elif [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
+                sudo tee /etc/apt/sources.list.d/debian.sources >/dev/null <<EOF
+Types: deb deb-src
+URIs: http://deb.debian.org/debian/
+Suites: unstable
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF
+            fi
+
+            # ───────────────────────────────────────────────
+            # SUCCESS MESSAGE
+            # ───────────────────────────────────────────────
+            if [[ $mode == cli ]]; then
+                echo -e "\n$GREEN✔ Source list successfully updated to unstable/sid.$RESET\n"
+            elif [[ $mode == tui ]]; then
+                dialog --title "Success" \
+                       --msgbox "\n✔ Source list successfully updated to unstable/sid." 6 80
+            fi
+            return 0
+            ;;
+        no|x|NO)
+            clear
+            if [[ $mode == cli ]]; then
+                echo -e "\n$RED✖ Aborting Operation...$RESET\n"
+            elif [[ $mode == tui ]]; then
+                dialog --title "Notification" --msgbox "\n✖ Aborting Operation..." 10 80
+            fi
+            return 1
+            ;;
+        *)
+            if [[ $mode == cli ]]; then
+                echo -e "\n$RED⚠ Invalid choice.$RESET You must type 'confirm' to accept or 'no' to decline.\n"
+            elif [[ $mode == tui ]]; then
+                dialog --title "Invalid Choice" \
+                       --msgbox "\n⚠ Invalid choice.\n\nYou must select 'confirm' to accept or 'no' to decline." 7 80
+            fi
+            ;;
+        esac
+
+
+    done
+
+}
+
+debian_pkg_mng_menu(){
+    clear
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "################################"
+            echo "#####$ORANGE APT Manager Menu$RESET #####"
+            echo "################################"
+            echo "$BLUE edit.$RESET [Debian] edit sources list manually "
+            echo "$RED sid.$RESET [Debian] Switch to unstable/sid"
+            echo "$ORANGE x. EXIT $RESET "
+            read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "APT Manager Menu" --menu "Choose option : " 20 60 15 \
+            edit "[Debian] edit sources list manually" \
+            sid "[Debian] Switch to unstable/sid" \
+            x EXIT \
+            2>&1 >/dev/tty)
+        fi
+
+        case $cho in
+            edit)
+                if [[ -f "/etc/apt/sources.list" ]];then
+                    echo "old type source list detected :$YELLOW /etc/apt/sources.list$RESET"
+                    sudo nano /etc/apt/sources.list
+                elif [[ -f "/etc/apt/sources.list.d/debian.sources" ]];then
+                    echo "modern source list detected :$YELLOW /etc/apt/sources.list.d/debian.sources$RESET"
+                    sudo nano /etc/apt/sources.list.d/debian.sources
+                fi
+                clear
+                ;; 
+            sid)
+                sid_prompt
+                if (($?==0));then
+                    if [[ $mode == cli ]];then
+                        echo "$log_start"
+                        echo "you apt source is perfectly altered. The pre-configured sid/unstable template has been installed."
+                        echo "$GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET"
+                        echo "$log_end"
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox \
+                        "you apt source is perfectly altered. The pre-configured sid/unstable template has been installed. \n                        Now, you just have to update full-upgrade your linux" \
+                        10 60
+                    fi
+                elif (($?==1));then
+                    if [[ $mode == cli ]];then
+                        echo ""
+                        echo -e "$log_start\n$ORANGE the task is aborted $log_end"
+                        echo ""
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox "the task is aborted" 10 40
+                    fi
+                fi
+                ;; 
+            x|X) break ;; 
+            *) clear; echo "Invalid choice" ;; 
+        esac 
+    done
+    clear
+}
+
+# This file contains package manager utility functions specific to Ubuntu-based systems.
+
+enable_ubuntu_repos_prompt(){
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "$log_start"
+            echo "This will enable the 'universe', 'multiverse', and 'restricted' repositories for Ubuntu, providing access to a wider range of software."
+            echo "$log_end"
+            read -p "Are you sure ? (confirm or no) :" cho
+            clear
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "Enable Ubuntu Repositories" \
+                --backtitle "Package manager source list : Operations" \
+                --inputbox "This will enable the 'universe', 'multiverse', and 'restricted' repositories for Ubuntu, providing access to a wider range of software.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
+                2>&1 >/dev/tty)
+            clear
+        fi
+
+        case $cho in
+        confirm)
+            clear
+            sudo add-apt-repository universe -y
+            sudo add-apt-repository multiverse -y
+            sudo add-apt-repository restricted -y
+            return 0
+            ;;
+        no|x|NO)
+            clear
+            return 1
+            ;;
+        *)
+            if [[ $mode == cli ]];then
+                echo -e "\n$RED⚠ Invalid choice.$RESET You must type 'confirm' to accept or 'no' to decline.\n"
+            elif [[ $mode == tui ]];then
+                dialog --title "Invalid Choice" \
+                       --msgbox "\n⚠ Invalid choice.\n\nYou must select 'confirm' to accept or 'no' to decline." 7 80
+            fi
+            ;;
+        esac
+    done
+}
+
+ubuntu_pkg_mng_menu(){
+    clear
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "################################"
+            echo "#####$ORANGE APT Manager Menu (Ubuntu)$RESET #####"
+            echo "################################"
+            echo "$BLUE edit.$RESET Edit sources list manually "
+            echo "$BLUE enable_repos.$RESET Enable Universe, Multiverse, Restricted Repositories"
+            echo "$ORANGE x. EXIT $RESET "
+            read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "APT Manager Menu (Ubuntu)" --menu "Choose option : " 20 60 15 \
+            edit "Edit sources list manually" \
+            enable_repos "Enable Universe, Multiverse, Restricted Repositories" \
+            x EXIT \
+            2>&1 >/dev/tty)
+        fi
+
+        case $cho in
+            edit)
+                if [[ -f "/etc/apt/sources.list" ]];then
+                    sudo nano /etc/apt/sources.list
+                elif [[ -f "/etc/apt/sources.list.d/ubuntu.sources" ]];then
+                    sudo nano /etc/apt/sources.list.d/ubuntu.sources
+                fi
+                clear
+                ;;
+            enable_repos)
+                enable_ubuntu_repos_prompt
+                if (($?==0));then
+                    if [[ $mode == cli ]];then
+                        echo "$log_start"
+                        echo "Universe, Multiverse, and Restricted repositories have been enabled."
+                        echo "$GREEN Now, you just have to$ORANGE update$GREEN your system$RESET"
+                        echo "$log_end"
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox \
+                        "Universe, Multiverse, and Restricted repositories have been enabled. \
+                        Now, you just have to update your system" \
+                        10 60
+                    fi
+                elif (($?==1));then
+                    if [[ $mode == cli ]];then
+                        echo ""
+                        echo -e "$log_start\n$ORANGE the task is aborted $log_end"
+                        echo ""
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox "the task is aborted" 10 40
+                    fi
+                fi
+                ;;
+            x|X) break ;;
+            *) clear; echo "Invalid choice" ;;
+        esac
+    done
+    clear
+}
+# This file contains package manager utility functions specific to Arch-based systems.
+
+rank_prompt(){
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "$log_start"
+            echo "This will rank your Pacman mirrors using 'reflector' and save the 10 fastest to /etc/pacman.d/mirrorlist."
+            echo "$log_end"
+            read -p "Are you sure ? (confirm or no) :" cho
+            clear
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "Pacman Mirror Ranking" \
+                --backtitle "Package manager source list : Operations" \
+                --inputbox "This will rank your Pacman mirrors using 'reflector' and save the 10 fastest to /etc/pacman.d/mirrorlist.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
+                2>&1 >/dev/tty)
+            clear
+        fi
+
+        case $cho in
+        confirm)
+            clear
+            if ! command_exists reflector; then
+                install_pkg_dynamic reflector install-force
+            fi
+            sudo reflector --latest 10 --sort rate --save /etc/pacman.d/mirrorlist
+            return 0
+            ;; 
+        no|x|NO)
+            clear
+            return 1
+            ;; 
+        *)
+            if [[ $mode == cli ]];then
+                echo -e "\n$RED⚠ Invalid choice.$RESET You must type 'confirm' to accept or 'no' to decline.\n"
+            elif [[ $mode == tui ]];then
+                dialog --title "Invalid Choice" \
+                       --msgbox "\n⚠ Invalid choice.\n\nYou must select 'confirm' to accept or 'no' to decline." 7 80
+            fi
+            ;; 
+        esac
+    done
+}
+
+multilib_prompt(){
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "$log_start"
+            echo "This will enable the [multilib] repository in /etc/pacman.conf, required for 32-bit software like Steam or Wine."
+            echo "$log_end"
+            read -p "Are you sure ? (confirm or no) :" cho
+            clear
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "Enable Multilib Repository" \
+                --backtitle "Package manager source list : Operations" \
+                --inputbox "This will enable the [multilib] repository in /etc/pacman.conf, required for 32-bit software like Steam or Wine.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
+                2>&1 >/dev/tty)
+            clear
+        fi
+
+        case $cho in
+        confirm)
+            clear
+            sudo sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
+            return 0
+            ;; 
+        no|x|NO)
+            clear
+            return 1
+            ;; 
+        *)
+            if [[ $mode == cli ]];then
+                echo -e "\n$RED⚠ Invalid choice.$RESET You must type 'confirm' to accept or 'no' to decline.\n"
+            elif [[ $mode == tui ]];then
+                dialog --title "Invalid Choice" \
+                       --msgbox "\n⚠ Invalid choice.\n\nYou must select 'confirm' to accept or 'no' to decline." 7 80
+            fi
+            ;; 
+        esac
+    done
+}
+
+arch_pkg_mng_menu(){
+    clear
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "################################"
+            echo "#####$ORANGE Pacman Manager Menu$RESET #####"
+            echo "################################"
+            echo "$BLUE edit.$RESET Edit /etc/pacman.conf"
+            echo "$BLUE multilib.$RESET Enable [multilib] repository"
+            echo "$GREEN rank.$RESET Rank mirrors with reflector"
+            echo "$ORANGE x. EXIT $RESET "
+            read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "Pacman Manager Menu" --menu "Choose option : " 20 60 15 \
+            edit "Edit /etc/pacman.conf" \
+            multilib "Enable [multilib] repository" \
+            rank "Rank mirrors with reflector" \
+            x EXIT \
+            2>&1 >/dev/tty)
+        fi
+
+        case $cho in
+            edit)
+                sudo nano /etc/pacman.conf
+                clear
+                ;; 
+            multilib)
+                multilib_prompt
+                if (($?==0));then
+                    if [[ $mode == cli ]];then
+                        echo "$log_start"
+                        echo "Multilib repository has been enabled. You should now run 'sudo pacman -Syu' to synchronize."
+                        echo "$GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET"
+                        echo "$log_end"
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox \
+                        "Multilib repository has been enabled. You should now run 'sudo pacman -Syu' to synchronize. \ 
+                        Now, you just have to update full-upgrade your linux" \
+                        10 60
+                    fi
+                elif (($?==1));then
+                    if [[ $mode == cli ]];then
+                        echo ""
+                        echo -e "$log_start\n$ORANGE the task is aborted $log_end"
+                        echo ""
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox "the task is aborted" 10 40
+                    fi
+                fi
+                ;; 
+            rank)
+                rank_prompt
+                if (($?==0));then
+                    if [[ $mode == cli ]];then
+                        echo "$log_start"
+                        echo "Pacman mirrorlist has been updated with the 10 latest and fastest mirrors."
+                        echo "$GREEN Now, you just have to$ORANGE update$GREEN &$ORANGE full-upgrade$GREEN your linux$RESET"
+                        echo "$log_end"
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox \
+                        "Pacman mirrorlist has been updated with the 10 latest and fastest mirrors. \ 
+                        Now, you just have to update full-upgrade your linux" \
+                        10 60
+                    fi
+                elif (($?==1));then
+                    if [[ $mode == cli ]];then
+                        echo ""
+                        echo -e "$log_start\n$ORANGE the task is aborted $log_end"
+                        echo ""
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox "the task is aborted" 10 40
+                    fi
+                fi
+                ;; 
+            x|X) break ;; 
+            *) clear; echo "Invalid choice" ;; 
+        esac
+    done
+    clear
+}
+
+# This file contains package manager utility functions specific to Fedora-based systems.
+
+fusion_prompt(){
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "$log_start"
+            echo "This will install the RPM Fusion 'free' and 'non-free' repositories, which provide a lot of extra software, multimedia codecs, and drivers."
+            echo "$log_end"
+            read -p "Are you sure ? (confirm or no) :" cho
+            clear
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "Enable RPM Fusion Repositories" \
+                --backtitle "Package manager source list : Operations" \
+                --inputbox "This will install the RPM Fusion 'free' and 'non-free' repositories, which provide a lot of extra software, multimedia codecs, and drivers.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
+                2>&1 >/dev/tty)
+            clear
+        fi
+
+        case $cho in
+        confirm)
+            clear
+            sudo dnf install "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" -y
+            sudo dnf install "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm" -y
+            return 0
+            ;; 
+        no|x|NO)
+            clear
+            return 1
+            ;; 
+        *)
+            if [[ $mode == cli ]];then
+                echo -e "\n$RED⚠ Invalid choice.$RESET You must type 'confirm' to accept or 'no' to decline.\n"
+            elif [[ $mode == tui ]];then
+                dialog --title "Invalid Choice" \
+                       --msgbox "\n⚠ Invalid choice.\n\nYou must select 'confirm' to accept or 'no' to decline." 7 80
+            fi
+            ;; 
+        esac
+    done
+}
+
+fedora_pkg_mng_menu(){
+    clear
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "################################"
+            echo "#####$ORANGE DNF Manager Menu$RESET #####"
+            echo "################################"
+            echo "$BLUE edit.$RESET Edit /etc/dnf/dnf.conf"
+            echo "$BLUE fusion.$RESET Enable RPM Fusion (Free & Non-Free)"
+            echo "$ORANGE x. EXIT $RESET "
+            read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "DNF Manager Menu" --menu "Choose option : " 20 60 15 \
+            edit "Edit /etc/dnf/dnf.conf" \
+            fusion "Enable RPM Fusion (Free & Non-Free)" \
+            x EXIT \
+            2>&1 >/dev/tty)
+        fi
+
+        case $cho in
+            edit)
+                sudo nano /etc/dnf/dnf.conf
+                clear
+                ;; 
+            fusion)
+                fusion_prompt
+                if (($?==0));then
+                    if [[ $mode == cli ]];then
+                        echo "$log_start"
+                        echo "RPM Fusion Free and Non-Free repositories have been enabled."
+                        echo "$log_end"
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox \
+                        "RPM Fusion Free and Non-Free repositories have been enabled."
+                        10 60
+                    fi
+                elif (($?==1));then
+                    if [[ $mode == cli ]];then
+                        echo ""
+                        echo -e "$log_start\n$ORANGE the task is aborted $log_end"
+                        echo ""
+                    elif [[ $mode == tui ]];then
+                        dialog --title "notification" --msgbox "the task is aborted" 10 40
+                    fi
+                fi
+                ;; 
+            x|X) break ;; 
+            *) clear; echo "Invalid choice" ;; 
+        esac
+    done
+    clear
+}
+
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
+pkg_mng_menu(){
+    clear
+
+    if   [[ "$(package_manager)" == "apt" ]]; then
+        if [[ "$DISTRO_ID" == "debian" ]];then
+            debian_pkg_mng_menu;
+        elif [[ "$DISTRO_ID" == "ubuntu" ]];then
+            ubuntu_pkg_mng_menu;
+        fi
+    elif [[ "$(package_manager)" == "pacman" ]]; then
+        arch_pkg_mng_menu;
+    elif [[ "$(package_manager)" == "dnf" ]]; then
+        fedora_pkg_mng_menu;
+    else
+        # cli and tui msg (pkg mngr doesnt exist)
+        return 1
+    fi
+    clear
+}
+DE_cho=()
+if [[ $(package_manager) == "apt" ]]; then
+    DE_cho_dialog=(
+        "######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
+        kde-full              "Plasma setups with all utilities that KDE provides" off
+        kde-standard          "Plasma setups with standard KDE utilities" off
+        kde-plasma-desktop    "Plasma setups with minimal KDE utilities" off
+        gnome                 "a android like looking nice desktop environment" off
+        cinnamon-desktop-environment "A very light weight Desktop Environment" off
+        xfce4                 "Another super light weight Desktop Environment" off	
+        "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
+        hyprland              "a tiling window manager" off
+        i3                    "another tiling window manager" off
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+    DE_cho_dialog=(
+        "######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
+        plasma                "KDE Plasma (Standard/Full)" off
+        plasma-desktop        "KDE Plasma (Minimal)" off
+        gnome                 "GNOME Desktop Environment" off
+        cinnamon              "Cinnamon Desktop Environment" off
+        xfce4                 "XFCE Desktop Environment" off	
+        "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
+        hyprland              "a tiling window manager" off
+        i3-wm                 "another tiling window manager" off
+    )
+elif [[ $(package_manager) == "dnf" ]]; then
+    DE_cho_dialog=(
+        "######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
+        "@kde-desktop"        "KDE Plasma Desktop Environment" off
+        "@gnome-desktop"      "GNOME Desktop Environment" off
+        "@cinnamon-desktop"   "Cinnamon Desktop Environment" off
+        "@xfce-desktop"       "XFCE Desktop Environment" off
+        "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
+        "hyprland"            "a tiling window manager" off
+        "i3"                  "another tiling window manager" off
+    )
+fi
+shrink DE_cho_dialog DE_cho  # shrink also excluded catagory headers
+
+tasksel_custom_menu(){
+    local cho
+    pkgs=();
+        if [[ $mode == tui ]];then
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
+                    --title "Download Desktop Environment with default DM" \
+                    --checklist "Select/toggle preffered options : " 30 90 25 \
+                    "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
+
+            # Handle cancel/esc
+            if [[ $? == 1 || $? == 255 ]]; then
+                echo "Cancelled by user. Returning..."
+                return 2
+            fi        
+            
+            # Filtering cho into pkgs
+            read -ra cho <<< "$cho"
+            local j
+            for ((j=0;j<${#cho[@]};j++));do 
+                [[ ${cho[$j]} == *#* ]] && continue
+                pkgs+=("${cho[$j]}")
+            done
+            prompt_install_type "${pkgs[@]}"
+        elif [[ $mode == cli ]];then
+            while true;do
+                echo "##########################################################"
+                echo "#### Download Desktop Environment with default DM     ####"
+                echo "##########################################################"
+                echo ""
+                local i=1
+                local current_de_cho=()
+                for item in "${DE_cho[@]}"; do
+                    # Skip category headers
+                    if [[ "$item" == "######"* ]]; then
+                        echo "$item" # Print category headers
+                    else
+                        echo "$i. $item"
+                        current_de_cho+=("$item") # Store actual packages for selection
+                        ((i++))
+                    fi
+                done
+                echo "x. Exit"
+                echo -e "$log_end\n"
+                read -p "Select/type your preferred option : " cho
+
+                if [[ "$cho" =~ ^[xX]$ ]]; then
+                    echo "Exiting...";
+                    break
+                elif [[ "$cho" =~ ^[0-9]+$ ]] && (( cho >= 1 && cho <= ${#current_de_cho[@]} )); then
+                    local index=$((cho - 1))
+                    local pkg="${current_de_cho[$index]}"
+                    prompt_install_type "$pkg"
+                else
+                    echo "Invalid choice. Please enter a number between 1 and ${#current_de_cho[@]}, or 'x' to exit."
+                fi
+            done
+        fi
+}
+
+DE_DM_menu(){
+    local cho
+    while true;do
+        if [[ $mode == tui ]];then
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
+                --title "Download Desktop Environment and Display Manager" \
+                --menu "Select the Preferred Option :" 30 90 25 \
+                1 "Desktop with it's recommended Display Manager (Default - no hassle)" \
+                2 "Desktop Environment Only (advanced)" \
+                3 "Display Manager Only (advanced)" \
+                4 "sddm + hyprland (custom - already set)" \
+                5 "Tasksel (Debian based distros only !)" \
+                x "Exit" 2>&1 >/dev/tty )
+        elif [[ $mode == cli ]];then
+                echo "##########################################################"
+                echo "#### Download Desktop Environment and Display Manager ####"
+                echo "##########################################################"
+                echo ""
+                echo "1. Desktop with it's recommended Display Manager (Default - no hassle)"
+                echo "2. Desktop Environment Only (advanced)"
+                echo "3. Display Manager Only (advanced)"
+                echo "4. sddm + hyprland (custom - already set)"
+                echo "5. Tasksel (Debian based distros only !)"
+                echo "x. Exit"
+                echo -e "$log_end\n"
+                read -p "Select/type your preferred option : " cho
+        fi
+
+        case $cho in
+        1) tasksel_custom_menu ;;
+        2) tasksel_custom_menu ;; # For now, same as option 1, can be refined later for DE only
+        3) echo "Display Manager Only (advanced) - Not yet implemented.";;
+        4) echo "sddm + hyprland (custom) - Not yet implemented.";;
+        5) 
+            if command_exists tasksel; then
+                sudo tasksel
+            else
+                install_pkg_dynamic tasksel
+            fi
+            ;;
+        x|X) clean; break ;;
+        esac
+    done
+
+}
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
+# Detect package manager
+if [[ $(package_manager) == "apt" ]]; then
+	# Debian/Ubuntu/Sid  [ or debian based ]
+    build_essential_pkg="build-essential"
+    manpages_pkg="manpages-dev"
+    openjdk_pkg="openjdk-21-jdk" # openjdk-25-jdk is not available yet
+    ninja_pkg="ninja-build"
+    pipewire_libs_pkg="pipewire-audio-client-libraries"
+    firacode_pkg="fonts-firacode"
+    python_pkg="python3"
+    pip_pkg="python3-pip"
+    thunar_pkg="thunar"
+    network_manager_pkg="network-manager"
+    edge_pkg="microsoft-edge-stable"
+    
+    # Defaults for Ubuntu, Mint, etc.
+    spectacle_pkg="spectacle"
+    hyprcursor_pkg="hyprcursor"
+
+    case "$DISTRO_ID" in
+        "debian")
+            spectacle_pkg="kde-spectacle"
+            hyprcursor_pkg="hyprcursor-util"
+            ;;
+        "ubuntu"|"linuxmint")
+            # Currently no specific overrides needed
+            ;;
+        *) # Default for other debian-based distros
+            # No specific overrides
+            ;;
+    esac
+elif [[ $(package_manager) == "pacman" ]]; then
+	# Arch [ or arch based ]
+	build_essential_pkg="base-devel"
+	manpages_pkg="man-pages"
+	openjdk_pkg="jdk-openjdk"
+    ninja_pkg="ninja"
+    pipewire_libs_pkg="pipewire-alsa pipewire-jack"
+    firacode_pkg="ttf-fira-code"
+    python_pkg="python"
+    pip_pkg="python-pip"
+    thunar_pkg="thunar"
+    network_manager_pkg="networkmanager"
+    spectacle_pkg="spectacle"
+    edge_pkg="microsoft-edge-stable-bin"
+    hyprcursor_pkg="hyprcursor"
+elif [[ $(package_manager) == "dnf" ]]; then
+    # Fedora [ or fedora based ]
+    build_essential_pkg="@development-tools"
+    manpages_pkg="man-pages"
+    openjdk_pkg="java-21-openjdk-devel"
+    ninja_pkg="ninja-build"
+    pipewire_libs_pkg="pipewire-libs"
+    firacode_pkg="fira-code-fonts"
+    python_pkg="python3"
+    pip_pkg="python3-pip"
+    thunar_pkg="Thunar"
+    network_manager_pkg="NetworkManager"
+    spectacle_pkg="spectacle"
+    edge_pkg="microsoft-edge-stable"
+    hyprcursor_pkg="hyprcursor"
+else
+	echo "Unsupported distro"
+	exit 1
+fi
+
+## shrink function was here
+
+# list of all catagories
+
+# essentials_dev
+# essentials_terminal
+# essentials_desktop
+# essentials_hyprland
+# firmware_generic
+# firmware_intel
+# firmware_amd
+# firmware_nvidia
+
+
+# Now define the array using the variables
+essentials_dev=()
+essentials_dev_dialog=(
+	"##########_CLI_Dev_Tools_##########" "__________ Catagory Description [below] __________" off
+	git                                   "Version control system" on
+	"$build_essential_pkg"                "Essential build tools (gcc, g++, make)" on
+	gdb                                   "Debugging tools for C/C++" on
+	"$manpages_pkg"                       "Developer manual pages" on
+	make                                  "GNU build utility" on
+	"$ninja_pkg"                           "Fast alternative build system" on
+	cmake                                 "Cross-platform C++ build tool" on
+	"$openjdk_pkg"                        "Java Development Kit (includes JRE)" on
+	"$python_pkg"                         "Python programming language" off
+	"$pip_pkg"                            "Python package manager" off
+)
+shrink essentials_dev_dialog essentials_dev
+
+
+essentials_terminal=()
+essentials_terminal_dialog=(     # meant to contain pkgs that will not pull desktop environment with it, so safe to be installed by rookies in a server setup
+	"##########_essentials_terminal_Tools_##########" "__________ Category Description [below] __________" off
+	gawk               "Needed for ble.sh (core dependency)" on
+	
+	nano               "Beginner-friendly terminal text editor" on
+	neovim             "Modern Vim-based text editor" on
+	tmux               "Terminal multiplexer (split panes, sessions)" on
+	
+	mpv                "CLI/GUI media player (audio/video)" off
+	
+	btop               "System monitor (like Task Manager)" on
+	fastfetch          "System information fetcher (like neofetch)" on
+	
+	zip                "File compression utility" on
+	unzip              "File decompression utility" on
+	
+	bat                "Modern cat alternative with syntax highlighting" off
+	lsd                "Modern ls alternative with icons and colors" off
+	zoxide             "Smarter cd command that learns directory usage" off
+	fzf                "Fuzzy finder for fast search" on
+	ripgrep            "Fast grep alternative for searching text" on
+	
+	"##########_Network_Tools_CLI_##########" "__________ Category Description [below] __________" off
+	wget          "Command-line downloader (HTTP, HTTPS, FTP)" on
+	# net-tools  # ill add when i understand each
+	# nmap
+	# iwd
+	ufw           "Simple firewall manager (iptables frontend)" on
+	fail2ban      "Intrusion prevention tool for SSH and services" off
+)
+shrink essentials_terminal_dialog essentials_terminal
+
+
+essentials_desktop=()
+essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop environment with it, so safe to be installed by rookies when inside a Desktop environment
+	"##########_essentials_desktop_Tools_##########" "__________ Category Description [below] __________" off
+	kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
+	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
+	mousepad            "Simple GUI text editor (Notepad-like)" on
+	mpv                 "Media player for audio/video (CLI+GUI)" on
+	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
+	
+	obs-studio          "Screen recorder and streamer (open-source)" on
+	shotcut             "Non-linear video editor (free)" on
+
+	blueman             "Bluetooth device manager GUI (blueman-manager)" on
+	"$network_manager_pkg" "Network connection manager (wired/wireless)" on
+    network-manager-applet "Network connection manager GUI applet" on
+	
+	xdg-desktop-portal  "Desktop integration/screen share service (required by DEs)" on
+	xdg-utils           "CLI desktop tools (xdg-open, mime handling, etc.)" on
+
+	pipewire                        "Modern audio/video server (PulseAudio/Jack replacement)" on
+	"$pipewire_libs_pkg" "Audio client libraries for PipeWire" on
+	
+
+	maim                "CLI screenshot utility (full/region)(X11 only)" off
+	xclip               "CLI clipboard manager (X11 only)" off
+
+    "$spectacle_pkg"    "A widely supported ss app" off
+    flameshot           "A widely supported ss app" off
+	
+	speech-dispatcher  "Needed by softwares that relay on text-to-speech" off #  for TTS (i.e. text-to-speech for firefox and many)
+	"$firacode_pkg"     "Monospace developer font (no glyphs)" off
+)
+shrink essentials_desktop_dialog essentials_desktop
+
+essentials_hyprland=()
+essentials_hyprland_dialog=(
+	"##########_Hyprland_Utils_##########" "__________ Category Description [below] __________" off
+	waybar                      "Customizable status/task bar for Wayland" on
+	rofi                        "Launcher and window switcher (X11/Wayland)" on
+	hyprpaper                   "Wallpaper daemon for Hyprland" on
+	
+    "#_________#" "sub catagory" off
+	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
+	"$hyprcursor_pkg"           "Cursor theme manager for Hyprland" on
+
+    "#_________#" "sub catagory" off
+    "$network_manager_pkg" "Network connection manager (wired/wireless)" on
+    network-manager-applet "Network connection manager GUI applet" on
+	
+    "#_________#" "sub catagory" off
+    cliphist                    "clipboard meneger" on
+	wl-clipboard                "Clipboard manager (Wayland only)" on
+
+    "#_________#" "sub catagory" off
+	grim                        "Screenshot tool (Wayland only)" on
+	slurp                       "Region selector for screenshot (Wayland only)" on
+    swappy                      "Post SS tool (in short)" on
+)
+shrink essentials_hyprland_dialog essentials_hyprland
+
+corechunk_hyprland=()
+corechunk_hyprland_dialog=(
+	"##########_Hyprland_Utils_##########" "__________ Category Description [below] __________" off
+
+	"#_________# Core Hyprland Utilities" "sub catagory" off
+	hyprpaper                   "Wallpaper daemon for Hyprland" on
+	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
+	"$hyprcursor_pkg"           "Cursor theme manager for Hyprland" on
+
+	"#_________# Must for corechunk/hyprland" "sub catagory (used directly in the dots)" off
+    kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
+	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
+	firefox                     "A web browser" on
+
+	"#_____# Launchers & Bars" "subsub catagory" off
+	waybar                      "Customizable status/task bar for Wayland" on
+	rofi                        "Launcher and window switcher (X11/Wayland)" on
+	wofi                        "A Wayland native launcher" off
+
+	"#_____# Clipboard & Screenshot" "subsub catagory" off
+	cliphist                    "clipboard meneger" on
+	wl-clipboard                "Clipboard manager (Wayland only)" on
+	grim                        "Screenshot tool (Wayland only)" on
+	slurp                       "Region selector for screenshot (Wayland only)" on
+	swappy                      "Post SS tool (in short)" on
+
+    "#_________# Recommended cli" "sub catagory" off
+	ranger                      "A console file manager" on
+	neovim                      "Modern Vim-based text editor" on
+	gawk                        "Needed for ble.sh (core dependency)" on
+	tmux                        "Terminal multiplexer (split panes, sessions)" on
+	btop                        "System monitor (like Task Manager)" on
+	fastfetch                   "System information fetcher (like neofetch)" on
+	zip                         "File compression utility" on
+	unzip                       "File decompression utility" on
+
+    "#_________# Recommended GUI" "sub catagory" off
+	mousepad            "Simple GUI text editor (Notepad-like)" on
+	mpv                 "Media player for audio/video (CLI+GUI)" on
+	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
+	"$edge_pkg"                 "A web browser" off
+)
+shrink corechunk_hyprland_dialog corechunk_hyprland
+
+essentials_extra=()
+essentials_extra_dialog=(
+	oh-my-posh   "Shell prompt theming engine (cross-shell)" on
+	auto-cpufreq "CPU frequency optimizer and power saver" on
+)
+shrink essentials_extra_dialog essentials_extra
+
+
+
+
+
+
+
+#################################################
+##################[ Generic ]####################
+#################################################
+firmware_generic=()
+if [[ $(package_manager) == "apt" ]]; then
+    firmware_generic_dialog=(
+        firmware-linux "Binary firmware for various drivers in the Linux kernel (metapackage)" on
+        firmware-linux-free "Binary firmware for various drivers in the Linux kernel" on
+        firmware-linux-nonfree "Binary firmware for various drivers in the Linux kernel (metapackage)" on
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+    firmware_generic_dialog=(
+        "linux-firmware" "Firmware files for Linux" on
+    )
+elif [[ $(package_manager) == "dnf" ]]; then
+    firmware_generic_dialog=(
+        "linux-firmware" "Firmware files for Linux" on
+    )
+fi
+shrink firmware_generic_dialog firmware_generic
+#################################################
+##################[ INTEL ]######################
+#################################################
+firmware_intel=()
+if [[ $(package_manager) == "apt" ]]; then
+    firmware_intel_dialog=(
+        "intel-microcode" "Processor microcode firmware for Intel CPUs" on
+        firmware-sof-signed    "Intel Sound Open Firmware firmware - signed" on
+        firmware-misc-nonfree  "Binary firmware for various drivers in the Linux kernel" on
+        firmware-iwlwifi       "Intel Wi-Fi firmware" on
+        firmware-intel-graphics "Binary firmware for Intel iGPUs and IPUs" on
+        firmware-intel-misc     "Binary firmware for miscellaneous Intel devices and chips" on
+        firmware-intel-sound    "Binary firmware for Intel sound DSPs" on
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+    firmware_intel_dialog=(
+        "intel-ucode" "Processor microcode for Intel CPUs" on
+        "linux-firmware"     "Firmware files for Linux"     on
+        "sof-firmware"       "Sound Open Firmware"          on
+        "mesa"               "OpenGL implementation"        on
+        "vulkan-intel"       "Intel's Vulkan driver"        on
+        "intel-media-driver" "Intel Media Driver for VAAPI" on
+    )
+elif [[ $(package_manager) == "dnf" ]]; then
+    firmware_intel_dialog=(
+        "microcode_ctl" "Microcode update utility for Intel and AMD" on
+        "linux-firmware" "Firmware files for Linux" on
+        "alsa-sof-firmware" "Sound Open Firmware" on
+        "mesa-vulkan-drivers" "Mesa Vulkan drivers for Intel and AMD" on
+        "intel-media-driver" "Intel Media Driver for VAAPI (from RPM Fusion)" on
+    )
+fi
+shrink firmware_intel_dialog firmware_intel
+#################################################
+#################[AMD-radeon]####################
+#################################################
+firmware_amd=()
+if [[ $(package_manager) == "apt" ]]; then
+    firmware_amd_dialog=(
+        "amd64-microcode" "Processor microcode firmware for AMD CPUs" on
+        firmware-amd-graphics "Binary firmware for AMD/ATI graphics and NPU chips" on
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+    firmware_amd_dialog=(
+        "amd-ucode" "Processor microcode for AMD CPUs" on
+        "linux-firmware" "Firmware files for Linux" on
+        "mesa"           "OpenGL implementation" on
+        "vulkan-radeon"  "Radeon's Vulkan driver" on
+    )
+elif [[ $(package_manager) == "dnf" ]]; then
+    firmware_amd_dialog=(
+        "microcode_ctl" "Microcode update utility for Intel and AMD" on
+        "linux-firmware" "Firmware files for Linux" on
+        "mesa-vulkan-drivers" "Mesa Vulkan drivers for Intel and AMD" on
+    )
+fi
+shrink firmware_amd_dialog firmware_amd
+#################################################
+#################[ NVIDIA ]######################
+#################################################
+firmware_nvidia=()
+if [[ $(package_manager) == "apt" ]]; then
+    firmware_nvidia_dialog=(
+        "nvidia-driver-full" "NVIDIA metapackage (all components)" on
+        "firmware-nvidia-graphics" "Binary firmware for Nvidia GPU chips" on
+        "nvidia-cuda-toolkit" "NVIDIA CUDA development toolkit" off
+    )
+elif [[ $(package_manager) == "pacman" ]]; then
+    firmware_nvidia_dialog=(
+        "nvidia" "NVIDIA driver" on
+        "nvidia-utils" "NVIDIA driver utilities" on
+        "lib32-nvidia-utils" "32-bit NVIDIA driver utilities" on
+        "linux-firmware" "Firmware files for Linux" on
+    )
+elif [[ $(package_manager) == "dnf" ]]; then
+    firmware_nvidia_dialog=(
+        "akmod-nvidia" "NVIDIA driver kernel module (from RPM Fusion)" on
+        "xorg-x11-drv-nvidia-cuda" "CUDA support for NVIDIA driver (from RPM Fusion)" on
+    )
+fi
+shrink firmware_nvidia_dialog firmware_nvidia
+#################################################
+
+##########################    recheck all added in the if/else above (feelin lazy)
+
+# research - linux-generic firmwares for arch
+#	linux-firmware
+
+# research - nvidia full stack for arch
+#	nvidia
+#	nvidia-utils
+#	lib32-nvidia-utils
+#	linux-firmware
+
+# research - amd/radeon full stack for arch
+#	linux-firmware (via linux-firmware-amdgpu)
+#	mesa
+#	vulkan-radeon
+
+# research - amd/radeon full stack for arch
+#	Debian: firmware-misc-nonfree      → Arch: linux-firmware (included by default)        # Misc Intel firmware (Wi-Fi, Bluetooth, etc.)
+#	Debian: firmware-iwlwifi            → Arch: linux-firmware                                # Intel Wi-Fi firmware
+#	Debian: firmware-sof-signed         → Arch: sof-firmware                                  # Intel Sound Open Firmware (DSP)
+#	Debian: n/a (GPU integrated)        → Arch: mesa + vulkan-intel                          # Open-source GPU drivers for Intel iGPUs
+#	Debian: n/a (optional proprietary)  → Arch: intel-media-driver / intel-graphics-driver   # Optional accelerated driver stack
+
+
+
+
+
+#	Docker image's variant
+#	# Debian
+#	curl -s "https://registry.hub.docker.com/v2/repositories/library/debian/tags?page_size=100" | grep -oP '"name":\s*"\K[^"]+'
+#	
+#	# Ubuntu
+#	curl -s "https://registry.hub.docker.com/v2/repositories/library/ubuntu/tags?page_size=100" | grep -oP '"name":\s*"\K[^"]+'
+#	
+#	# Fedora
+#	curl -s "https://registry.hub.docker.com/v2/repositories/library/fedora/tags?page_size=100" | grep -oP '"name":\s*"\K[^"]+'
+#	
+#	# Arch Linux
+#	curl -s "https://registry.hub.docker.com/v2/repositories/library/archlinux/tags?page_size=100" | grep -oP '"name":\s*"\K[^"]+'
+#	
+#	# Alpine
+#	curl -s "https://registry.hub.docker.com/v2/repositories/library/alpine/tags?page_size=100" | grep -oP '"name":\s*"\K[^"]+'
+menu_info(){
+	local info_text="
+==============================================================
+					   $GREEN INFO SECTION$RESET
+==============================================================
+=========================$YELLOW Navigation$RESET =========================
+$YELLOW Use ↑ ↓ / PgUp / PgDn to scroll vertically
+$YELLOW Use ← → to scroll horizontally (with -S mode)
+$YELLOW Press 'q' to exit viewer$RESET
+==============================================================
+** AI generated so please check official doc first **
+───────────────────────────────$MAGENTA[ Development CLI Packages ]$RESET───────────────────────────────
+Package               | Description                                    | Compatibility            | Remarks                          | Command
+---------------------------------------------------------------------------------------------------------------
+git                   | Version control system                         | CLI (All)                | Essential for dev work            | git
+build-essential(debian)| GCC, G++, Make build tools                    | CLI (Debian-based)       | Core compiler tools               | gcc, g++, make
+base-devel(arch)                                                                                                                      | [same as above]
+gdb                   | Debugger for compiled languages                | CLI (All)                | Used for debugging C/C++          | gdb
+manpages-dev(debian)  | Developer manual pages                         | CLI (All)                | Adds developer manpages           | man
+man-pages(arch)                                                                                                                       | [same as above]
+make                  | GNU build automation tool                      | CLI (All)                | Often pre-installed               | make
+ninja-build           | Fast build system                              | CLI (All)                | Alternative to make               | ninja
+cmake                 | Cross-platform build system generator          | CLI (All)                | Generates build configs           | cmake
+openjdk-25-jdk(debian)| Java Development Kit (includes JRE)            | CLI/GUI (All)            | Required for Java development     | java, javac
+jdk-openjdk(arch)                                                                                                                     | [same as above]
+python3               | Python programming language                    | CLI/GUI (All)            | Modern scripting language         | python3
+python3-pip           | Python package manager                         | CLI (All)                | For installing Python modules     | pip3
+
+────────────────────────────────$BLUE[ Core CLI Packages ]$RESET───────────────────────────────────
+Package               | Description                                    | Compatibility            | Remarks                          | Command
+---------------------------------------------------------------------------------------------------------------
+gawk                  | Text processing and scripting tool             | CLI (All)                | Dependency for ble.sh             | gawk
+tmux                  | Terminal multiplexer                           | CLI (All)                | Manage multiple sessions          | tmux
+neovim                | Modern text editor                             | CLI/GUI (All)            | Vim-based, powerful editor        | nvim
+nano                  | Simple text editor                             | CLI (All)                | Easy for beginners                | nano
+mpv                   | CLI media player                               | CLI/GUI (All)            | Also supports GUI playback        | mpv
+btop                  | Modern system monitor                          | CLI (All)                | Task-manager alternative          | btop
+fastfetch             | System info viewer                             | CLI (All)                | Similar to neofetch               | fastfetch
+zip/unzip             | Compression utilities                          | CLI (All)                | Common file operations            | zip, unzip
+bat                   | cat alternative with highlighting              | CLI (All)                | Enhanced file viewer              | bat
+lsd                   | Modern ls alternative                          | CLI (All)                | Adds icons and color              | lsd
+zoxide                | Smart cd command                               | CLI (All)                | Learns directory usage            | z
+fzf                   | Fuzzy finder                                   | CLI (All)                | Used in scripts and search        | fzf
+ripgrep               | Fast text searcher                             | CLI (All)                | Modern grep alternative           | rg
+fonts-firacode        | Monospace developer font                       | GUI/Desktop only         | No glyphs included                | N/A
+
+───────────────────────────────$ORANGE[ Network Tools CLI ]$RESET────────────────────────────────────
+Package               | Description                                    | Compatibility            | Remarks                          | Command
+---------------------------------------------------------------------------------------------------------------
+wget                  | Command-line downloader                        | CLI (All)                | Supports HTTP, HTTPS, FTP         | wget
+ufw                   | Simple firewall manager                        | CLI (All)                | Frontend for iptables             | ufw
+fail2ban              | Intrusion prevention tool                      | CLI (Server/Desktop)     | Protects SSH/services             | fail2ban-client
+
+────────────────────────────────$GREEN[ Core GUI Packages ]$RESET───────────────────────────────────
+Package               | Description                                    | Compatibility            | Remarks                          | Command
+---------------------------------------------------------------------------------------------------------------
+blueman               | Bluetooth device manager (GUI)                 | Desktop (X11/Wayland)    | GUI frontend for bluetoothctl     | blueman-manager
+network-manager       | Manage wired/wireless connections              | Desktop (All)            | Often used with GUI applets       | nm-connection-editor
+kitty                 | GPU-accelerated terminal emulator              | Desktop (All)            | Image and emoji support           | kitty
+thunar                | Lightweight file manager                       | Desktop (X11/Wayland)    | XFCE’s file manager               | thunar
+mousepad              | Simple GUI text editor                         | Desktop (All)            | Basic Notepad-like editor         | mousepad
+mpv                   | Media player                                   | Desktop (All)            | GUI and CLI playback supported    | mpv
+zathura               | Document viewer (PDF, EPUB, etc.)              | Desktop (All)            | Keyboard-driven UI                | zathura
+obs-studio            | Screen recorder and streamer                   | Desktop (All)            | Free and open-source              | obs
+shotcut               | Video editor                                   | Desktop (All)            | Non-linear video editor           | shotcut
+xdg-desktop-portal    | Screen sharing and app integration layer       | Desktop (All)            | Required for flatpak/screenshare  | N/A
+xdg-utils             | Desktop integration utilities                  | Desktop (All)            | Handles xdg-open, mime, etc.      | xdg-open
+maim                  | Screenshot tool                                | Desktop (X11/Wayland)    | Region and full capture support   | maim
+xclip                 | Clipboard tool                                 | Desktop (X11/Wayland)    | Scriptable clipboard access       | xclip
+
+───────────────────────────────$SKY_BLUE[ Hyprland Utilities ]$RESET────────────────────────────────────
+Package               | Description                                    | Compatibility            | Remarks                          | Command
+---------------------------------------------------------------------------------------------------------------
+xdg-desktop-portal-hyprland | Hyprland portal backend                 | Wayland (Hyprland)       | Enables screenshots/sharing       | N/A
+hyprpaper             | Wallpaper daemon for Hyprland                  | Wayland (Hyprland)       | Lightweight wallpaper manager     | hyprpaper
+hyprcursor-util       | Cursor theme manager for Hyprland              | Wayland (Hyprland)       | Controls custom cursor themes     | N/A
+waybar                | Customizable status/task bar                   | Wayland (All)            | System info and tray bar          | waybar
+rofi                  | Launcher and window switcher                   | X11/Wayland              | Similar to dmenu, very extensible | rofi
+grim                  | Screenshot tool                                | Wayland only             | Works with slurp for region grab  | grim
+slurp                 | Region selector for screenshots                | Wayland only             | Used with grim                   | slurp
+wl-clipboard          | Clipboard utility                              | Wayland only             | Works like xclip alternative      | wl-copy
+
+───────────────────────────────$YELLOW[ GitHub Apps (Custom Install) ]$RESET───────────────────────────
+Package               | Description                                    | Compatibility            | Remarks                          | Command
+---------------------------------------------------------------------------------------------------------------
+oh-my-posh            | Shell prompt theme engine                      | CLI (All)                | Adds themes and status segments   | oh-my-posh
+auto-cpufreq          | CPU frequency optimizer                        | CLI (All)                | Power saving tool                 | auto-cpufreq
+
+────────────────────────────────$ORANGE[ Firmware Packages ]$RESET────────────────────────────────────
+Chipset               | Packages                                       | Compatibility            | Remarks
+---------------------------------------------------------------------------------------------------------------
+INTEL                 | firmware-misc-nonfree,firmware-linux-nonfree,  | x86_64 | Enables Intel Wi-Fi, audio, GPU firmware
+						  firmware-sof-signed, firmware-iwlwifi 
+AMD                   | firmware-amd-graphics                          | x86_64 | Required for AMD GPUs
+NVIDIA                | nvidia-driver                                  | x86_64 | Proprietary NVIDIA driver
+
+==================================$RED[[ END ]]$RESET==================================
+"
+
+	# Use less for scrollable output
+	echo -e "$info_text" | less -RS
+}
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
+
+
+dev_sign=" [ unavailable right now ] "
+menu_essential(){
+    while true;do
+        local cho_2=""
+
+        if [[ $mode == cli ]];then
+            echo ""
+            echo "$divider"
+            echo "$BLUE 01.$BLUE [INTEL]$ORANGE Firmware packages$RESET"
+            echo "$BLUE 02.$RED [AMD]$ORANGE Firmware packages$RESET"
+            echo "$BLUE 03.$GREEN [NVIDIA]$ORANGE Firmware packages$RESET"
+            echo "$divider"
+            echo "$BLUE 1.$RESET Core CLI$MAGENTA Dev$RESET packages [ e.g. compiler or build tools ]"
+            echo "$BLUE 2.$RESET Core$BLUE CLI$RESET packages"
+            echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
+            echo "$BLUE 4.$SKY_BLUE Hyprland$RESET Echosystem packages"
+            echo "$BLUE 5.$MAGENTA corechunk's hyprland$RESET packages"
+            echo "$BLUE 6.$RESET github software packages $RED(comming soon)$RESET "
+            echo "$BLUE 9.$RESET INFO PAGE [navigation with up/down arrow]"
+            echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
+            echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
+            echo "$RED x.$RED EXIT$RESET"
+            echo "$divider"
+            read -p "Select Your Preferred Option : " cho_2
+            echo ""
+        elif [[ $mode == tui ]];then
+            cho_2=$(dialog --title " ##### ##### Essential Packages ##### ##### " \
+            --menu "Select Option : " 30 90 25\
+            01 "[INTEL] Firmware packages" \
+            02 "[AMD] Firmware packages" \
+            03 "[NVIDIA] Firmware packages" \
+            1 "Core CLI Dev packages [e.g. compiler or build tools]" \
+            2 "Core CLI packages" \
+            3 "Core GUI packages" \
+            4 "Hyprland Echosystem packages" \
+            5 "corechunk's hyprland packages" \
+            6 "github software packages (comming soon)" \
+            9 "INFO PAGE [navigation with up/down arrow]" \
+            all "install all packages$RESET shown here" \
+            all_f "install [1-5] [force]" \
+            x "EXIT" \
+            2>&1 >/dev/tty)
+        fi
+
+
+        if [[ $mode == cli ]];then
+            case $cho_2 in
+            00) prompt_install_type dialog ;;
+            01) prompt_install_type "${firmware_intel[@]}" ;;
+            02) prompt_install_type "${firmware_amd[@]}" ;;
+            03) prompt_install_type "${firmware_nvidia[@]}" ;;
+            1)  prompt_install_type "${essentials_dev[@]}" ;;
+            2)  prompt_install_type "${essentials_terminal[@]}" ;;
+            3)  prompt_install_type "${essentials_desktop[@]}" ;;
+            4)  prompt_install_type "${essentials_hyprland[@]}" ;;
+            5)  prompt_install_type "${corechunk_hyprland[@]}" ;;
+                                                                        #00)install_pkg_dynamic dialog ;;
+                                                                        #01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+                                                                        #02)for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+                                                                        #03)for pkg in "${firmware_nvidia[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+                                                                        #1)for pkg in "${essentials_dev[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+                                                                        #2)for pkg in "${essentials_terminal[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+                                                                        #3)for pkg in "${essentials_desktop[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+                                                                        #4)for pkg in "${essentials_hyprland[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+                                                                        #5)for pkg in "${network_tools_cli[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
+            9)menu_info ;;
+            all_f|ALL_F)
+                for grps in essentials_dev essentials_terminal essentials_desktop essentials_hyprland;do
+                    for pkg in "${grps[@]}";do install_pkg_dynamic "$pkg" install-force; done
+                done ;;
+            x|X)clear;break ;;
+            *)
+                echo "invalid choice !"
+                echo "you need to type the text shown before the dots as option" ;;
+            esac
+        elif [[ $mode == tui ]];then   # [to future me] make the cli portion proccess like this one; im lazy right now
+            echo ""
+            case $cho_2 in
+            01) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "Intel Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_intel_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            02) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "AMD Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_amd_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            03) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "NVIDIA Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_nvidia_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            1)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_dev" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_dev_dialog[@]}" 2>&1 >/dev/tty);read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for (( i=0; i<${#raw_pkgs[@]}; i++ ));do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done ;prompt_install_type  "${pkgs[@]}" ;;
+            2)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_terminal" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_terminal_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            3)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_desktop" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_desktop_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            4)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_hyprland" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            5)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "corechunk's_hyprland_pkgs" --checklist "Select/toggle preffered options : " 30 90 25 "${corechunk_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            9) menu_info ;;
+            x) tput reset;clear;break ;;
+            esac
+        fi
+    done
+}
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
+acf(){
+    if command_exists auto-cpufreq;then acf_stat="already enabled"; else acf_stat="$n"; fi
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "$BLUE 1.$RESET install GUI monitor"
+            echo "$BLUE 2.$RESET view status"
+            echo "$BLUE 3.$RESET remove auto-cpufreq totally"
+            
+            echo "$RED x.$RESET EXIT"
+            read -p "Select a option :" cho
+            clear
+        elif [[ $mode == tui ]];then
+
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
+                        --title "Enable efficient battery optimization (via auto-cpufreq)" \
+                        --menu "Choose Your Preferred Option : " 30 90 25 \
+                1 "install GUI monitor" \
+                2 "view status" \
+                3 "remove auto-cpufreq totally" \
+                x "EXIT" 2>&1 >/dev/tty)
+            clean
+        fi
+
+
+        case $cho in
+        1)
+            sudo auto-cpufreq --install
+            ;;
+        2)
+            sudo auto-cpufreq --stats
+            ;;
+        3)
+            git clone https://github.com/AdnanHodzic/auto-cpufreq.git
+            cd auto-cpufreq
+            sudo ./auto-cpufreq-installer --remove
+            cd ..
+            rm -rf auto-cpufreq
+            ;;
+        x|X)
+            break
+            ;;
+        *)
+            clear
+            echo "#RED Invalid Choice$RESET"
+            echo "$log_end"
+            ;;
+        esac
+    done
+}
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
+ufw_menu(){
+    if [[ $mode == cli ]];then
+        local y="[$GREEN installed$RESET ]"
+        local n="[$RED not installed$RESET ]"
+    elif [[ $mode == tui ]];then
+        local y="[ installed ]"
+        local n="[ not installed ]"
+    fi
+
+
+    local cho
+    while true;do
+        if sudo_command_exists ufw;then ufw_stat="$y"; else ufw_stat="$n"; fi
+        if sudo_command_exists fail2ban;then f2b_stat="$y"; else f2b_stat="$n"; fi
+
+        if [[ $mode == cli ]];then
+			echo "$BLUE 1.$RESET install ufw firewall $ufw_stat"
+			echo "$BLUE 2.$RESET enable ufw & set rules"
+			echo "$BLUE 3.$RESET install fail2ban $f2b_stat"
+			echo "$BLUE 4.$RESET enable fail2ban & set rules"
+			echo "$log_end"
+			echo "$RED x.$RESET EXIT"
+			read -p "Select a option :" cho
+        elif [[ $mode == tui ]];then
+			echo hi
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
+                        --title "Enable firewall (via ufw & fail2ban)" \
+                        --menu "Choose Your Preferred Option : " 30 90 25 \
+					1 "install ufw firewall $ufw_stat" \
+					2 "enable ufw & set rules" \
+					3 "install fail2ban $f2b_stat" \
+					4 "enable fail2ban & set rules" \
+					x "EXIT" 2>&1 >/dev/tty)
+		fi
+
+        case $cho in
+        1)
+            install_pkg_dynamic ufw default
+            echo "$log_end"
+            ;;
+        2)
+            sudo ufw limit 22/tcp
+            sudo ufw allow 80/tcp
+            sudo ufw allow 443/tcp
+            sudo ufw default deny incoming
+            sudo ufw default allow outgoing
+            sudo ufw enable
+            echo "$log_end"
+            ;;
+        3)
+            install_pkg_dynamic fail2ban default
+            echo "$log_end"
+            ;;
+        4)
+            sudo systemctl enable fail2ban
+            sudo systemctl start fail2ban
+            echo "$log_end"
+            ;;
+        x|X)
+            break
+            ;;
+        *)
+            clear
+            echo "#RED Invalid Choice$RESET"
+            echo "$log_end"
+            ;;
+        esac
+    done
+}
+                # ========= Choose Operation Mode =========
+if [[ $2 == cli ]];then
+    mode_msg="Running$BLUE CLI$RESET Mode ..."
+    mode=cli
+elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ============   #  added * cause we dont have other mode and i dont want it to fail execution anyways
+    if ! command_exists dialog;then
+        echo -e "TUI mode requires package 'dialog'\ncan't continue without 'dialog'"
+        if prompt_user "wanna install 'dialog' ? [ y/N ] : ";then
+            echo "installing$ORANGE 'dialog'$RESET ..."
+            install_pkg_dynamic dialog install-force
+        else
+            echo "$ORANGE aborting installing dialog and the program ...$RESET"
+            exit 1
+        fi
+    fi
+
+    mode_msg="Running TUI Mode ..."
+    mode=tui
+fi
+
+#=========ALL_Loaded_msg=========
+if   [[ $mode == tui ]];then
+    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
+    clean
+elif [[ $mode == cli || $2 == * ]];then
+    echo -e "\n✅ All dependencies loaded!\n✅$mode_msg"
+    read -n1 -r -p "Press any key to continue..." key
+    clear
+fi
+
+
+# ================= Main Menu =================
+main_menu (){
+    local y="[$GREEN installed$RESET ]"
+    local n="[$RED not installed$RESET ]"
+
+    #if command_exists tasksel; then tasksel_stat="$y"; else tasksel_stat="$n"; fi
+    if command_exists auto-cpufreq; then acf_stat="$y"; else acf_stat="$n"; fi
+
+    while true; do
+    local cho
+        if [[ $mode == tui ]];then
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu" --menu "Select the Preferred Option :" 30 90 15 \
+            00 "Edit pakg manager source list" \
+            01 "Download Desktop Environment & more" \
+            1  "essential softwares" \
+            2  "Enable firewall" \
+            3  "Enable efficient battery optimization (via auto-cpufreq)" \
+            4  "dotfiles and wallpapers (coming soon)" \
+            x  "EXIT" \
+            2>&1 >/dev/tty)
+            clean
+        elif [[ $mode == cli ]];then
+            echo "$WARNING 00.$RESET Edit pakg manager source list"
+            echo "$WARNING 01.$RESET Download Desktop Environment & more"
+            echo "$divider"
+            echo "$BLUE 1.$RESET essential softwares"
+            echo "$BLUE 2.$RESET Enable firewall"
+            echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
+            echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (coming soon)"
+            echo "$divider"
+            echo "$RED x. EXIT $RESET"
+            echo ""
+            read -p "$GREEN[$RESET selection num $GREEN] :$RESET " cho
+            clear
+        #else
+        #    echo "invalid option mode"
+        fi
+
+        case $cho in
+            00) clear;pkg_mng_menu ;;
+            01) DE_DM_menu ;;
+            1) clear;menu_essential ;;
+            2) clear;ufw_menu ;;
+            3) clear;
+                if command_exists auto-cpufreq; then
+                    acf
+                else
+                    git clone https://github.com/AdnanHodzic/auto-cpufreq.git
+                    cd auto-cpufreq
+                    sudo ./auto-cpufreq-installer
+                    cd ..
+                    rm -rf auto-cpufreq
+                fi
+                ;;
+            x|X) clear;break;;
+            *) clear;echo "invalid choice" ;;
+        esac
+    done
+}
+
+# Verify system support before showing the main menu
+verify_support
+
+main_menu
+exit 0
+
+#core_end
