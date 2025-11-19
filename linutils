@@ -297,6 +297,14 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
             8 "purge without prompt [force]"\
             x "EXIT"\
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+                return 1 # Return 1 to indicate cancellation
+            fi
         fi
         clean
     
@@ -427,6 +435,12 @@ deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-fi
 
 Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
                     2>&1 >/dev/tty)
+                local exit_status=$?
+                if [ $exit_status -ne 0 ]; then
+                    clear
+                    if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                    return 1
+                fi
 
             # ───────────────────────────────────────────────
             # TUI DIALOG VERSION (MODERN FORMAT)
@@ -448,9 +462,15 @@ Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
                     2>&1 >/dev/tty)
+                local exit_status=$?
+                if [ $exit_status -ne 0 ]; then
+                    clear
+                    if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                    return 1
+                fi
             fi
 
-            clear
+            clean
         fi
 
         case $cho in
@@ -531,6 +551,13 @@ debian_pkg_mng_menu(){
             sid "[Debian] Switch to unstable/sid" \
             x EXIT \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho in
@@ -590,6 +617,13 @@ enable_ubuntu_repos_prompt(){
                 --backtitle "Package manager source list : Operations" \
                 --inputbox "This will enable the 'universe', 'multiverse', and 'restricted' repositories for Ubuntu, providing access to a wider range of software.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
                 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                clear
+                if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                return 1
+            fi
             clear
         fi
 
@@ -635,6 +669,13 @@ ubuntu_pkg_mng_menu(){
             enable_repos "Enable Universe, Multiverse, Restricted Repositories" \
             x EXIT \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho in
@@ -692,6 +733,13 @@ rank_prompt(){
                 --backtitle "Package manager source list : Operations" \
                 --inputbox "This will rank your Pacman mirrors using 'reflector' and save the 10 fastest to /etc/pacman.d/mirrorlist.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
                 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                clear
+                if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                return 1
+            fi
             clear
         fi
 
@@ -734,6 +782,13 @@ multilib_prompt(){
                 --backtitle "Package manager source list : Operations" \
                 --inputbox "This will enable the [multilib] repository in /etc/pacman.conf, required for 32-bit software like Steam or Wine.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
                 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                clear
+                if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                return 1
+            fi
             clear
         fi
 
@@ -779,6 +834,13 @@ arch_pkg_mng_menu(){
             rank "Rank mirrors with reflector" \
             x EXIT \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho in
@@ -857,6 +919,13 @@ fusion_prompt(){
                 --backtitle "Package manager source list : Operations" \
                 --inputbox "This will install the RPM Fusion 'free' and 'non-free' repositories, which provide a lot of extra software, multimedia codecs, and drivers.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
                 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                clear
+                if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                return 1
+            fi
             clear
         fi
 
@@ -901,6 +970,13 @@ fedora_pkg_mng_menu(){
             fusion "Enable RPM Fusion (Free & Non-Free)" \
             x EXIT \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho in
@@ -1008,10 +1084,10 @@ tasksel_custom_menu(){
                     --checklist "Select/toggle preffered options : " 30 90 25 \
                     "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
 
-            # Handle cancel/esc
-            if [[ $? == 1 || $? == 255 ]]; then
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
                 echo "Cancelled by user. Returning..."
-                return 2
+                return 1 # Changed from return 2 to return 1
             fi        
             
             # Filtering cho into pkgs
@@ -1071,6 +1147,13 @@ DE_DM_menu(){
                 4 "sddm + hyprland (custom - already set)" \
                 5 "Tasksel (Debian based distros only !)" \
                 x "Exit" 2>&1 >/dev/tty )
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         elif [[ $mode == cli ]];then
                 echo "##########################################################"
                 echo "#### Download Desktop Environment and Display Manager ####"
@@ -1127,6 +1210,14 @@ acf(){
                 2 "view status" \
                 3 "remove auto-cpufreq totally" \
                 x "EXIT" 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
+
             clean
         fi
 
@@ -1252,6 +1343,13 @@ menu_github_pkgs() {
             2 "Auto-CPUFreq (Power optimization)" \
             x "EXIT" \
             2>&1 >/dev/tty)
+
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho_3 in
@@ -1806,6 +1904,13 @@ menu_essential(){
             all_f "install [1-5] [force]" \
             x "EXIT" \
             2>&1 >/dev/tty)
+
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
 
@@ -1894,6 +1999,13 @@ ufw_menu(){
 					3 "install fail2ban $f2b_stat" \
 					4 "enable fail2ban & set rules" \
 					x "EXIT" 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
 		fi
 
         case $cho in
@@ -1937,42 +2049,103 @@ ufw_menu(){
 # Description: Manages the corechunk/dotfiles repository.
 #
 
+delete_corechunk_dotfiles() {
+    local dotfiles_dir_name="corechunk.dotfiles.d"
+    local dotfiles_dir_path="$HOME/$dotfiles_dir_name"
+    local warning_msg="This will permanently delete the '$dotfiles_dir_name' directory from your home directory (~/). This is where downloaded content like dotfiles and configurations are stored. You might do this to free up space or to perform a clean re-installation. This action cannot be undone."
+    local confirmation_input=""
+
+    if [[ ! -d "$dotfiles_dir_path" ]]; then
+        if [[ $mode == tui ]]; then
+            dialog --msgbox "The directory '$dotfiles_dir_name' does not exist in your home directory. Nothing to delete." 7 60
+        else
+            echo "The directory '$dotfiles_dir_name' does not exist in your home directory. Nothing to delete."
+        fi
+        return
+    fi
+
+    if [[ $mode == tui ]]; then
+        confirmation_input=$(dialog --title "⚠️ DANGER ⚠️" --inputbox "$warning_msg\n\nTo confirm this action, type 'confirm' below:" 12 70 2>&1 >/dev/tty)
+        local exit_status=$?
+        if [ $exit_status -ne 0 ]; then # Handle Cancel/ESC
+            dialog --msgbox "Deletion cancelled." 5 30
+            return
+        fi
+    else
+        echo -e "\n⚠️ DANGER ⚠️\n$warning_msg\n"
+        read -p "To confirm this action, type 'confirm' and press Enter: " confirmation_input
+    fi
+
+    if [[ "$confirmation_input" == "confirm" ]]; then
+        echo "Deleting '$dotfiles_dir_path'..."
+        if rm -rf "$dotfiles_dir_path"; then
+            if [[ $mode == tui ]]; then
+                dialog --msgbox "Directory '$dotfiles_dir_name' has been successfully deleted." 6 60
+            else
+                echo "Directory '$dotfiles_dir_name' has been successfully deleted."
+            fi
+        else
+            if [[ $mode == tui ]]; then
+                dialog --msgbox "An error occurred while trying to delete the directory." 6 60
+            else
+                echo "An error occurred while trying to delete the directory."
+            fi
+        fi
+    else
+        if [[ $mode == tui ]]; then
+            dialog --msgbox "Incorrect confirmation. Deletion cancelled." 5 40
+        else
+            echo "Incorrect confirmation. Deletion cancelled."
+        fi
+    fi
+
+    if [[ $mode == cli ]]; then
+        echo "Press any key to continue."
+        read -n 1 -s -r
+    fi
+}
+
 menu_corechunk_dotfiles() {
     clear
     local dotfiles_dir="corechunk.dotfiles.d"
-    if [ -d "$dotfiles_dir" ]; then
-        if [ -f "$dotfiles_dir/installer.sh" ]; then
+    local dotfiles_path="$HOME/$dotfiles_dir" # Define the full path
+
+    if [ -d "$dotfiles_path" ]; then
+        if [ -f "$dotfiles_path/installer.sh" ]; then
             echo "Found existing dotfiles installation. Running installer..."
-            (cd "$dotfiles_dir" && ./installer.sh)
+            (cd "$dotfiles_path" && ./installer.sh $mode)
             echo "Installer finished. Press any key to return to the main menu."
             read -n 1 -s -r
         else
             if [[ $mode == tui ]]; then
-                dialog --msgbox "Directory '$dotfiles_dir' exists but 'installer.sh' is missing. Please check the directory or remove it to re-download." 8 70
+                dialog --msgbox "Directory '$dotfiles_path' exists but 'installer.sh' is missing. Please check the directory or remove it to re-download." 8 70
             else
-                echo "Directory '$dotfiles_dir' exists but 'installer.sh' is missing."
+                echo "Directory '$dotfiles_path' exists but 'installer.sh' is missing."
                 echo "Please check the directory or remove it to re-download."
                 read -n 1 -s -r -p "Press any key to continue..."
             fi
         fi
     else
         local response
+        local download_prompt="The dotfiles repository is not found. This will clone the 'corechunk/dotfiles' repository into '$dotfiles_path'. Do you want to proceed with the download?"
+
         if [[ $mode == tui ]]; then
-            dialog --yesno "The dotfiles repository is not found. Do you want to download it now?" 7 60
+            dialog --yesno "$download_prompt" 10 70
             response=$?
         else
             # prompt_user is defined in the main script's dependencies
-            prompt_user "The dotfiles repository is not found. Do you want to download it now? [y/N]: "
+            echo -e "\n$download_prompt"
+            prompt_user "[y/N]: "
             response=$?
         fi
 
         if [ $response -eq 0 ]; then # 0 is 'Yes' for both dialog and prompt_user
-            echo "Cloning dotfiles repository..."
-            if git clone https://github.com/corechunk/dotfiles.git "$dotfiles_dir"; then
+            echo "Cloning dotfiles repository into '$dotfiles_path'..."
+            if git clone https://github.com/corechunk/dotfiles.git "$dotfiles_path"; then
                 if [[ $mode == tui ]]; then
-                    dialog --msgbox "Repository cloned successfully into '$dotfiles_dir'.\nYou can run option 4 again to start the installer." 8 70
+                    dialog --msgbox "Repository cloned successfully into '$dotfiles_path'.\nYou can run option 4 again to start the installer." 8 70
                 else
-                    echo "Repository cloned successfully into '$dotfiles_dir'."
+                    echo "Repository cloned successfully into '$dotfiles_path'."
                     echo "You can run option 4 again to start the installer."
                 fi
             else
@@ -2018,13 +2191,22 @@ elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ====
 fi
 
 #=========ALL_Loaded_msg=========
-if   [[ $mode == tui ]];then
-    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg" 10 60
-    clean
-elif [[ $mode == cli || $2 == * ]];then
+if [[ $mode == cli || $2 == * ]];then # temporarily this if/else is made to run cli(always) cause ascii looks great. and cant be shown in tui
+    echo "
+
+    $BLUE   ____                 ____ _                 _         __$GREEN  _   _                   _     _   _         
+    $BLUE  / ___|___  _ __ ___  / ___| |__  _   _ _ __ | | __    / /$GREEN | | (_)  _ __    _   _  | |_  (_) | |  ___   
+    $BLUE | |   / _ \| '__/ _ \| |   | '_ \| | | | '_ \| |/ /   / / $GREEN | | | | | '_ \  | | | | | __| | | | | / __|  
+    $BLUE | |__| (_) | | |  __/| |___| | | | |_| | | | |   <   / /  $GREEN | | | | | | | | | |_| | | |_  | | | | \__ \  
+    $BLUE  \____\___/|_|  \___| \____|_| |_|\__,_|_| |_|_|\_\ /_/   $GREEN |_| |_| |_| |_|  \__,_|  \__| |_| |_| |___/_ 
+    $RESET
+    "
     echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg"
     read -n1 -r -p "Press any key to continue..." key
     clear
+elif   [[ $mode == tui ]];then
+    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg" 10 60
+    clean
 fi
 
 
@@ -2046,8 +2228,17 @@ main_menu (){
             2  "Enable firewall" \
             3  "Enable efficient battery optimization (via auto-cpufreq)" \
             4  "Manage dotfiles and wallpapers (corechunk)" \
+            5  "Delete downloaded dotfiles" \
             x  "EXIT" \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
+
             clean
         elif [[ $mode == cli ]];then
             echo "$WARNING 00.$RESET Edit pakg manager source list"
@@ -2057,6 +2248,7 @@ main_menu (){
             echo "$BLUE 2.$RESET Enable firewall"
             echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
             echo "$MAGENTA 4. Manage dotfiles and wallpapers (corechunk)$RESET"
+            echo "$RED 5. Delete downloaded dotfiles$RESET"
             echo "$divider"
             echo "$RED x. EXIT $RESET"
             echo ""
@@ -2085,6 +2277,9 @@ main_menu (){
             4)
                 menu_corechunk_dotfiles
                 ;;
+            5)
+                delete_corechunk_dotfiles
+                ;;
             x|X) clear;break;;
             *) clear;echo "invalid choice" ;;
         esac
@@ -2093,8 +2288,10 @@ main_menu (){
 
 # Verify system support before showing the main menu
 verify_support
-
+(
+cd $HOME
 main_menu
+)
 exit 0
 
 #core_end
