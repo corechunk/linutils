@@ -27,6 +27,8 @@ else
     export DISTRO_ID=$(uname -s)
 fi
 
+export ARCH_NAME=$(uname -m) # Detect system architecture
+
 #if [[ $has_sudo -eq 1 ]]; then
 #    echo "You have sudo privileges."
 #else
@@ -37,19 +39,25 @@ fi
 
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(
-    base/base.sh
+    base/base.sh #utils
     base/pkg_mng_debian.sh
     base/pkg_mng_ubuntu.sh
     base/pkg_mng_arch.sh
     base/pkg_mng_fedora.sh
-    base/pkg_mng_util.sh
-    tasksel_custom/tasksel_custom.sh
+    base/pkg_mng_util.sh #menu
+    tasksel_custom/tasksel_custom.sh #menu
+    
+    essential/github_pkgs/auto-cpufreq.sh
+    essential/github_pkgs/gh_pkg_rofi_patched.sh
+    essential/github_pkgs/gh_pkgs_menu.sh #menu
+    
     essential/essential_pre.sh
     essential/essential_pre_pkgs.sh
     essential/essential_pre_info.sh
-    essential/essential.sh
-    github_pkgs/auto-cpufreq.sh
-    github_pkgs/security.sh
+    essential/essential.sh #menu
+
+    essential/security.sh
+    dotfiles/dotfiles.sh #menu
 )
 
 bar_length=50
@@ -140,10 +148,10 @@ fi
 
 #=========ALL_Loaded_msg=========
 if   [[ $mode == tui ]];then
-    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
+    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg" 10 60
     clean
 elif [[ $mode == cli || $2 == * ]];then
-    echo -e "\n✅ All dependencies loaded!\n✅$mode_msg"
+    echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg"
     read -n1 -r -p "Press any key to continue..." key
     clear
 fi
@@ -166,7 +174,7 @@ main_menu (){
             1  "essential softwares" \
             2  "Enable firewall" \
             3  "Enable efficient battery optimization (via auto-cpufreq)" \
-            4  "dotfiles and wallpapers (coming soon)" \
+            4  "Manage dotfiles and wallpapers (corechunk)" \
             x  "EXIT" \
             2>&1 >/dev/tty)
             clean
@@ -177,7 +185,7 @@ main_menu (){
             echo "$BLUE 1.$RESET essential softwares"
             echo "$BLUE 2.$RESET Enable firewall"
             echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
-            echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (coming soon)"
+            echo "$MAGENTA 4. Manage dotfiles and wallpapers (corechunk)$RESET"
             echo "$divider"
             echo "$RED x. EXIT $RESET"
             echo ""
@@ -202,6 +210,9 @@ main_menu (){
                     cd ..
                     rm -rf auto-cpufreq
                 fi
+                ;;
+            4)
+                menu_corechunk_dotfiles
                 ;;
             x|X) clear;break;;
             *) clear;echo "invalid choice" ;;

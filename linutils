@@ -27,6 +27,8 @@ else
     export DISTRO_ID=$(uname -s)
 fi
 
+export ARCH_NAME=$(uname -m) # Detect system architecture
+
 #if [[ $has_sudo -eq 1 ]]; then
 #    echo "You have sudo privileges."
 #else
@@ -1104,6 +1106,167 @@ DE_DM_menu(){
 # some functions/variable called here maybe on other file
 # and they are need to be sourced in order to run properly
 
+acf(){
+    if command_exists auto-cpufreq;then acf_stat="already enabled"; else acf_stat="$n"; fi
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then
+            echo "$BLUE 1.$RESET install GUI monitor"
+            echo "$BLUE 2.$RESET view status"
+            echo "$BLUE 3.$RESET remove auto-cpufreq totally"
+            
+            echo "$RED x.$RESET EXIT"
+            read -p "Select a option :" cho
+            clear
+        elif [[ $mode == tui ]];then
+
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
+                        --title "Enable efficient battery optimization (via auto-cpufreq)" \
+                        --menu "Choose Your Preferred Option : " 30 90 25 \
+                1 "install GUI monitor" \
+                2 "view status" \
+                3 "remove auto-cpufreq totally" \
+                x "EXIT" 2>&1 >/dev/tty)
+            clean
+        fi
+
+
+        case $cho in
+        1)
+            sudo auto-cpufreq --install
+            ;;
+        2)
+            sudo auto-cpufreq --stats
+            ;;
+        3)
+            git clone https://github.com/AdnanHodzic/auto-cpufreq.git
+            cd auto-cpufreq
+            sudo ./auto-cpufreq-installer --remove
+            cd ..
+            rm -rf auto-cpufreq
+            ;;
+        x|X)
+            break
+            ;;
+        *)
+            clear
+            echo "#RED Invalid Choice$RESET"
+            echo "$log_end"
+            ;;
+        esac
+    done
+}
+#!/bin/bash
+
+install_rofi_patched() {
+    echo "=== Installing Rofi (lbonn Wayland fork) ==="
+
+    local PKG_MANAGER=$(package_manager)
+
+    echo "=== Installing dependencies ==="
+    if [[ "$PKG_MANAGER" == "apt" ]]; then
+        install_pkgs_dynamic install-force \
+            meson ninja-build git build-essential pkg-config \
+            libpango1.0-dev libcairo2-dev libglib2.0-dev \
+            libgdk-pixbuf-2.0-dev libstartup-notification0-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev \
+            libxcb1-dev libxcb-xkb-dev libxcb-randr0-dev \
+            libxcb-xinerama0-dev libxcb-util-dev \
+            libxcb-ewmh-dev libxcb-icccm4-dev libxcb-cursor-dev \
+            librsvg2-dev libwayland-dev wayland-protocols \
+            libxcb-keysyms1-dev
+    elif [[ "$PKG_MANAGER" == "pacman" ]]; then
+        install_pkgs_dynamic install-force \
+            meson ninja git base-devel pkgconf \
+            pango cairo glib2 \
+            gdk-pixbuf startup-notification \
+            libxkbcommon libxkbcommon-x11 \
+            libxcb xcb-util-xkb xcb-util-randr \
+            xcb-util-xinerama xcb-util \
+            xcb-util-wm xcb-util-cursor \
+            librsvg wayland wayland-protocols \
+            xcb-util-keysyms
+    elif [[ "$PKG_MANAGER" == "dnf" ]]; then
+        install_pkgs_dynamic install-force \
+            meson ninja-build git @development-tools pkg-config \
+            pango-devel cairo-devel glib2-devel \
+            gdk-pixbuf2-devel startup-notification-devel \
+            libxkbcommon-devel libxkbcommon-x11-devel \
+            libxcb-devel libxcb-xkb-devel libxcb-randr-devel \
+            libxcb-xinerama-devel libxcb-util-devel \
+            libxcb-ewmh-devel libxcb-icccm-devel libxcb-cursor-devel \
+            librsvg2-devel wayland-devel wayland-protocols-devel \
+            libxcb-keysyms-devel
+    else
+        echo "Unsupported package manager. Please install dependencies manually."
+        return 1
+    fi
+
+    echo "=== Creating temp directory ==="
+    TMPDIR=$(mktemp -d)
+    echo "Temp dir: $TMPDIR"
+    cd "$TMPDIR" || { echo "Failed to change to temp directory"; return 1; }
+
+    echo "=== Cloning rofi (lbonn wayland fork) ==="
+    git clone --depth=1 https://github.com/lbonn/rofi.git || { echo "Failed to clone rofi"; return 1; }
+    cd rofi || { echo "Failed to change to rofi directory"; return 1; }
+
+    echo "=== Meson setup ==="
+    meson setup build || { echo "Meson setup failed"; return 1; }
+
+    echo "=== Building ==="
+    ninja -C build || { echo "Ninja build failed"; return 1; }
+
+    echo "=== Installing ==="
+    sudo ninja -C build install || { echo "Ninja install failed"; return 1; }
+
+    echo "=== Cleaning up ==="
+    cd ~ || { echo "Failed to change to home directory"; return 1; }
+    rm -rf "$TMPDIR"
+
+    echo "=== DONE ==="
+    echo "Rofi Wayland build installed successfully."
+    # The original script had a 'read -rp "Press ENTER to exit..."' here.
+    # Since this is a function within a larger script, it's better to let the calling script handle pauses.
+    # If a pause is desired, it should be added in the menu function that calls this.
+}
+#!/bin/bash
+
+menu_github_pkgs() {
+    while true; do
+        local cho_3=""
+
+        if [[ $mode == cli ]]; then
+            echo ""
+            echo "$divider"
+            echo "$BLUE 1.$RESET Rofi Patched (Wayland fork)"
+            echo "$BLUE 2.$RESET Auto-CPUFreq (Power optimization)"
+            echo "$RED x.$RED EXIT$RESET"
+            echo "$divider"
+            read -p "Select Your Preferred Option : " cho_3
+            echo ""
+        elif [[ $mode == tui ]]; then
+            cho_3=$(dialog --title " ##### ##### GitHub Essential Packages ##### ##### " \
+            --menu "Select Option : " 30 90 25\
+            1 "Rofi Patched (Wayland fork)" \
+            2 "Auto-CPUFreq (Power optimization)" \
+            x "EXIT" \
+            2>&1 >/dev/tty)
+        fi
+
+        case $cho_3 in
+            1) clear; install_rofi_patched ;; 
+            2) clear; acf ;;
+            x|X) clear; break ;; 
+            *) echo "invalid choice !" ;; 
+        esac
+    done
+}
+
+
+# some functions/variable called here maybe on other file
+# and they are need to be sourced in order to run properly
+
 # Detect package manager
 if [[ $(package_manager) == "apt" ]]; then
 	# Debian/Ubuntu/Sid  [ or debian based ]
@@ -1508,23 +1671,19 @@ $YELLOW Use ↑ ↓ / PgUp / PgDn to scroll vertically
 $YELLOW Use ← → to scroll horizontally (with -S mode)
 $YELLOW Press 'q' to exit viewer$RESET
 ==============================================================
-** AI generated so please check official doc first **
 ───────────────────────────────$MAGENTA[ Development CLI Packages ]$RESET───────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 git                   | Version control system                         | CLI (All)                | Essential for dev work            | git
-build-essential(debian)| GCC, G++, Make build tools                    | CLI (Debian-based)       | Core compiler tools               | gcc, g++, make
-base-devel(arch)                                                                                                                      | [same as above]
+$(printf "%-21s" "$build_essential_pkg") | GCC, G++, Make build tools                    | CLI (All)                | Core compiler tools               | gcc, g++, make
 gdb                   | Debugger for compiled languages                | CLI (All)                | Used for debugging C/C++          | gdb
-manpages-dev(debian)  | Developer manual pages                         | CLI (All)                | Adds developer manpages           | man
-man-pages(arch)                                                                                                                       | [same as above]
+$(printf "%-21s" "$manpages_pkg") | Developer manual pages                         | CLI (All)                | Adds developer manpages           | man
 make                  | GNU build automation tool                      | CLI (All)                | Often pre-installed               | make
-ninja-build           | Fast build system                              | CLI (All)                | Alternative to make               | ninja
+$(printf "%-21s" "$ninja_pkg") | Fast build system                              | CLI (All)                | Alternative to make               | ninja
 cmake                 | Cross-platform build system generator          | CLI (All)                | Generates build configs           | cmake
-openjdk-25-jdk(debian)| Java Development Kit (includes JRE)            | CLI/GUI (All)            | Required for Java development     | java, javac
-jdk-openjdk(arch)                                                                                                                     | [same as above]
-python3               | Python programming language                    | CLI/GUI (All)            | Modern scripting language         | python3
-python3-pip           | Python package manager                         | CLI (All)                | For installing Python modules     | pip3
+$(printf "%-21s" "$openjdk_pkg") | Java Development Kit (includes JRE)            | CLI/GUI (All)            | Required for Java development     | java, javac
+$(printf "%-21s" "$python_pkg") | Python programming language                    | CLI/GUI (All)            | Modern scripting language         | python3
+$(printf "%-21s" "$pip_pkg") | Python package manager                         | CLI (All)                | For installing Python modules     | pip3
 
 ────────────────────────────────$BLUE[ Core CLI Packages ]$RESET───────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
@@ -1542,7 +1701,7 @@ lsd                   | Modern ls alternative                          | CLI (Al
 zoxide                | Smart cd command                               | CLI (All)                | Learns directory usage            | z
 fzf                   | Fuzzy finder                                   | CLI (All)                | Used in scripts and search        | fzf
 ripgrep               | Fast text searcher                             | CLI (All)                | Modern grep alternative           | rg
-fonts-firacode        | Monospace developer font                       | GUI/Desktop only         | No glyphs included                | N/A
+$(printf "%-21s" "$firacode_pkg") | Monospace developer font                       | GUI/Desktop only         | No glyphs included                | N/A
 
 ───────────────────────────────$ORANGE[ Network Tools CLI ]$RESET────────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
@@ -1555,9 +1714,9 @@ fail2ban              | Intrusion prevention tool                      | CLI (Se
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 blueman               | Bluetooth device manager (GUI)                 | Desktop (X11/Wayland)    | GUI frontend for bluetoothctl     | blueman-manager
-network-manager       | Manage wired/wireless connections              | Desktop (All)            | Often used with GUI applets       | nm-connection-editor
+$(printf "%-21s" "$network_manager_pkg") | Manage wired/wireless connections              | Desktop (All)            | Often used with GUI applets       | nm-connection-editor
 kitty                 | GPU-accelerated terminal emulator              | Desktop (All)            | Image and emoji support           | kitty
-thunar                | Lightweight file manager                       | Desktop (X11/Wayland)    | XFCE’s file manager               | thunar
+$(printf "%-21s" "$thunar_pkg") | Lightweight file manager                       | Desktop (X11/Wayland)    | XFCE’s file manager               | thunar
 mousepad              | Simple GUI text editor                         | Desktop (All)            | Basic Notepad-like editor         | mousepad
 mpv                   | Media player                                   | Desktop (All)            | GUI and CLI playback supported    | mpv
 zathura               | Document viewer (PDF, EPUB, etc.)              | Desktop (All)            | Keyboard-driven UI                | zathura
@@ -1567,13 +1726,14 @@ xdg-desktop-portal    | Screen sharing and app integration layer       | Desktop
 xdg-utils             | Desktop integration utilities                  | Desktop (All)            | Handles xdg-open, mime, etc.      | xdg-open
 maim                  | Screenshot tool                                | Desktop (X11/Wayland)    | Region and full capture support   | maim
 xclip                 | Clipboard tool                                 | Desktop (X11/Wayland)    | Scriptable clipboard access       | xclip
+$(printf "%-21s" "$spectacle_pkg") | Screenshot tool                                | Desktop (All)            | A widely supported screenshot app | spectacle
 
 ───────────────────────────────$SKY_BLUE[ Hyprland Utilities ]$RESET────────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 xdg-desktop-portal-hyprland | Hyprland portal backend                 | Wayland (Hyprland)       | Enables screenshots/sharing       | N/A
 hyprpaper             | Wallpaper daemon for Hyprland                  | Wayland (Hyprland)       | Lightweight wallpaper manager     | hyprpaper
-hyprcursor-util       | Cursor theme manager for Hyprland              | Wayland (Hyprland)       | Controls custom cursor themes     | N/A
+$(printf "%-21s" "$hyprcursor_pkg") | Cursor theme manager for Hyprland              | Wayland (Hyprland)       | Controls custom cursor themes     | N/A
 waybar                | Customizable status/task bar                   | Wayland (All)            | System info and tray bar          | waybar
 rofi                  | Launcher and window switcher                   | X11/Wayland              | Similar to dmenu, very extensible | rofi
 grim                  | Screenshot tool                                | Wayland only             | Works with slurp for region grab  | grim
@@ -1589,10 +1749,9 @@ auto-cpufreq          | CPU frequency optimizer                        | CLI (Al
 ────────────────────────────────$ORANGE[ Firmware Packages ]$RESET────────────────────────────────────
 Chipset               | Packages                                       | Compatibility            | Remarks
 ---------------------------------------------------------------------------------------------------------------
-INTEL                 | firmware-misc-nonfree,firmware-linux-nonfree,  | x86_64 | Enables Intel Wi-Fi, audio, GPU firmware
-						  firmware-sof-signed, firmware-iwlwifi 
-AMD                   | firmware-amd-graphics                          | x86_64 | Required for AMD GPUs
-NVIDIA                | nvidia-driver                                  | x86_64 | Proprietary NVIDIA driver
+INTEL                 | $(if [[ "$(package_manager)" == "apt" ]]; then echo "firmware-misc-nonfree, firmware-linux-nonfree, firmware-sof-signed, firmware-iwlwifi, firmware-intel-graphics, firmware-intel-misc, firmware-intel-sound"; elif [[ "$(package_manager)" == "pacman" ]]; then echo "intel-ucode, linux-firmware, sof-firmware, mesa, vulkan-intel, intel-media-driver"; elif [[ "$(package_manager)" == "dnf" ]]; then echo "microcode_ctl, linux-firmware, alsa-sof-firmware, mesa-vulkan-drivers, intel-media-driver"; fi) | x86_64 | Enables Intel Wi-Fi, audio, GPU firmware
+AMD                   | $(if [[ "$(package_manager)" == "apt" ]]; then echo "amd64-microcode, firmware-amd-graphics"; elif [[ "$(package_manager)" == "pacman" ]]; then echo "amd-ucode, linux-firmware, mesa, vulkan-radeon"; elif [[ "$(package_manager)" == "dnf" ]]; then echo "microcode_ctl, linux-firmware, mesa-vulkan-drivers"; fi) | x86_64 | Required for AMD GPUs
+NVIDIA                | $(if [[ "$(package_manager)" == "apt" ]]; then echo "nvidia-driver-full, firmware-nvidia-graphics, nvidia-cuda-toolkit (optional)"; elif [[ "$(package_manager)" == "pacman" ]]; then echo "nvidia, nvidia-utils, lib32-nvidia-utils, linux-firmware"; elif [[ "$(package_manager)" == "dnf" ]]; then echo "akmod-nvidia, xorg-x11-drv-nvidia-cuda"; fi) | x86_64 | Proprietary NVIDIA driver
 
 ==================================$RED[[ END ]]$RESET==================================
 "
@@ -1622,7 +1781,7 @@ menu_essential(){
             echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
             echo "$BLUE 4.$SKY_BLUE Hyprland$RESET Echosystem packages"
             echo "$BLUE 5.$MAGENTA corechunk's hyprland$RESET packages"
-            echo "$BLUE 6.$RESET github software packages $RED(comming soon)$RESET "
+            echo "$BLUE 6.$RESET GitHub Essential Packages"
             echo "$BLUE 9.$RESET INFO PAGE [navigation with up/down arrow]"
             echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
             echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
@@ -1641,7 +1800,7 @@ menu_essential(){
             3 "Core GUI packages" \
             4 "Hyprland Echosystem packages" \
             5 "corechunk's hyprland packages" \
-            6 "github software packages (comming soon)" \
+            6 "GitHub Essential Packages" \
             9 "INFO PAGE [navigation with up/down arrow]" \
             all "install all packages$RESET shown here" \
             all_f "install [1-5] [force]" \
@@ -1661,6 +1820,7 @@ menu_essential(){
             3)  prompt_install_type "${essentials_desktop[@]}" ;;
             4)  prompt_install_type "${essentials_hyprland[@]}" ;;
             5)  prompt_install_type "${corechunk_hyprland[@]}" ;;
+            6)  clear; menu_github_pkgs ;;
                                                                         #00)install_pkg_dynamic dialog ;;
                                                                         #01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
                                                                         #02)for pkg in "${firmware_amd[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
@@ -1691,63 +1851,11 @@ menu_essential(){
             3)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_desktop" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_desktop_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             4)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_hyprland" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             5)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "corechunk's_hyprland_pkgs" --checklist "Select/toggle preffered options : " 30 90 25 "${corechunk_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            6) clear; menu_github_pkgs ;;
             9) menu_info ;;
             x) tput reset;clear;break ;;
             esac
         fi
-    done
-}
-# some functions/variable called here maybe on other file
-# and they are need to be sourced in order to run properly
-
-acf(){
-    if command_exists auto-cpufreq;then acf_stat="already enabled"; else acf_stat="$n"; fi
-    local cho
-    while true;do
-        if [[ $mode == cli ]];then
-            echo "$BLUE 1.$RESET install GUI monitor"
-            echo "$BLUE 2.$RESET view status"
-            echo "$BLUE 3.$RESET remove auto-cpufreq totally"
-            
-            echo "$RED x.$RESET EXIT"
-            read -p "Select a option :" cho
-            clear
-        elif [[ $mode == tui ]];then
-
-            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
-                        --title "Enable efficient battery optimization (via auto-cpufreq)" \
-                        --menu "Choose Your Preferred Option : " 30 90 25 \
-                1 "install GUI monitor" \
-                2 "view status" \
-                3 "remove auto-cpufreq totally" \
-                x "EXIT" 2>&1 >/dev/tty)
-            clean
-        fi
-
-
-        case $cho in
-        1)
-            sudo auto-cpufreq --install
-            ;;
-        2)
-            sudo auto-cpufreq --stats
-            ;;
-        3)
-            git clone https://github.com/AdnanHodzic/auto-cpufreq.git
-            cd auto-cpufreq
-            sudo ./auto-cpufreq-installer --remove
-            cd ..
-            rm -rf auto-cpufreq
-            ;;
-        x|X)
-            break
-            ;;
-        *)
-            clear
-            echo "#RED Invalid Choice$RESET"
-            echo "$log_end"
-            ;;
-        esac
     done
 }
 # some functions/variable called here maybe on other file
@@ -1822,6 +1930,73 @@ ufw_menu(){
         esac
     done
 }
+#!/bin/bash
+
+#
+# Script: dotfiles.sh
+# Description: Manages the corechunk/dotfiles repository.
+#
+
+menu_corechunk_dotfiles() {
+    clear
+    local dotfiles_dir="corechunk.dotfiles.d"
+    if [ -d "$dotfiles_dir" ]; then
+        if [ -f "$dotfiles_dir/installer.sh" ]; then
+            echo "Found existing dotfiles installation. Running installer..."
+            (cd "$dotfiles_dir" && ./installer.sh)
+            echo "Installer finished. Press any key to return to the main menu."
+            read -n 1 -s -r
+        else
+            if [[ $mode == tui ]]; then
+                dialog --msgbox "Directory '$dotfiles_dir' exists but 'installer.sh' is missing. Please check the directory or remove it to re-download." 8 70
+            else
+                echo "Directory '$dotfiles_dir' exists but 'installer.sh' is missing."
+                echo "Please check the directory or remove it to re-download."
+                read -n 1 -s -r -p "Press any key to continue..."
+            fi
+        fi
+    else
+        local response
+        if [[ $mode == tui ]]; then
+            dialog --yesno "The dotfiles repository is not found. Do you want to download it now?" 7 60
+            response=$?
+        else
+            # prompt_user is defined in the main script's dependencies
+            prompt_user "The dotfiles repository is not found. Do you want to download it now? [y/N]: "
+            response=$?
+        fi
+
+        if [ $response -eq 0 ]; then # 0 is 'Yes' for both dialog and prompt_user
+            echo "Cloning dotfiles repository..."
+            if git clone https://github.com/corechunk/dotfiles.git "$dotfiles_dir"; then
+                if [[ $mode == tui ]]; then
+                    dialog --msgbox "Repository cloned successfully into '$dotfiles_dir'.\nYou can run option 4 again to start the installer." 8 70
+                else
+                    echo "Repository cloned successfully into '$dotfiles_dir'."
+                    echo "You can run option 4 again to start the installer."
+                fi
+            else
+                if [[ $mode == tui ]]; then
+                    dialog --msgbox "Failed to clone the repository." 5 40
+                else
+                    echo "Failed to clone the repository."
+                fi
+            fi
+        else
+            if [[ $mode == tui ]]; then
+                dialog --msgbox "Download skipped." 5 30
+            else
+                echo "Skipping download."
+            fi
+        fi
+
+        if [[ $mode == cli ]]; then
+            echo "Press any key to continue."
+            read -n 1 -s -r
+        fi
+    fi
+}
+
                 # ========= Choose Operation Mode =========
 if [[ $2 == cli ]];then
     mode_msg="Running$BLUE CLI$RESET Mode ..."
@@ -1844,10 +2019,10 @@ fi
 
 #=========ALL_Loaded_msg=========
 if   [[ $mode == tui ]];then
-    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅$mode_msg" 7 40
+    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg" 10 60
     clean
 elif [[ $mode == cli || $2 == * ]];then
-    echo -e "\n✅ All dependencies loaded!\n✅$mode_msg"
+    echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg"
     read -n1 -r -p "Press any key to continue..." key
     clear
 fi
@@ -1870,7 +2045,7 @@ main_menu (){
             1  "essential softwares" \
             2  "Enable firewall" \
             3  "Enable efficient battery optimization (via auto-cpufreq)" \
-            4  "dotfiles and wallpapers (coming soon)" \
+            4  "Manage dotfiles and wallpapers (corechunk)" \
             x  "EXIT" \
             2>&1 >/dev/tty)
             clean
@@ -1881,7 +2056,7 @@ main_menu (){
             echo "$BLUE 1.$RESET essential softwares"
             echo "$BLUE 2.$RESET Enable firewall"
             echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
-            echo "$MAGENTA 4. dotfiles and wallpapers$RESET  (coming soon)"
+            echo "$MAGENTA 4. Manage dotfiles and wallpapers (corechunk)$RESET"
             echo "$divider"
             echo "$RED x. EXIT $RESET"
             echo ""
@@ -1906,6 +2081,9 @@ main_menu (){
                     cd ..
                     rm -rf auto-cpufreq
                 fi
+                ;;
+            4)
+                menu_corechunk_dotfiles
                 ;;
             x|X) clear;break;;
             *) clear;echo "invalid choice" ;;

@@ -5,19 +5,22 @@ TARGET_SCRIPT := linutils
 
 # List all dependency files in the correct order for concatenation
 DEPENDENCY_FILES := \
-	base/base.sh \
-	base/pkg_mng_debian.sh \
-	base/pkg_mng_ubuntu.sh \
-	base/pkg_mng_arch.sh \
-	base/pkg_mng_fedora.sh \
-	base/pkg_mng_util.sh \
-	tasksel_custom/tasksel_custom.sh \
-	essential/essential_pre.sh \
-	essential/essential_pre_pkgs.sh \
-	essential/essential_pre_info.sh \
-	essential/essential.sh \
-	github_pkgs/auto-cpufreq.sh \
-	github_pkgs/security.sh
+    base/base.sh \
+    base/pkg_mng_debian.sh \
+    base/pkg_mng_ubuntu.sh \
+    base/pkg_mng_arch.sh \
+    base/pkg_mng_fedora.sh \
+    base/pkg_mng_util.sh \
+    tasksel_custom/tasksel_custom.sh \
+    essential/github_pkgs/auto-cpufreq.sh \
+    essential/github_pkgs/gh_pkg_rofi_patched.sh \
+    essential/github_pkgs/gh_pkgs_menu.sh \
+    essential/essential_pre.sh \
+    essential/essential_pre_pkgs.sh \
+    essential/essential_pre_info.sh \
+    essential/essential.sh \
+    essential/security.sh \
+    dotfiles/dotfiles.sh 
 
 # Define installation directory
 INSTALL_DIR := /usr/local/bin
@@ -26,6 +29,11 @@ INSTALL_DIR := /usr/local/bin
 
 all: build
 
+# Target to clean up generated files
+clean:
+	@echo "Cleaning up generated files..."
+	rm -f $(TARGET_SCRIPT)
+	@echo "Clean up complete."
 # Target to build the combined script
 build: $(TARGET_SCRIPT)
 
@@ -49,6 +57,7 @@ $(TARGET_SCRIPT): linutils.sh $(DEPENDENCY_FILES)
 	# Make the combined script executable
 	chmod +x $(TARGET_SCRIPT)
 	@echo "Successfully built $(TARGET_SCRIPT)"
+rebuild: clean build
 
 # Target to install the script
 install: build
@@ -56,8 +65,4 @@ install: build
 	sudo cp $(TARGET_SCRIPT) $(INSTALL_DIR)/ 
 	@echo "Successfully installed $(TARGET_SCRIPT)"
 
-# Target to clean up generated files
-clean:
-	@echo "Cleaning up generated files..."
-	rm -f $(TARGET_SCRIPT)
-	@echo "Clean up complete."
+

@@ -97,6 +97,7 @@ bash linutils.sh local tui
   - Essential **Server** and **Desktop** packages (editors, terminals, screenshot tools, media tools).
   - **Firewall and security menu (UFW, Fail2Ban).**
   - **Battery and power optimizations (auto-cpufreq installer).**
+  - **Dotfiles Management** for `corechunk/dotfiles` (cloning and installer execution).
   - Helpful UX: colorized messages, pauses/halt for user review, and clean terminal resets.
 >- #### Purpose kept in mind when making
 >  - Desktop packages section might contain cli tools that needs Desktop environment cause the section is meant for post Desktop environment setup so packages don't pull desktop environment with itself.
@@ -108,16 +109,15 @@ bash linutils.sh local tui
 
 When launched, the main menu exposes options like:
 
-- `00` __ Package Manager Utilities
-- `01` __ Install Desktop Environment (via `tasksel`)
-- `1`  ___ Essential CLI/Dev tools
-- `2`  ___ Core CLI tools
-- `3`  ___ Core GUI tools
-- `4`  ___ Hyprland / Wayland ecosystem helpers
-- `9`  ___ Info page (detailed package list and notes)
+- `00` __ Edit package manager source list
+- `01` __ Download Desktop Environment & more
+- `1`  ___ Essential Softwares
+- `2`  ___ Enable Firewall (UFW)
+- `3`  ___ Enable Battery Optimization (auto-cpufreq)
+- `4`  ___ Manage Dotfiles & Wallpapers (corechunk/dotfiles)
 - `x`  ___ Exit
 
-Each menu leads to a checklist (TUI) or a batch-selection (CLI). The **Package Manager Utilities** menu is now distro-aware, providing relevant options for your system:
+Each menu leads to further sub-menus or actions. Option `4` provides a convenient way to download and run the installer for the [corechunk/dotfiles](https://github.com/corechunk/dotfiles) repository. The **Package Manager Utilities** menu is now distro-aware, providing relevant options for your system:
 - **Debian:** Edit sources, switch to `sid` (unstable).
 - **Ubuntu:** Edit sources, enable `universe`/`multiverse`/`restricted` repos.
 - **Arch Linux:** Edit `pacman.conf`, enable `multilib` repository, rank mirrors.

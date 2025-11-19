@@ -8,23 +8,19 @@ $YELLOW Use ↑ ↓ / PgUp / PgDn to scroll vertically
 $YELLOW Use ← → to scroll horizontally (with -S mode)
 $YELLOW Press 'q' to exit viewer$RESET
 ==============================================================
-** AI generated so please check official doc first **
 ───────────────────────────────$MAGENTA[ Development CLI Packages ]$RESET───────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 git                   | Version control system                         | CLI (All)                | Essential for dev work            | git
-build-essential(debian)| GCC, G++, Make build tools                    | CLI (Debian-based)       | Core compiler tools               | gcc, g++, make
-base-devel(arch)                                                                                                                      | [same as above]
+$(printf "%-21s" "$build_essential_pkg") | GCC, G++, Make build tools                    | CLI (All)                | Core compiler tools               | gcc, g++, make
 gdb                   | Debugger for compiled languages                | CLI (All)                | Used for debugging C/C++          | gdb
-manpages-dev(debian)  | Developer manual pages                         | CLI (All)                | Adds developer manpages           | man
-man-pages(arch)                                                                                                                       | [same as above]
+$(printf "%-21s" "$manpages_pkg") | Developer manual pages                         | CLI (All)                | Adds developer manpages           | man
 make                  | GNU build automation tool                      | CLI (All)                | Often pre-installed               | make
-ninja-build           | Fast build system                              | CLI (All)                | Alternative to make               | ninja
+$(printf "%-21s" "$ninja_pkg") | Fast build system                              | CLI (All)                | Alternative to make               | ninja
 cmake                 | Cross-platform build system generator          | CLI (All)                | Generates build configs           | cmake
-openjdk-25-jdk(debian)| Java Development Kit (includes JRE)            | CLI/GUI (All)            | Required for Java development     | java, javac
-jdk-openjdk(arch)                                                                                                                     | [same as above]
-python3               | Python programming language                    | CLI/GUI (All)            | Modern scripting language         | python3
-python3-pip           | Python package manager                         | CLI (All)                | For installing Python modules     | pip3
+$(printf "%-21s" "$openjdk_pkg") | Java Development Kit (includes JRE)            | CLI/GUI (All)            | Required for Java development     | java, javac
+$(printf "%-21s" "$python_pkg") | Python programming language                    | CLI/GUI (All)            | Modern scripting language         | python3
+$(printf "%-21s" "$pip_pkg") | Python package manager                         | CLI (All)                | For installing Python modules     | pip3
 
 ────────────────────────────────$BLUE[ Core CLI Packages ]$RESET───────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
@@ -42,7 +38,7 @@ lsd                   | Modern ls alternative                          | CLI (Al
 zoxide                | Smart cd command                               | CLI (All)                | Learns directory usage            | z
 fzf                   | Fuzzy finder                                   | CLI (All)                | Used in scripts and search        | fzf
 ripgrep               | Fast text searcher                             | CLI (All)                | Modern grep alternative           | rg
-fonts-firacode        | Monospace developer font                       | GUI/Desktop only         | No glyphs included                | N/A
+$(printf "%-21s" "$firacode_pkg") | Monospace developer font                       | GUI/Desktop only         | No glyphs included                | N/A
 
 ───────────────────────────────$ORANGE[ Network Tools CLI ]$RESET────────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
@@ -55,9 +51,9 @@ fail2ban              | Intrusion prevention tool                      | CLI (Se
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 blueman               | Bluetooth device manager (GUI)                 | Desktop (X11/Wayland)    | GUI frontend for bluetoothctl     | blueman-manager
-network-manager       | Manage wired/wireless connections              | Desktop (All)            | Often used with GUI applets       | nm-connection-editor
+$(printf "%-21s" "$network_manager_pkg") | Manage wired/wireless connections              | Desktop (All)            | Often used with GUI applets       | nm-connection-editor
 kitty                 | GPU-accelerated terminal emulator              | Desktop (All)            | Image and emoji support           | kitty
-thunar                | Lightweight file manager                       | Desktop (X11/Wayland)    | XFCE’s file manager               | thunar
+$(printf "%-21s" "$thunar_pkg") | Lightweight file manager                       | Desktop (X11/Wayland)    | XFCE’s file manager               | thunar
 mousepad              | Simple GUI text editor                         | Desktop (All)            | Basic Notepad-like editor         | mousepad
 mpv                   | Media player                                   | Desktop (All)            | GUI and CLI playback supported    | mpv
 zathura               | Document viewer (PDF, EPUB, etc.)              | Desktop (All)            | Keyboard-driven UI                | zathura
@@ -67,13 +63,14 @@ xdg-desktop-portal    | Screen sharing and app integration layer       | Desktop
 xdg-utils             | Desktop integration utilities                  | Desktop (All)            | Handles xdg-open, mime, etc.      | xdg-open
 maim                  | Screenshot tool                                | Desktop (X11/Wayland)    | Region and full capture support   | maim
 xclip                 | Clipboard tool                                 | Desktop (X11/Wayland)    | Scriptable clipboard access       | xclip
+$(printf "%-21s" "$spectacle_pkg") | Screenshot tool                                | Desktop (All)            | A widely supported screenshot app | spectacle
 
 ───────────────────────────────$SKY_BLUE[ Hyprland Utilities ]$RESET────────────────────────────────────
 Package               | Description                                    | Compatibility            | Remarks                          | Command
 ---------------------------------------------------------------------------------------------------------------
 xdg-desktop-portal-hyprland | Hyprland portal backend                 | Wayland (Hyprland)       | Enables screenshots/sharing       | N/A
 hyprpaper             | Wallpaper daemon for Hyprland                  | Wayland (Hyprland)       | Lightweight wallpaper manager     | hyprpaper
-hyprcursor-util       | Cursor theme manager for Hyprland              | Wayland (Hyprland)       | Controls custom cursor themes     | N/A
+$(printf "%-21s" "$hyprcursor_pkg") | Cursor theme manager for Hyprland              | Wayland (Hyprland)       | Controls custom cursor themes     | N/A
 waybar                | Customizable status/task bar                   | Wayland (All)            | System info and tray bar          | waybar
 rofi                  | Launcher and window switcher                   | X11/Wayland              | Similar to dmenu, very extensible | rofi
 grim                  | Screenshot tool                                | Wayland only             | Works with slurp for region grab  | grim
@@ -89,10 +86,9 @@ auto-cpufreq          | CPU frequency optimizer                        | CLI (Al
 ────────────────────────────────$ORANGE[ Firmware Packages ]$RESET────────────────────────────────────
 Chipset               | Packages                                       | Compatibility            | Remarks
 ---------------------------------------------------------------------------------------------------------------
-INTEL                 | firmware-misc-nonfree,firmware-linux-nonfree,  | x86_64 | Enables Intel Wi-Fi, audio, GPU firmware
-						  firmware-sof-signed, firmware-iwlwifi 
-AMD                   | firmware-amd-graphics                          | x86_64 | Required for AMD GPUs
-NVIDIA                | nvidia-driver                                  | x86_64 | Proprietary NVIDIA driver
+INTEL                 | $(if [[ "$(package_manager)" == "apt" ]]; then echo "firmware-misc-nonfree, firmware-linux-nonfree, firmware-sof-signed, firmware-iwlwifi, firmware-intel-graphics, firmware-intel-misc, firmware-intel-sound"; elif [[ "$(package_manager)" == "pacman" ]]; then echo "intel-ucode, linux-firmware, sof-firmware, mesa, vulkan-intel, intel-media-driver"; elif [[ "$(package_manager)" == "dnf" ]]; then echo "microcode_ctl, linux-firmware, alsa-sof-firmware, mesa-vulkan-drivers, intel-media-driver"; fi) | x86_64 | Enables Intel Wi-Fi, audio, GPU firmware
+AMD                   | $(if [[ "$(package_manager)" == "apt" ]]; then echo "amd64-microcode, firmware-amd-graphics"; elif [[ "$(package_manager)" == "pacman" ]]; then echo "amd-ucode, linux-firmware, mesa, vulkan-radeon"; elif [[ "$(package_manager)" == "dnf" ]]; then echo "microcode_ctl, linux-firmware, mesa-vulkan-drivers"; fi) | x86_64 | Required for AMD GPUs
+NVIDIA                | $(if [[ "$(package_manager)" == "apt" ]]; then echo "nvidia-driver-full, firmware-nvidia-graphics, nvidia-cuda-toolkit (optional)"; elif [[ "$(package_manager)" == "pacman" ]]; then echo "nvidia, nvidia-utils, lib32-nvidia-utils, linux-firmware"; elif [[ "$(package_manager)" == "dnf" ]]; then echo "akmod-nvidia, xorg-x11-drv-nvidia-cuda"; fi) | x86_64 | Proprietary NVIDIA driver
 
 ==================================$RED[[ END ]]$RESET==================================
 "
