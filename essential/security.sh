@@ -34,6 +34,13 @@ ufw_menu(){
 					3 "install fail2ban $f2b_stat" \
 					4 "enable fail2ban & set rules" \
 					x "EXIT" 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
 		fi
 
         case $cho in

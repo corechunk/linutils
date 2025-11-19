@@ -64,6 +64,12 @@ deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-fi
 
 Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
                     2>&1 >/dev/tty)
+                local exit_status=$?
+                if [ $exit_status -ne 0 ]; then
+                    clear
+                    if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                    return 1
+                fi
 
             # ───────────────────────────────────────────────
             # TUI DIALOG VERSION (MODERN FORMAT)
@@ -85,9 +91,15 @@ Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
                     2>&1 >/dev/tty)
+                local exit_status=$?
+                if [ $exit_status -ne 0 ]; then
+                    clear
+                    if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                    return 1
+                fi
             fi
 
-            clear
+            clean
         fi
 
         case $cho in
@@ -168,6 +180,13 @@ debian_pkg_mng_menu(){
             sid "[Debian] Switch to unstable/sid" \
             x EXIT \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho in

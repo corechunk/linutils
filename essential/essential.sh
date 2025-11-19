@@ -45,6 +45,13 @@ menu_essential(){
             all_f "install [1-5] [force]" \
             x "EXIT" \
             2>&1 >/dev/tty)
+
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
 

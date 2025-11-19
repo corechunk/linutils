@@ -175,8 +175,17 @@ main_menu (){
             2  "Enable firewall" \
             3  "Enable efficient battery optimization (via auto-cpufreq)" \
             4  "Manage dotfiles and wallpapers (corechunk)" \
+            5  "Delete downloaded dotfiles" \
             x  "EXIT" \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
+
             clean
         elif [[ $mode == cli ]];then
             echo "$WARNING 00.$RESET Edit pakg manager source list"
@@ -186,6 +195,7 @@ main_menu (){
             echo "$BLUE 2.$RESET Enable firewall"
             echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
             echo "$MAGENTA 4. Manage dotfiles and wallpapers (corechunk)$RESET"
+            echo "$RED 5. Delete downloaded dotfiles$RESET"
             echo "$divider"
             echo "$RED x. EXIT $RESET"
             echo ""
@@ -214,6 +224,9 @@ main_menu (){
             4)
                 menu_corechunk_dotfiles
                 ;;
+            5)
+                delete_corechunk_dotfiles
+                ;;
             x|X) clear;break;;
             *) clear;echo "invalid choice" ;;
         esac
@@ -222,8 +235,10 @@ main_menu (){
 
 # Verify system support before showing the main menu
 verify_support
-
+(
+cd $HOME
 main_menu
+)
 exit 0
 
 #core_end

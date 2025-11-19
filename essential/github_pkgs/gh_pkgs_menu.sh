@@ -20,6 +20,13 @@ menu_github_pkgs() {
             2 "Auto-CPUFreq (Power optimization)" \
             x "EXIT" \
             2>&1 >/dev/tty)
+
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho_3 in

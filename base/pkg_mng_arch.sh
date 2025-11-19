@@ -14,6 +14,13 @@ rank_prompt(){
                 --backtitle "Package manager source list : Operations" \
                 --inputbox "This will rank your Pacman mirrors using 'reflector' and save the 10 fastest to /etc/pacman.d/mirrorlist.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
                 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                clear
+                if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                return 1
+            fi
             clear
         fi
 
@@ -56,6 +63,13 @@ multilib_prompt(){
                 --backtitle "Package manager source list : Operations" \
                 --inputbox "This will enable the [multilib] repository in /etc/pacman.conf, required for 32-bit software like Steam or Wine.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
                 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                clear
+                if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                return 1
+            fi
             clear
         fi
 
@@ -101,6 +115,13 @@ arch_pkg_mng_menu(){
             rank "Rank mirrors with reflector" \
             x EXIT \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho in

@@ -14,6 +14,13 @@ fusion_prompt(){
                 --backtitle "Package manager source list : Operations" \
                 --inputbox "This will install the RPM Fusion 'free' and 'non-free' repositories, which provide a lot of extra software, multimedia codecs, and drivers.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
                 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                clear
+                if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                return 1
+            fi
             clear
         fi
 
@@ -58,6 +65,13 @@ fedora_pkg_mng_menu(){
             fusion "Enable RPM Fusion (Free & Non-Free)" \
             x EXIT \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho in

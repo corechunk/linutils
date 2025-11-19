@@ -47,10 +47,10 @@ tasksel_custom_menu(){
                     --checklist "Select/toggle preffered options : " 30 90 25 \
                     "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
 
-            # Handle cancel/esc
-            if [[ $? == 1 || $? == 255 ]]; then
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
                 echo "Cancelled by user. Returning..."
-                return 2
+                return 1 # Changed from return 2 to return 1
             fi        
             
             # Filtering cho into pkgs
@@ -110,6 +110,13 @@ DE_DM_menu(){
                 4 "sddm + hyprland (custom - already set)" \
                 5 "Tasksel (Debian based distros only !)" \
                 x "Exit" 2>&1 >/dev/tty )
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         elif [[ $mode == cli ]];then
                 echo "##########################################################"
                 echo "#### Download Desktop Environment and Display Manager ####"

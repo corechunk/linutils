@@ -14,6 +14,13 @@ enable_ubuntu_repos_prompt(){
                 --backtitle "Package manager source list : Operations" \
                 --inputbox "This will enable the 'universe', 'multiverse', and 'restricted' repositories for Ubuntu, providing access to a wider range of software.\n\nType 'confirm' to proceed or 'no' to cancel:" 10 90 \
                 2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                clear
+                if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                return 1
+            fi
             clear
         fi
 
@@ -59,6 +66,13 @@ ubuntu_pkg_mng_menu(){
             enable_repos "Enable Universe, Multiverse, Restricted Repositories" \
             x EXIT \
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+            fi
         fi
 
         case $cho in

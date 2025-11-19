@@ -258,6 +258,14 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
             8 "purge without prompt [force]"\
             x "EXIT"\
             2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+                return 1 # Return 1 to indicate cancellation
+            fi
         fi
         clean
     
