@@ -147,13 +147,22 @@ elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ====
 fi
 
 #=========ALL_Loaded_msg=========
-if   [[ $mode == tui ]];then
-    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg" 10 60
-    clean
-elif [[ $mode == cli || $2 == * ]];then
+if [[ $mode == cli || $2 == * ]];then # temporarily this if/else is made to run cli(always) cause ascii looks great. and cant be shown in tui
+    echo "
+
+    $BLUE   ____                 ____ _                 _         __$GREEN  _   _                   _     _   _         
+    $BLUE  / ___|___  _ __ ___  / ___| |__  _   _ _ __ | | __    / /$GREEN | | (_)  _ __    _   _  | |_  (_) | |  ___   
+    $BLUE | |   / _ \| '__/ _ \| |   | '_ \| | | | '_ \| |/ /   / / $GREEN | | | | | '_ \  | | | | | __| | | | | / __|  
+    $BLUE | |__| (_) | | |  __/| |___| | | | |_| | | | |   <   / /  $GREEN | | | | | | | | | |_| | | |_  | | | | \__ \  
+    $BLUE  \____\___/|_|  \___| \____|_| |_|\__,_|_| |_|_|\_\ /_/   $GREEN |_| |_| |_| |_|  \__,_|  \__| |_| |_| |___/_ 
+    $RESET
+    "
     echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg"
     read -n1 -r -p "Press any key to continue..." key
     clear
+elif   [[ $mode == tui ]];then
+    dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg" 10 60
+    clean
 fi
 
 
