@@ -82,11 +82,11 @@ update_codechunk_dotfiles(){
             tui)
                 dialog --clear \
                     --title "update/delete corechunk dotfiles & wallpapers" \
-                    --msgbox "the script doesn't exist, we will create one" \
+                    --msgbox "$msg" \
                     10 45
                 ;;            
             cli)
-            read -n 1 -s -r -p "the script doesn't exist, we will create one"
+            read -n 1 -s -r -p "$msg"
                 ;;
             esac
         else
@@ -130,7 +130,6 @@ mng_corechunk_dotfiles(){ # manages delete/update func calls
                 --backtitle "[ https://github.com/corechunk/linutils ]" \
                 --title "corechunk dotfiles & wallpapers collection" \
                 --menu "choose preferred option" 25 90 17 \
-                --default-item "1" \
                 1 "update the dotfiles script only excluding the dotfiles/wallpapers" \
                 2 "delete the dotfiles including wallpapers" \
                 x "exit" \
