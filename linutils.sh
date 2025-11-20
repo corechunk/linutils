@@ -47,6 +47,8 @@ dep=(
     base/pkg_mng_util.sh #menu
     tasksel_custom/tasksel_custom.sh #menu
     
+    dotfiles/dotfiles.sh #menu
+    
     essential/github_pkgs/auto-cpufreq.sh
     essential/github_pkgs/gh_pkg_rofi_patched.sh
     essential/github_pkgs/gh_pkgs_menu.sh #menu
@@ -57,7 +59,6 @@ dep=(
     essential/essential.sh #menu
 
     essential/security.sh
-    dotfiles/dotfiles.sh #menu
 )
 
 bar_length=50
@@ -183,8 +184,8 @@ main_menu (){
             1  "essential softwares" \
             2  "Enable firewall" \
             3  "Enable efficient battery optimization (via auto-cpufreq)" \
-            4  "Manage dotfiles and wallpapers (corechunk)" \
-            5  "Delete downloaded dotfiles" \
+            4  "dotfiles and wallpapers (corechunk)" \
+            5  "Update/Delete downloaded dotfiles" \
             x  "EXIT" \
             2>&1 >/dev/tty)
             
@@ -203,8 +204,8 @@ main_menu (){
             echo "$BLUE 1.$RESET essential softwares"
             echo "$BLUE 2.$RESET Enable firewall"
             echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
-            echo "$MAGENTA 4. Manage dotfiles and wallpapers (corechunk)$RESET"
-            echo "$RED 5. Delete downloaded dotfiles$RESET"
+            echo "$MAGENTA 4. dotfiles and wallpapers (corechunk)$RESET"
+            echo "$RED 5. Update/Delete downloaded dotfiles$RESET"
             echo "$divider"
             echo "$RED x. EXIT $RESET"
             echo ""
@@ -234,7 +235,7 @@ main_menu (){
                 menu_corechunk_dotfiles
                 ;;
             5)
-                delete_corechunk_dotfiles
+                mng_corechunk_dotfiles
                 ;;
             x|X) clear;break;;
             *) clear;echo "invalid choice" ;;

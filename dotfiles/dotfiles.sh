@@ -61,7 +61,116 @@ delete_corechunk_dotfiles() {
     fi
 }
 
-menu_corechunk_dotfiles() {
+update_codechunk_dotfiles(){
+    local dotfiles_dir="corechunk.dotfiles.d"
+    local dotfiles_path="$HOME/$dotfiles_dir" # Define the full path
+    local dotfiles_installer_path="$dotfiles_path/installer.sh"
+
+    if [ -d "$dotfiles_path" ];then
+        #[[ -f "$dotfiles_path/installer.sh" ]] && echo found
+        #read -n 1 -s -r
+        if [ -f "$dotfiles_path/installer.sh" ];then
+            echo "$(curl -fsSL https://raw.githubusercontent.com/corechunk/dotfiles/main/installer.sh)" > "$dotfiles_installer_path"
+            
+            if [[ "$?" != "0" ]];then
+                local msg="file failed to update"
+            else
+                local msg="file updated successf to update"
+            fi
+            
+            case $mode in
+            tui)
+                dialog --clear \
+                    --title "update/delete corechunk dotfiles & wallpapers" \
+                    --msgbox "the script doesn't exist, we will create one" \
+                    10 45
+                ;;            
+            cli)
+            read -n 1 -s -r -p "the script doesn't exist, we will create one"
+                ;;
+            esac
+        else
+            case $mode in
+            tui)
+                dialog --clear \
+                    --title "update/delete corechunk dotfiles & wallpapers" \
+                    --msgbox "the script doesn't exist, we will create one" \
+                    10 45
+            ;;
+            cli)
+                read -n 1 -s -r -p "the script doesn't exist, we will create one"
+            ;;
+            esac
+            touch "$dotfiles_installer_path"
+        fi
+    else
+        case $mode in
+        tui)
+            whiptail --clear --scrolltext \
+                --title "update/delete corechunk dotfiles & wallpapers" \
+                --msgbox "You haven't downloaded corechunk dotfiles yet" \
+                10 45
+        ;;
+        cli)
+            read -n 1 -s -r -p "You haven't downloaded corechunk dotfiles yet"
+        ;;
+        esac
+    fi
+
+}
+
+mng_corechunk_dotfiles(){ # manages delete/update func calls
+    clean
+    local menu_cho
+    
+    while true;do
+        case "$mode" in
+        "tui")
+            menu_cho=$(dialog \
+                --backtitle "[ https://github.com/corechunk/linutils ]" \
+                --title "corechunk dotfiles & wallpapers collection" \
+                --menu "choose preferred option" 25 90 17 \
+                --default-item "1" \
+                1 "update the dotfiles script only excluding the dotfiles/wallpapers" \
+                2 "delete the dotfiles including wallpapers" \
+                x "exit" \
+                2>&1 >/dev/tty)
+                [[ "$?" != "0" ]] && break
+            ;;
+        "cli")
+            echo "##### corechunk dotfiles manager #####"
+            echo "$log_start"
+            echo "$BLUE 1.$RESET update the dotfiles script only excluding the dotfiles/wallpapers"
+            echo "$BLUE 2.$RESET delete the dotfiles including wallpapers"
+            echo "$RED x. EXIT $RESET"
+            echo "$log_end"
+            read -p "choose preferred option : " menu_cho
+
+            ;;
+        esac
+
+        clean
+
+        case $menu_cho in 
+        1)
+            update_codechunk_dotfiles
+            clean
+        ;;
+        2)
+            delete_corechunk_dotfiles
+            clean
+        ;;
+        x|X)
+            break
+        ;;
+        *)
+            echo "Invalid Choice : please write the segment before '.' as a option to choose !"
+        ;;
+        esac
+    done
+}
+
+menu_corechunk_dotfiles(){
     clear
     local dotfiles_dir="corechunk.dotfiles.d"
     local dotfiles_path="$HOME/$dotfiles_dir" # Define the full path
