@@ -542,18 +542,9 @@ Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
         confirm)
             clear
             # ───────────────────────────────────────────────
-            # OLD FORMAT (sources.list)
-            # ───────────────────────────────────────────────
-            if [[ -f "/etc/apt/sources.list" ]]; then
-                echo "deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" \
-                    | sudo tee /etc/apt/sources.list >/dev/null
-                echo "deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" \
-                    | sudo tee -a /etc/apt/sources.list >/dev/null
-
-            # ───────────────────────────────────────────────
             # MODERN FORMAT (.sources)
             # ───────────────────────────────────────────────
-            elif [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
+            if [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
                 sudo tee /etc/apt/sources.list.d/debian.sources >/dev/null <<EOF
 Types: deb deb-src
 URIs: http://deb.debian.org/debian/
@@ -561,6 +552,15 @@ Suites: unstable
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOF
+            # ───────────────────────────────────────────────
+            # OLD FORMAT (sources.list)
+            # ───────────────────────────────────────────────
+            elif [[ -f "/etc/apt/sources.list" ]]; then
+                echo "deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" \
+                    | sudo tee /etc/apt/sources.list >/dev/null
+                echo "deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware" \
+                    | sudo tee -a /etc/apt/sources.list >/dev/null
+  
             fi
 
             # ───────────────────────────────────────────────
@@ -627,12 +627,12 @@ debian_pkg_mng_menu(){
 
         case $cho in
             edit)
-                if [[ -f "/etc/apt/sources.list" ]];then
-                    echo "old type source list detected :$YELLOW /etc/apt/sources.list$RESET"
-                    sudo nano /etc/apt/sources.list
-                elif [[ -f "/etc/apt/sources.list.d/debian.sources" ]];then
+                if [[ -f "/etc/apt/sources.list.d/debian.sources" ]];then
                     echo "modern source list detected :$YELLOW /etc/apt/sources.list.d/debian.sources$RESET"
                     sudo nano /etc/apt/sources.list.d/debian.sources
+                elif [[ -f "/etc/apt/sources.list" ]];then
+                    echo "old type source list detected :$YELLOW /etc/apt/sources.list$RESET"
+                    sudo nano /etc/apt/sources.list
                 fi
                 clear
                 ;; 
