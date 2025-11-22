@@ -83,10 +83,10 @@ ubuntu_pkg_mng_menu(){
 
         case $cho in
             edit)
-                if [[ -f "/etc/apt/sources.list" ]];then
-                    sudo nano /etc/apt/sources.list
-                elif [[ -f "/etc/apt/sources.list.d/ubuntu.sources" ]];then
+                if [[ -f "/etc/apt/sources.list.d/ubuntu.sources" ]];then
                     sudo nano /etc/apt/sources.list.d/ubuntu.sources
+                elif [[ -f "/etc/apt/sources.list" ]];then
+                    sudo nano /etc/apt/sources.list
                 fi
                 clear
                 ;;

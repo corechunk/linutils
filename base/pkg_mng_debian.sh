@@ -7,27 +7,12 @@ sid_prompt(){
 
         if [[ $mode == cli ]]; then
 
-            # ───────────────────────────────────────────────
-            # OLD APT FORMAT DETECTED
-            # /etc/apt/sources.list (legacy)
-            # ───────────────────────────────────────────────
-            if [[ -f "/etc/apt/sources.list" ]]; then
-                echo "old type source list detected :$YELLOW /etc/apt/sources.list$RESET"
-                echo ""
-                echo "$log_start"
-                echo "Are you sure you want to change your apt source to$RED unstable/sid.$RESET"
-                echo "These two lines below will be added to$MAGENTA /etc/apt/sources.list$RESET"
-                echo ""
-                echo "$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
-                echo "$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
-                echo "$log_end"
-                echo ""
 
             # ───────────────────────────────────────────────
             # MODERN APT FORMAT DETECTED
             # /etc/apt/sources.list.d/debian.sources
             # ───────────────────────────────────────────────
-            elif [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
+            if [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
                 echo "modern source list detected :$YELLOW /etc/apt/sources.list.d/debian.sources$RESET"
                 echo ""
                 echo "$log_start"
@@ -42,39 +27,31 @@ sid_prompt(){
                 echo ""
                 echo "$log_end"
                 echo ""
+            # ───────────────────────────────────────────────
+            # OLD APT FORMAT DETECTED
+            # /etc/apt/sources.list (legacy)
+            # ───────────────────────────────────────────────
+            elif [[ -f "/etc/apt/sources.list" ]]; then
+                echo "old type source list detected :$YELLOW /etc/apt/sources.list$RESET"
+                echo ""
+                echo "$log_start"
+                echo "Are you sure you want to change your apt source to$RED unstable/sid.$RESET"
+                echo "These two lines below will be added to$MAGENTA /etc/apt/sources.list$RESET"
+                echo ""
+                echo "$YELLOW deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
+                echo "$YELLOW deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware$RESET"
+                echo "$log_end"
+                echo ""
             fi
             read -p "Are you sure ? (confirm or no) :" cho
             clear
         elif [[ $mode == tui ]]; then
 
-            # ───────────────────────────────────────────────
-            # TUI DIALOG VERSION (OLD FORMAT)
-            # ───────────────────────────────────────────────
-            if [[ -f "/etc/apt/sources.list" ]]; then
-                cho=$(dialog --title "APT Source Change Confirmation" \
-                    --backtitle "Package manager source list : Operations" \
-                    --inputbox "Old-style sources list detected : '/etc/apt/sources.list'.
-
-Are you sure you want to change your apt source to unstable/sid?
-
-Your 'sources.list' file will be replaced with the Sid version:
-
-deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware
-
-Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
-                    2>&1 >/dev/tty)
-                local exit_status=$?
-                if [ $exit_status -ne 0 ]; then
-                    clear
-                    if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
-                    return 1
-                fi
 
             # ───────────────────────────────────────────────
             # TUI DIALOG VERSION (MODERN FORMAT)
             # ───────────────────────────────────────────────
-            elif [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
+            if [[ -f "/etc/apt/sources.list.d/debian.sources" ]]; then
                 cho=$(dialog --title "APT Source Change Confirmation" \
                     --backtitle "Package manager source list : Operations" \
                     --inputbox "Modern APT unified source detected '/etc/apt/sources.list.d/debian.sources'.
@@ -88,6 +65,29 @@ URIs: http://deb.debian.org/debian/
 Suites: unstable
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
+                    2>&1 >/dev/tty)
+                local exit_status=$?
+                if [ $exit_status -ne 0 ]; then
+                    clear
+                    if [[ $mode == tui ]]; then dialog --msgbox "Operation cancelled." 5 30; else echo "Operation cancelled."; fi
+                    return 1
+                fi
+            # ───────────────────────────────────────────────
+            # TUI DIALOG VERSION (OLD FORMAT)
+            # ───────────────────────────────────────────────
+            elif [[ -f "/etc/apt/sources.list" ]]; then
+                cho=$(dialog --title "APT Source Change Confirmation" \
+                    --backtitle "Package manager source list : Operations" \
+                    --inputbox "Old-style sources list detected : '/etc/apt/sources.list'.
+
+Are you sure you want to change your apt source to unstable/sid?
+
+Your 'sources.list' file will be replaced with the Sid version:
+
+deb http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian/ unstable main contrib non-free non-free-firmware
 
 Type 'confirm' to proceed or 'no' to cancel:" 20 90 \
                     2>&1 >/dev/tty)
