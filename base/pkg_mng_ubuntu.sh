@@ -1,5 +1,11 @@
 # This file contains package manager utility functions specific to Ubuntu-based systems.
 
+# Types: deb
+# URIs: http://security.ubuntu.com/ubuntu/
+# Suites: noble-security
+# Components: main restricted universe multiverse
+# Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
 enable_ubuntu_repos_prompt(){
     local cho
     while true;do

@@ -27,7 +27,9 @@ INSTALL_DIR := /usr/local/bin
 
 .PHONY: all build install clean
 
-all: build
+all: build install
+
+re-all: clean build install
 
 # Target to clean up generated files
 clean:
