@@ -36,7 +36,7 @@ Because it’s written entirely in **Bash**, it works anywhere Bash does — no 
 By default, `linutils` runs in **remote + TUI** mode when invoked with no arguments (this is the recommended quick path).
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/corechunk/linutils/main/linutils)
 ```
 
 This default invocation does the following:
@@ -51,6 +51,9 @@ This default invocation does the following:
 ## CLI args
 
 linutils uses **positional** CLI arguments for now. In future versions we will support `--long-args` style flags.
+- for now: linutils.sh supports both argument
+- 'linutils' - which is a standalone file, it only supports the 2nd positional argument for cli/tui [keep 1st arg like "" if u wanna choose cli/tui]
+  - this doesn't support 1st arg cause it doesn't need dependency dourcing as its a standalone executable script.
 
 **Current positional arguments:**
 
