@@ -209,6 +209,22 @@ fi
         elif [[ $(package_manager) == "dnf" ]];then
             sudo dnf remove "$1" -y # dnf doesn't have a direct purge equivalent
         fi
+    elif [[ $2 == install-norec ]];then #9 Install without recommends, with prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1" --no-install-recommends
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1" --needed # pacman doesn't install recommends by default
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf install "$1" --setopt=install_weak_deps=False
+        fi
+    elif [[ $2 == install-force-norec ]];then #10 Install without recommends, without prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1" -y --no-install-recommends
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1" --needed --noconfirm # pacman doesn't install recommends by default
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf install "$1" -y --setopt=install_weak_deps=False
+        fi
     else
         echo "invalid option for installation, ..."
         return 1;
@@ -282,6 +298,8 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
             echo "6. uninstall without prompt [force]"
             echo "7. purge with prompt"
             echo "8. purge without prompt [force]"
+            echo "9 install with prompt (no rec)"
+            echo "10 install without prompt [force] (no rec)"
             echo "x. EXIT"
             echo ""
             read -p "Choose preferred option : " cho
@@ -295,6 +313,8 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
             6 "uninstall without prompt [force]"\
             7 "purge with prompt"\
             8 "purge without prompt [force]"\
+            9 "install with prompt (no rec)"\
+            10 "install without prompt [force] (no rec)"\
             x "EXIT"\
             2>&1 >/dev/tty)
             
@@ -318,6 +338,51 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
         6) install_pkgs_dynamic remove-force "${pkgs[@]}";return 0 ;;
         7) install_pkgs_dynamic purge "${pkgs[@]}";return 0 ;;
         8) install_pkgs_dynamic purge-force "${pkgs[@]}";return 0 ;;
+        9) install_pkgs_dynamic install-norec "${pkgs[@]}";return 0 ;;
+        10) install_pkgs_dynamic install-force-norec "${pkgs[@]}";return 0 ;;
+        x|X) clear;tput reset;return 1 ;;
+        *) tput reset;clear;echo -e "invalid option ! \n" ;;
+        esac
+    done
+}
+prompt_install_type_simple(){       # used install_pkgs_dynamic()  <------------
+    local pkgs=("$@")           # can be used to prompt user about installation mathods with a large set of pkgs
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then   # this is not used yet
+            echo ""
+            echo "1. install with prompt"
+            echo "2. re-install with prompt"
+            echo "3. uninstall with prompt"
+            echo "4. purge with prompt"
+            echo "x. EXIT"
+            echo ""
+            read -p "Choose preferred option : " cho
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " 30 90 25\
+            1 "install with prompt"\
+            2 "re-install with prompt"\
+            3 "uninstall with prompt"\
+            4 "purge with prompt"\
+            x "EXIT"\
+            2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+                return 1 # Return 1 to indicate cancellation
+            fi
+        fi
+        clean
+    
+
+        case $cho in
+        1) install_pkgs_dynamic default "${pkgs[@]}";return 0 ;;
+        2) install_pkgs_dynamic re-install "${pkgs[@]}";return 0 ;;
+        3) install_pkgs_dynamic remove "${pkgs[@]}";return 0 ;;
+        4) install_pkgs_dynamic purge "${pkgs[@]}";return 0 ;;
         x|X) clear;tput reset;return 1 ;;
         *) tput reset;clear;echo -e "invalid option ! \n" ;;
         esac
@@ -602,6 +667,12 @@ debian_pkg_mng_menu(){
 }
 
 # This file contains package manager utility functions specific to Ubuntu-based systems.
+
+# Types: deb
+# URIs: http://security.ubuntu.com/ubuntu/
+# Suites: noble-security
+# Components: main restricted universe multiverse
+# Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 
 enable_ubuntu_repos_prompt(){
     local cho
@@ -1035,7 +1106,6 @@ pkg_mng_menu(){
     fi
     clear
 }
-DE_cho=()
 if [[ $(package_manager) == "apt" ]]; then
     DE_cho_dialog=(
         "######_Desktop_Environments_######" "__________ Catagory Description [below] __________" off
@@ -1055,8 +1125,8 @@ elif [[ $(package_manager) == "pacman" ]]; then
         plasma                "KDE Plasma (Standard/Full)" off
         plasma-desktop        "KDE Plasma (Minimal)" off
         gnome                 "GNOME Desktop Environment" off
-        cinnamon              "Cinnamon Desktop Environment" off
-        xfce4                 "XFCE Desktop Environment" off	
+        @cinnamon-desktop   "Cinnamon Desktop Environment" off
+        @xfce-desktop       "XFCE Desktop Environment" off	
         "######_Window_Manager_######" "__________ Catagory Description [below] __________" off
         hyprland              "a tiling window manager" off
         i3-wm                 "another tiling window manager" off
@@ -1073,11 +1143,44 @@ elif [[ $(package_manager) == "dnf" ]]; then
         "i3"                  "another tiling window manager" off
     )
 fi
+DE_cho=()
 shrink DE_cho_dialog DE_cho  # shrink also excluded catagory headers
 
-tasksel_custom_menu(){
+
+# Display Manager choices (per-distro)
+
+if [[ $(package_manager) == "apt" ]]; then
+    gdm_pkg="gdm3"
+elif [[ $(package_manager) == "pacman" ]]; then
+    gdm_pkg="gdm"
+elif [[ $(package_manager) == "dnf" ]]; then
+    gdm_pkg="gdm"
+fi
+DM_cho_dialog=(
+    "######_Display_Managers_######" "__________ Catagory Description [below] __________" off
+    sddm        "Simple Desktop Display Manager (sddm)" off
+    lightdm     "Lightweight Display Manager (lightdm)" off
+    $gdm_pkg         "GNOME Display Manager (gdm)" off
+    lxdm        "Lightweight X11 Display Manager (lxdm)" off
+)
+DM_cho=()
+
+# Populate DM_cho (remove category headers)
+if command -v shrink >/dev/null 2>&1; then
+    shrink DM_cho_dialog DM_cho
+else
+    for item in "${DM_cho_dialog[@]}"; do
+        if [[ "$item" == "######"* ]]; then
+            continue
+        fi
+        DM_cho+=("$item")
+    done
+fi
+
+
+tasksel_custom_menu(){    # for opt1 as a distro neutral tasksel alternative
     local cho
-    pkgs=();
+    local pkgs=();
         if [[ $mode == tui ]];then
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                     --title "Download Desktop Environment with default DM" \
@@ -1097,11 +1200,69 @@ tasksel_custom_menu(){
                 [[ ${cho[$j]} == *#* ]] && continue
                 pkgs+=("${cho[$j]}")
             done
-            prompt_install_type "${pkgs[@]}"
+            prompt_install_type_simple "${pkgs[@]}"
         elif [[ $mode == cli ]];then
             while true;do
                 echo "##########################################################"
                 echo "#### Download Desktop Environment with default DM     ####"
+                echo "##########################################################"
+                echo ""
+                local i=1
+                local current_de_cho=()
+                for item in "${DE_cho[@]}"; do
+                    # Skip category headers
+                    if [[ "$item" == "######"* ]]; then
+                        echo "$item" # Print category headers
+                    else
+                        echo "$i. $item"
+                        current_de_cho+=("$item") # Store actual packages for selection
+                        ((i++))
+                    fi
+                done
+                echo "x. Exit"
+                echo -e "$log_end\n"
+                read -p "Select/type your preferred option : " cho
+
+                if [[ "$cho" =~ ^[xX]$ ]]; then
+                    echo "Exiting...";
+                    break
+                elif [[ "$cho" =~ ^[0-9]+$ ]] && (( cho >= 1 && cho <= ${#current_de_cho[@]} )); then
+                    local index=$((cho - 1))
+                    local pkg="${current_de_cho[$index]}"
+                    prompt_install_type_simple "$pkg"
+                else
+                    echo "Invalid choice. Please enter a number between 1 and ${#current_de_cho[@]}, or 'x' to exit."
+                fi
+            done
+        fi
+}
+adv_DE_menu(){  # for opt 01 as an advanced opt to manage desktop environment only
+    local cho
+    local pkgs=();
+        if [[ $mode == tui ]];then
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
+                    --title "Manage Desktop Environment (Advanced)" \
+                    --checklist "Select/toggle preffered option : " 30 90 25 \
+                    "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
+
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                echo "Cancelled by user. Returning..."
+                return 1 # Changed from return 2 to return 1
+            fi        
+            
+            # Filtering cho into pkgs
+            read -ra cho <<< "$cho"
+            local j
+            for ((j=0;j<${#cho[@]};j++));do 
+                [[ ${cho[$j]} == *#* ]] && continue
+                pkgs+=("${cho[$j]}")
+            done
+            prompt_install_type "${pkgs[@]}"
+        elif [[ $mode == cli ]];then
+            while true;do
+                echo "##########################################################"
+                echo "######    Manage Desktop Environment (Advanced)     ######"
                 echo "##########################################################"
                 echo ""
                 local i=1
@@ -1133,6 +1294,64 @@ tasksel_custom_menu(){
             done
         fi
 }
+adv_DM_menu(){  # for opt 02 as an advanced opt to manage Display Manager only
+    local cho
+    pkgs=();
+        if [[ $mode == tui ]];then
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
+                    --title "Manage Display Manager (Advanced)" \
+                    --checklist "Select/toggle preffered option : " 30 90 25 \
+                    "${DM_cho_dialog[@]}" 2>&1 >/dev/tty)
+
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                echo "Cancelled by user. Returning..."
+                return 1 # Changed from return 2 to return 1
+            fi        
+            
+            # Filtering cho into pkgs
+            read -ra cho <<< "$cho"
+            local j
+            for ((j=0;j<${#cho[@]};j++));do 
+                [[ ${cho[$j]} == *#* ]] && continue
+                pkgs+=("${cho[$j]}")
+            done
+            prompt_install_type "${pkgs[@]}"
+        elif [[ $mode == cli ]];then
+            while true;do
+                echo "##########################################################"
+                echo "######      Manage Display Manager (Advanced)       ######"
+                echo "##########################################################"
+                echo ""
+                local i=1
+                local current_dm_cho=()
+                for item in "${DM_cho[@]}"; do
+                    # Skip category headers
+                    if [[ "$item" == "######"* ]]; then
+                        echo "$item" # Print category headers
+                    else
+                        echo "$i. $item"
+                        current_dm_cho+=("$item") # Store actual packages for selection
+                        ((i++))
+                    fi
+                done
+                echo "x. Exit"
+                echo -e "$log_end\n"
+                read -p "Select/type your preferred option : " cho
+
+                if [[ "$cho" =~ ^[xX]$ ]]; then
+                    echo "Exiting...";
+                    break
+                elif [[ "$cho" =~ ^[0-9]+$ ]] && (( cho >= 1 && cho <= ${#current_dm_cho[@]} )); then
+                    local index=$((cho - 1))
+                    local pkg="${current_dm_cho[$index]}"
+                    prompt_install_type "$pkg"
+                else
+                    echo "Invalid choice. Please enter a number between 1 and ${#current_dm_cho[@]}, or 'x' to exit."
+                fi
+            done
+        fi
+}
 
 DE_DM_menu(){
     local cho
@@ -1142,10 +1361,11 @@ DE_DM_menu(){
                 --title "Download Desktop Environment and Display Manager" \
                 --menu "Select the Preferred Option :" 30 90 25 \
                 1 "Desktop with it's recommended Display Manager (Default - no hassle)" \
-                2 "Desktop Environment Only (advanced)" \
-                3 "Display Manager Only (advanced)" \
-                4 "sddm + hyprland (custom - already set)" \
-                5 "Tasksel (Debian based distros only !)" \
+                2 "[coming soon][tempplate] sddm + hyprland (custom - already set)" \
+                deb "Tasksel (DE downloader - Debian based distros only !)" \
+                "##disclaimer##" "Don't choose options from below if you don't know what you are doing" \
+                01 "Desktop Environment Only (advanced)" \
+                02 "Display Manager Only (advanced)" \
                 x "Exit" 2>&1 >/dev/tty )
             
             local exit_status=$?
@@ -1160,28 +1380,36 @@ DE_DM_menu(){
                 echo "##########################################################"
                 echo ""
                 echo "1. Desktop with it's recommended Display Manager (Default - no hassle)"
-                echo "2. Desktop Environment Only (advanced)"
-                echo "3. Display Manager Only (advanced)"
-                echo "4. sddm + hyprland (custom - already set)"
-                echo "5. Tasksel (Debian based distros only !)"
+                echo "2. [coming soon][tempplate] sddm + hyprland (custom - already set)"
+                echo "deb. Tasksel (DE downloader - Debian based distros only !)"
+                echo "**disclaimer** Don't choose options from below if you don't know what you are doing" 
+                echo "01. Desktop Environment Only (advanced)"
+                echo "02. Display Manager Only (advanced)"
                 echo "x. Exit"
                 echo -e "$log_end\n"
                 read -p "Select/type your preferred option : " cho
         fi
-
+        
         case $cho in
         1) tasksel_custom_menu ;;
-        2) tasksel_custom_menu ;; # For now, same as option 1, can be refined later for DE only
-        3) echo "Display Manager Only (advanced) - Not yet implemented.";;
-        4) echo "sddm + hyprland (custom) - Not yet implemented.";;
-        5) 
+        2) echo "sddm + hyprland (custom) - Not yet implemented.";;
+        deb) 
             if command_exists tasksel; then
                 sudo tasksel
             else
                 install_pkg_dynamic tasksel
+                
+                if command_exists tasksel; then
+                    sudo tasksel
+                else
+                    echo "tasksel installation failed. Please install it manually and try again."
+                fi
             fi
             ;;
+        01) adv_DE_menu ;;
+        02) adv_DM_menu ;;
         x|X) clean; break ;;
+        *) echo "invalid choice" ;;
         esac
     done
 
@@ -2105,7 +2333,115 @@ delete_corechunk_dotfiles() {
     fi
 }
 
-menu_corechunk_dotfiles() {
+update_codechunk_dotfiles(){
+    local dotfiles_dir="corechunk.dotfiles.d"
+    local dotfiles_path="$HOME/$dotfiles_dir" # Define the full path
+    local dotfiles_installer_path="$dotfiles_path/installer.sh"
+
+    if [ -d "$dotfiles_path" ];then
+        #[[ -f "$dotfiles_path/installer.sh" ]] && echo found
+        #read -n 1 -s -r
+        if [ -f "$dotfiles_path/installer.sh" ];then
+            echo "$(curl -fsSL https://raw.githubusercontent.com/corechunk/dotfiles/main/installer.sh)" > "$dotfiles_installer_path"
+            
+            if [[ "$?" != "0" ]];then
+                local msg="file failed to update"
+            else
+                local msg="file updated successf to update"
+            fi
+            
+            case $mode in
+            tui)
+                dialog --clear \
+                    --title "update/delete corechunk dotfiles & wallpapers" \
+                    --msgbox "$msg" \
+                    10 45
+                ;;            
+            cli)
+            read -n 1 -s -r -p "$msg"
+                ;;
+            esac
+        else
+            case $mode in
+            tui)
+                dialog --clear \
+                    --title "update/delete corechunk dotfiles & wallpapers" \
+                    --msgbox "the script doesn't exist, we will create one" \
+                    10 45
+            ;;
+            cli)
+                read -n 1 -s -r -p "the script doesn't exist, we will create one"
+            ;;
+            esac
+            touch "$dotfiles_installer_path"
+        fi
+    else
+        case $mode in
+        tui)
+            whiptail --clear --scrolltext \
+                --title "update/delete corechunk dotfiles & wallpapers" \
+                --msgbox "You haven't downloaded corechunk dotfiles yet" \
+                10 45
+        ;;
+        cli)
+            read -n 1 -s -r -p "You haven't downloaded corechunk dotfiles yet"
+        ;;
+        esac
+    fi
+
+}
+
+mng_corechunk_dotfiles(){ # manages delete/update func calls
+    clean
+    local menu_cho
+    
+    while true;do
+        case "$mode" in
+        "tui")
+            menu_cho=$(dialog \
+                --backtitle "[ https://github.com/corechunk/linutils ]" \
+                --title "corechunk dotfiles & wallpapers collection" \
+                --menu "choose preferred option" 25 90 17 \
+                1 "update the dotfiles script only excluding the dotfiles/wallpapers" \
+                2 "delete the dotfiles including wallpapers" \
+                x "exit" \
+                2>&1 >/dev/tty)
+                [[ "$?" != "0" ]] && break
+            ;;
+        "cli")
+            echo "##### corechunk dotfiles manager #####"
+            echo "$log_start"
+            echo "$BLUE 1.$RESET update the dotfiles script only excluding the dotfiles/wallpapers"
+            echo "$BLUE 2.$RESET delete the dotfiles including wallpapers"
+            echo "$RED x. EXIT $RESET"
+            echo "$log_end"
+            read -p "choose preferred option : " menu_cho
+
+            ;;
+        esac
+
+        clean
+
+        case $menu_cho in 
+        1)
+            update_codechunk_dotfiles
+            clean
+        ;;
+        2)
+            delete_corechunk_dotfiles
+            clean
+        ;;
+        x|X)
+            break
+        ;;
+        *)
+            echo "Invalid Choice : please write the segment before '.' as a option to choose !"
+        ;;
+        esac
+    done
+}
+
+menu_corechunk_dotfiles(){
     clear
     local dotfiles_dir="corechunk.dotfiles.d"
     local dotfiles_path="$HOME/$dotfiles_dir" # Define the full path
@@ -2227,8 +2563,8 @@ main_menu (){
             1  "essential softwares" \
             2  "Enable firewall" \
             3  "Enable efficient battery optimization (via auto-cpufreq)" \
-            4  "Manage dotfiles and wallpapers (corechunk)" \
-            5  "Delete downloaded dotfiles" \
+            4  "dotfiles and wallpapers (corechunk)" \
+            5  "Update/Delete downloaded dotfiles" \
             x  "EXIT" \
             2>&1 >/dev/tty)
             
@@ -2247,8 +2583,8 @@ main_menu (){
             echo "$BLUE 1.$RESET essential softwares"
             echo "$BLUE 2.$RESET Enable firewall"
             echo "$BLUE 3.$RESET Enable efficient battery optimization (via auto-cpufreq) $acf_stat"
-            echo "$MAGENTA 4. Manage dotfiles and wallpapers (corechunk)$RESET"
-            echo "$RED 5. Delete downloaded dotfiles$RESET"
+            echo "$MAGENTA 4. dotfiles and wallpapers (corechunk)$RESET"
+            echo "$RED 5. Update/Delete downloaded dotfiles$RESET"
             echo "$divider"
             echo "$RED x. EXIT $RESET"
             echo ""
@@ -2278,7 +2614,7 @@ main_menu (){
                 menu_corechunk_dotfiles
                 ;;
             5)
-                delete_corechunk_dotfiles
+                mng_corechunk_dotfiles
                 ;;
             x|X) clear;break;;
             *) clear;echo "invalid choice" ;;

@@ -170,6 +170,22 @@ fi
         elif [[ $(package_manager) == "dnf" ]];then
             sudo dnf remove "$1" -y # dnf doesn't have a direct purge equivalent
         fi
+    elif [[ $2 == install-norec ]];then #9 Install without recommends, with prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1" --no-install-recommends
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1" --needed # pacman doesn't install recommends by default
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf install "$1" --setopt=install_weak_deps=False
+        fi
+    elif [[ $2 == install-force-norec ]];then #10 Install without recommends, without prompt
+        if   [[ $(package_manager) == "apt" ]];then
+            sudo apt install "$1" -y --no-install-recommends
+        elif [[ $(package_manager) == "pacman" ]];then
+            sudo pacman -S "$1" --needed --noconfirm # pacman doesn't install recommends by default
+        elif [[ $(package_manager) == "dnf" ]];then
+            sudo dnf install "$1" -y --setopt=install_weak_deps=False
+        fi
     else
         echo "invalid option for installation, ..."
         return 1;
@@ -243,6 +259,8 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
             echo "6. uninstall without prompt [force]"
             echo "7. purge with prompt"
             echo "8. purge without prompt [force]"
+            echo "9 install with prompt (no rec)"
+            echo "10 install without prompt [force] (no rec)"
             echo "x. EXIT"
             echo ""
             read -p "Choose preferred option : " cho
@@ -256,6 +274,8 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
             6 "uninstall without prompt [force]"\
             7 "purge with prompt"\
             8 "purge without prompt [force]"\
+            9 "install with prompt (no rec)"\
+            10 "install without prompt [force] (no rec)"\
             x "EXIT"\
             2>&1 >/dev/tty)
             
@@ -279,6 +299,51 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
         6) install_pkgs_dynamic remove-force "${pkgs[@]}";return 0 ;;
         7) install_pkgs_dynamic purge "${pkgs[@]}";return 0 ;;
         8) install_pkgs_dynamic purge-force "${pkgs[@]}";return 0 ;;
+        9) install_pkgs_dynamic install-norec "${pkgs[@]}";return 0 ;;
+        10) install_pkgs_dynamic install-force-norec "${pkgs[@]}";return 0 ;;
+        x|X) clear;tput reset;return 1 ;;
+        *) tput reset;clear;echo -e "invalid option ! \n" ;;
+        esac
+    done
+}
+prompt_install_type_simple(){       # used install_pkgs_dynamic()  <------------
+    local pkgs=("$@")           # can be used to prompt user about installation mathods with a large set of pkgs
+    local cho
+    while true;do
+        if [[ $mode == cli ]];then   # this is not used yet
+            echo ""
+            echo "1. install with prompt"
+            echo "2. re-install with prompt"
+            echo "3. uninstall with prompt"
+            echo "4. purge with prompt"
+            echo "x. EXIT"
+            echo ""
+            read -p "Choose preferred option : " cho
+        elif [[ $mode == tui ]];then
+            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " 30 90 25\
+            1 "install with prompt"\
+            2 "re-install with prompt"\
+            3 "uninstall with prompt"\
+            4 "purge with prompt"\
+            x "EXIT"\
+            2>&1 >/dev/tty)
+            
+            local exit_status=$?
+            if [ $exit_status -ne 0 ]; then
+                # Handle ESC or Cancel
+                clear
+                break
+                return 1 # Return 1 to indicate cancellation
+            fi
+        fi
+        clean
+    
+
+        case $cho in
+        1) install_pkgs_dynamic default "${pkgs[@]}";return 0 ;;
+        2) install_pkgs_dynamic re-install "${pkgs[@]}";return 0 ;;
+        3) install_pkgs_dynamic remove "${pkgs[@]}";return 0 ;;
+        4) install_pkgs_dynamic purge "${pkgs[@]}";return 0 ;;
         x|X) clear;tput reset;return 1 ;;
         *) tput reset;clear;echo -e "invalid option ! \n" ;;
         esac
