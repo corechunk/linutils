@@ -1,6 +1,11 @@
 # some functions/variable called here maybe on other file
 # and they are need to be sourced in order to run properly
 
+#  mostly same in all distros, but some differ
+    thunar_pkg="thunar"
+    whiptail_pkg="whiptail"
+    
+
 # Detect package manager
 if [[ $(package_manager) == "apt" ]]; then
 	# Debian/Ubuntu/Sid  [ or debian based ]
@@ -12,7 +17,6 @@ if [[ $(package_manager) == "apt" ]]; then
     firacode_pkg="fonts-firacode"
     python_pkg="python3"
     pip_pkg="python3-pip"
-    thunar_pkg="thunar"
     network_manager_pkg="network-manager"
     edge_pkg="microsoft-edge-stable"
     
@@ -42,11 +46,11 @@ elif [[ $(package_manager) == "pacman" ]]; then
     firacode_pkg="ttf-fira-code"
     python_pkg="python"
     pip_pkg="python-pip"
-    thunar_pkg="thunar"
     network_manager_pkg="networkmanager"
     spectacle_pkg="spectacle"
     edge_pkg="microsoft-edge-stable-bin"
     hyprcursor_pkg="hyprcursor"
+    whiptail_pkg="newt"
 elif [[ $(package_manager) == "dnf" ]]; then
     # Fedora [ or fedora based ]
     build_essential_pkg="@development-tools"
