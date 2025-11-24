@@ -1,5 +1,5 @@
 # pkgs array starting with essentials are collective catagories
-# pkgs array starting with essen are simpler single catagories
+# pkgs array starting with ess are simpler single catagories
 
 
 # These are one of those collective catagories
@@ -10,6 +10,7 @@
 #corechunk_hyprland_dialog=()
 #essentials_extra_dialog=()
 
+
 # These are shrinked for non-tui usage
 #essentials_dev=()
 #essentials_terminal=()
@@ -19,6 +20,13 @@
 #essentials_extra=()
 
 
+ess_tui_pkgs=()  # all essentials_*_dialog merged for tui usage
+ess_tui_pkgs_dialog=(
+    "###_TUI_Tools_###"   "_____ Category Description [below] _____" off
+    dialog                "Dialog (classic CLI dialog tool)" off
+    "$whiptail_pkg"       "Whiptail (lightweight dialog alternative)" off
+    gum                   "Gum (modern CLI UI toolkit)" off
+)
 
 
 
@@ -27,6 +35,9 @@ essentials_dev_dialog=(
 
     "###_Development_Tools_###"     "_____ Category Description [below] _____" off
 	git                                   "Version control system" on
+    gh                                    "GitHub CLI tool" off
+    docker                               "Containerization platform" off
+    docker-compose                      "Container orchestration tool" off
 	"$build_essential_pkg"                "Essential build tools (gcc, g++, make)" on
 	gdb                                   "Debugging tools for C/C++" on
 	"$manpages_pkg"                       "Developer manual pages" on
@@ -35,28 +46,73 @@ essentials_dev_dialog=(
 	make                                  "GNU build utility" on
 	"$ninja_pkg"                           "Fast alternative build system" on
 	cmake                                 "Cross-platform C++ build tool" on
+    cargo                                 "Rust package manager and build tool" off
+    npm                                   "Node.js package manager" off
+    yarn                                  "Alternative Node.js package manager" off
+    gradle                                "Build automation tool (Java, Android, etc.)" off
+    maven                                 "Java project management and comprehension tool" off
+    ant                                   "Java build tool" off
+    autotools                             "GNU build system (autoconf, automake, libtool)" off
 
-    "###_Programming_Languages_###" "_____ Category Description [below] _____" off
+    "###_Compiler_or_Interpreter_###" "_____ Category Description [below] _____" off
+    gcc                                   "C, C++, Objective-C, Objective-C++, Fortran, Ada, D (GDC), Go (GCCGO) [compiler]" on
+    clang                                 "C, C++, and Objective-C compiler" off
+    javac                                 "Java programming language compiler" off
 	"$openjdk_pkg"                        "Java Development Kit (includes JRE)" on
+    dotnet-sdk                            "Microsoft .NET SDK" off
+    kotlin                                "Kotlin programming language compiler" off
 	"$python_pkg"                         "Python programming language" off
 	"$pip_pkg"                            "Python package manager" off
+    golang                                "Go programming language compiler" off
+    "$rust_pkg"                           "Rust programming language compiler" off
+    rust-src                              "Rust standard library source code" off
+    nodejs                                "JavaScript runtime environment" off
+    yarn                                  "Alternative Node.js package manager" off
+    php                                   "PHP programming language" off
+    ruby                                  "Ruby programming language" off
+    perl                                  "Perl programming language" off
+    swift                                 "Swift programming language" off
+    lua                                   "Lua programming language" off
+    r-base                                "R programming language environment" off
+    julia                                 "Julia programming language" off
+    erlang                                "Erlang programming language" off
+    elixir                                "Elixir programming language" off
+    haskell                              "Haskell programming language compiler" off
+    scala                                 "Scala programming language" off
 )
 
 
 essentials_terminal_dialog=(     # meant to contain pkgs that will not pull desktop environment with it, so safe to be installed by rookies in a server setup
 	"######_essentials_terminal_pkgs_######" "__________ Collective Category __________" off
 
-	gawk               "Needed for ble.sh (core dependency)" on
 	
+    "###_Terminals_Tools_###" "_____ Category Description [below] _____" off
 	nano               "Beginner-friendly terminal text editor" on
 	neovim             "Modern Vim-based text editor" on
 	tmux               "Terminal multiplexer (split panes, sessions)" on
+
 	
+    "###_Media_Players_&_Tools_CLI_###" "_____ Category Description [below] _____" off
 	mpv                "CLI/GUI media player (audio/video)" off
-	
+    ffmpeg             "CLI audio/video converter and recorder" on
+
+    
+    "###_System_Monitoring_###" "_____ Category Description [below] _____" off
 	btop               "System monitor (like Task Manager)" on
+    htop              "Interactive process viewer" off
 	fastfetch          "System information fetcher (like neofetch)" on
+    neofetch          "System information fetcher" off
+
+    "###_Shell_Enhancements_###" "_____ Category Description [below] _____" off
+	gawk             "Needed for ble.sh (core dependency)" on
+    ble.sh           "Bash line editor with autosuggestions and syntax highlighting" off
+    zsh              "Z shell (alternative to bash)" off
+    #maybe AUR #oh-my-zsh        "Framework for managing zsh configuration" off
+    #starship         "Cross-shell prompt with git and lang support" off
 	
+    "###_File_Management_###" "_____ Category Description [below] _____" off
+    ranger             "A console file manager" on
+    yazi              "A terminal file manager with git integration" off
 	zip                "File compression utility" on
 	unzip              "File decompression utility" on
 	
@@ -68,11 +124,6 @@ essentials_terminal_dialog=(     # meant to contain pkgs that will not pull desk
 	fzf                "Fuzzy finder for fast search" on
 	ripgrep            "Fast grep alternative for searching text" on
 
-    "###_TUI_Tools_###" "_____ Category Description [below] _____" off
-    dialog             "Dialog (classic CLI dialog tool)" off
-    "$whiptail_pkg"    "Whiptail (lightweight dialog alternative)" off
-    gum                "Gum (modern CLI UI toolkit)" off
-	
 	"###_Network_Tools_CLI_###" "_____ Category Description [below] _____" off
 	wget          "Command-line downloader (HTTP, HTTPS, FTP)" on
 	# net-tools  # ill add when i understand each
@@ -80,6 +131,14 @@ essentials_terminal_dialog=(     # meant to contain pkgs that will not pull desk
 	# iwd
 	ufw           "Simple firewall manager (iptables frontend)" on
 	fail2ban      "Intrusion prevention tool for SSH and services" off
+    yt-dlp        "CLI tool to download videos from YouTube and other sites" off
+	
+    "###_Virtual_Emulators_###" "_____ Category Description [below] _____" off
+    qemu-system  "Generic and open source machine emulator and virtualizer" off
+    virtualbox   "Powerful x86 and AMD64/Intel64 virtualization product" off
+
+    # tui
+    "${ess_tui_pkgs_dialog[@]}"
 )
 
 
@@ -113,6 +172,7 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
     "###_Web_Browsers_###" "_____ Category Description [below] _____" off
     firefox             "A web browser" on
     chromium            "A web browser" off
+
     
 
     "###_content_creation_###" "_____ Category Description [below] _____" off
@@ -151,6 +211,7 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
 	blueman             "Bluetooth device manager GUI (blueman-manager)" on
 	"$network_manager_pkg" "Network connection manager (wired/wireless)" on
     network-manager-applet "Network connection manager GUI applet" on
+    youtubedl-gui "[deb] GUI for youtube-dl/yt-dlp" on
 
     "###_Accessibility_Fonts_###" "_____ Category Description [below] _____" off
 	speech-dispatcher  "Needed by softwares that relay on text-to-speech" off #  for TTS (i.e. text-to-speech for firefox and many)
@@ -162,8 +223,15 @@ essentials_hyprland_dialog=(
 
 	"##########_Hyprland_Utils_##########" "__________ Category Description [below] __________" off
 	waybar                      "Customizable status/task bar for Wayland" on
-	rofi                        "Launcher and window switcher (X11/Wayland)" on
+    quickbar                    "Lightweight Wayland status bar" off
+	
+    rofi                        "Launcher and window switcher (X11/Wayland)" on
+    wofi                        "A Wayland native launcher" off
+
 	hyprpaper                   "Wallpaper daemon for Hyprland" on
+    mpvpaper                    "MPV-based wallpaper setter for Hyprland" off
+    swww                        "Simple Wayland wallpaper setter" off
+
 	
     "#_________#" "sub catagory" off
 	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
@@ -195,6 +263,7 @@ corechunk_hyprland_dialog=(
 	"#_________# Must for corechunk/hyprland" "sub catagory (used directly in the dots)" off
     kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
 	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
+	ranger                      "A console file manager" on
 	firefox                     "A web browser" on
 
 	"#_____# Launchers & Bars" "subsub catagory" off
@@ -210,7 +279,6 @@ corechunk_hyprland_dialog=(
 	swappy                      "Post SS tool (in short)" on
 
     "#_________# Recommended cli" "sub catagory" off
-	ranger                      "A console file manager" on
 	neovim                      "Modern Vim-based text editor" on
 	gawk                        "Needed for ble.sh (core dependency)" on
 	tmux                        "Terminal multiplexer (split panes, sessions)" on
@@ -220,9 +288,9 @@ corechunk_hyprland_dialog=(
 	unzip                       "File decompression utility" on
 
     "#_________# Recommended GUI" "sub catagory" off
-	mousepad            "Simple GUI text editor (Notepad-like)" on
-	mpv                 "Media player for audio/video (CLI+GUI)" on
-	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
+	mousepad                    "Simple GUI text editor (Notepad-like)" on
+	mpv                        "Media player for audio/video (CLI+GUI)" on
+	zathura                    "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
 	"$edge_pkg"                 "A web browser" off
 )
 
@@ -230,6 +298,10 @@ essentials_extra_dialog=(
 	oh-my-posh   "Shell prompt theming engine (cross-shell)" on
 	auto-cpufreq "CPU frequency optimizer and power saver" on
 )
+
+
+
+
 
 
 # non tui usage arrays

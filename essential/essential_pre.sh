@@ -13,6 +13,7 @@ if [[ $(package_manager) == "apt" ]]; then
     manpages_pkg="manpages-dev"
     openjdk_pkg="openjdk-21-jdk" # openjdk-25-jdk is not available yet
     ninja_pkg="ninja-build"
+    rust_pkg="rustc"
     pipewire_libs_pkg="pipewire-audio-client-libraries"
     firacode_pkg="fonts-firacode"
     python_pkg="python3"
@@ -42,6 +43,7 @@ elif [[ $(package_manager) == "pacman" ]]; then
 	manpages_pkg="man-pages"
 	openjdk_pkg="jdk-openjdk"
     ninja_pkg="ninja"
+    rust_pkg="rust"
     pipewire_libs_pkg="pipewire-alsa pipewire-jack"
     firacode_pkg="ttf-fira-code"
     python_pkg="python"
@@ -57,6 +59,7 @@ elif [[ $(package_manager) == "dnf" ]]; then
     manpages_pkg="man-pages"
     openjdk_pkg="java-21-openjdk-devel"
     ninja_pkg="ninja-build"
+    rust_pkg="rust"
     pipewire_libs_pkg="pipewire-libs"
     firacode_pkg="fira-code-fonts"
     python_pkg="python3"

@@ -20,10 +20,9 @@ menu_essential(){
             echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
             echo "$BLUE 4.$SKY_BLUE Hyprland$RESET Echosystem packages"
             echo "$BLUE 5.$MAGENTA corechunk's hyprland$RESET packages"
+            echo "$RED 5_force.$MAGENTA [force] corechunk's hyprland$RESET packages"
             echo "$BLUE 6.$RESET GitHub Essential Packages"
             echo "$BLUE 9.$RESET INFO PAGE [navigation with up/down arrow]"
-            echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
-            echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
             echo "$RED x.$RED EXIT$RESET"
             echo "$divider"
             read -p "Select Your Preferred Option : " cho_2
@@ -39,10 +38,9 @@ menu_essential(){
             3 "Core GUI packages" \
             4 "Hyprland Echosystem packages" \
             5 "corechunk's hyprland packages" \
+            5_force "[force] corechunk's hyprland packages" \
             6 "GitHub Essential Packages" \
             9 "INFO PAGE [navigation with up/down arrow]" \
-            all "install all packages$RESET shown here" \
-            all_f "install [1-5] [force]" \
             x "EXIT" \
             2>&1 >/dev/tty)
 
@@ -66,6 +64,8 @@ menu_essential(){
             3)  prompt_install_type "${essentials_desktop[@]}" ;;
             4)  prompt_install_type "${essentials_hyprland[@]}" ;;
             5)  prompt_install_type "${corechunk_hyprland[@]}" ;;
+            5_force)
+                for pkg in "${corechunk_hyprland[@]}"; do install_pkg_dynamic "$pkg" install-force; done ;;
             6)  clear; menu_github_pkgs ;;
                                                                         #00)install_pkg_dynamic dialog ;;
                                                                         #01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
@@ -97,6 +97,8 @@ menu_essential(){
             3)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_desktop" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_desktop_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             4)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_hyprland" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             5)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "corechunk's_hyprland_pkgs" --checklist "Select/toggle preffered options : " 30 90 25 "${corechunk_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            5_force)
+                for pkg in "${corechunk_hyprland[@]}"; do install_pkg_dynamic "$pkg" install-force; done ;;
             6) clear; menu_github_pkgs ;;
             9) menu_info ;;
             x) tput reset;clear;break ;;
