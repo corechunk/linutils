@@ -1593,6 +1593,11 @@ menu_github_pkgs() {
 # some functions/variable called here maybe on other file
 # and they are need to be sourced in order to run properly
 
+#  mostly same in all distros, but some differ
+    thunar_pkg="thunar"
+    whiptail_pkg="whiptail"
+    
+
 # Detect package manager
 if [[ $(package_manager) == "apt" ]]; then
 	# Debian/Ubuntu/Sid  [ or debian based ]
@@ -1600,11 +1605,11 @@ if [[ $(package_manager) == "apt" ]]; then
     manpages_pkg="manpages-dev"
     openjdk_pkg="openjdk-21-jdk" # openjdk-25-jdk is not available yet
     ninja_pkg="ninja-build"
+    rust_pkg="rustc"
     pipewire_libs_pkg="pipewire-audio-client-libraries"
     firacode_pkg="fonts-firacode"
     python_pkg="python3"
     pip_pkg="python3-pip"
-    thunar_pkg="thunar"
     network_manager_pkg="network-manager"
     edge_pkg="microsoft-edge-stable"
     
@@ -1630,21 +1635,23 @@ elif [[ $(package_manager) == "pacman" ]]; then
 	manpages_pkg="man-pages"
 	openjdk_pkg="jdk-openjdk"
     ninja_pkg="ninja"
+    rust_pkg="rust"
     pipewire_libs_pkg="pipewire-alsa pipewire-jack"
     firacode_pkg="ttf-fira-code"
     python_pkg="python"
     pip_pkg="python-pip"
-    thunar_pkg="thunar"
     network_manager_pkg="networkmanager"
     spectacle_pkg="spectacle"
     edge_pkg="microsoft-edge-stable-bin"
     hyprcursor_pkg="hyprcursor"
+    whiptail_pkg="newt"
 elif [[ $(package_manager) == "dnf" ]]; then
     # Fedora [ or fedora based ]
     build_essential_pkg="@development-tools"
     manpages_pkg="man-pages"
     openjdk_pkg="java-21-openjdk-devel"
     ninja_pkg="ninja-build"
+    rust_pkg="rust"
     pipewire_libs_pkg="pipewire-libs"
     firacode_pkg="fira-code-fonts"
     python_pkg="python3"
@@ -1661,110 +1668,240 @@ fi
 
 ## shrink function was here
 
-# list of all catagories
-
-# essentials_dev
-# essentials_terminal
-# essentials_desktop
-# essentials_hyprland
-# firmware_generic
-# firmware_intel
-# firmware_amd
-# firmware_nvidia
+# pkgs array starting with essentials are collective catagories
+# pkgs array starting with ess are simpler single catagories
 
 
-# Now define the array using the variables
-essentials_dev=()
+# These are one of those collective catagories
+#essentials_dev_dialog=()
+#essentials_terminal_dialog=()
+#essentials_desktop_dialog=()
+#essentials_hyprland_dialog=()
+#corechunk_hyprland_dialog=()
+#essentials_extra_dialog=()
+
+
+# These are shrinked for non-tui usage
+#essentials_dev=()
+#essentials_terminal=()
+#essentials_desktop=()
+#essentials_hyprland=()
+#corechunk_hyprland=()
+#essentials_extra=()
+
+
+ess_tui_pkgs=()  # all essentials_*_dialog merged for tui usage
+ess_tui_pkgs_dialog=(
+    "###_TUI_Tools_###"   "_____ Category Description [below] _____" off
+    dialog                "Dialog (classic CLI dialog tool)" off
+    "$whiptail_pkg"       "Whiptail (lightweight dialog alternative)" off
+    gum                   "Gum (modern CLI UI toolkit)" off
+)
+
+
+
 essentials_dev_dialog=(
-	"##########_CLI_Dev_Tools_##########" "__________ Catagory Description [below] __________" off
+	"######_essentials_dev_pkgs_######" "__________ Collective Category __________" off
+
+    "###_Development_Tools_###"     "_____ Category Description [below] _____" off
 	git                                   "Version control system" on
+    gh                                    "GitHub CLI tool" off
+    docker                               "Containerization platform" off
+    docker-compose                      "Container orchestration tool" off
 	"$build_essential_pkg"                "Essential build tools (gcc, g++, make)" on
 	gdb                                   "Debugging tools for C/C++" on
 	"$manpages_pkg"                       "Developer manual pages" on
+
+    "###_Build_Systems_###"         "_____ Category Description [below] _____" off
 	make                                  "GNU build utility" on
 	"$ninja_pkg"                           "Fast alternative build system" on
 	cmake                                 "Cross-platform C++ build tool" on
+    cargo                                 "Rust package manager and build tool" off
+    npm                                   "Node.js package manager" off
+    yarn                                  "Alternative Node.js package manager" off
+    gradle                                "Build automation tool (Java, Android, etc.)" off
+    maven                                 "Java project management and comprehension tool" off
+    ant                                   "Java build tool" off
+    autotools                             "GNU build system (autoconf, automake, libtool)" off
+
+    "###_Compiler_or_Interpreter_###" "_____ Category Description [below] _____" off
+    gcc                                   "C, C++, Objective-C, Objective-C++, Fortran, Ada, D (GDC), Go (GCCGO) [compiler]" on
+    clang                                 "C, C++, and Objective-C compiler" off
+    javac                                 "Java programming language compiler" off
 	"$openjdk_pkg"                        "Java Development Kit (includes JRE)" on
+    dotnet-sdk                            "Microsoft .NET SDK" off
+    kotlin                                "Kotlin programming language compiler" off
 	"$python_pkg"                         "Python programming language" off
 	"$pip_pkg"                            "Python package manager" off
+    golang                                "Go programming language compiler" off
+    "$rust_pkg"                           "Rust programming language compiler" off
+    rust-src                              "Rust standard library source code" off
+    nodejs                                "JavaScript runtime environment" off
+    yarn                                  "Alternative Node.js package manager" off
+    php                                   "PHP programming language" off
+    ruby                                  "Ruby programming language" off
+    perl                                  "Perl programming language" off
+    swift                                 "Swift programming language" off
+    lua                                   "Lua programming language" off
+    r-base                                "R programming language environment" off
+    julia                                 "Julia programming language" off
+    erlang                                "Erlang programming language" off
+    elixir                                "Elixir programming language" off
+    haskell                              "Haskell programming language compiler" off
+    scala                                 "Scala programming language" off
 )
-shrink essentials_dev_dialog essentials_dev
 
 
-essentials_terminal=()
 essentials_terminal_dialog=(     # meant to contain pkgs that will not pull desktop environment with it, so safe to be installed by rookies in a server setup
-	"##########_essentials_terminal_Tools_##########" "__________ Category Description [below] __________" off
-	gawk               "Needed for ble.sh (core dependency)" on
+	"######_essentials_terminal_pkgs_######" "__________ Collective Category __________" off
+
 	
+    "###_Terminals_Tools_###" "_____ Category Description [below] _____" off
 	nano               "Beginner-friendly terminal text editor" on
 	neovim             "Modern Vim-based text editor" on
 	tmux               "Terminal multiplexer (split panes, sessions)" on
+
 	
+    "###_Media_Players_&_Tools_CLI_###" "_____ Category Description [below] _____" off
 	mpv                "CLI/GUI media player (audio/video)" off
-	
+    ffmpeg             "CLI audio/video converter and recorder" on
+
+    
+    "###_System_Monitoring_###" "_____ Category Description [below] _____" off
 	btop               "System monitor (like Task Manager)" on
+    htop              "Interactive process viewer" off
 	fastfetch          "System information fetcher (like neofetch)" on
+    neofetch          "System information fetcher" off
+
+    "###_Shell_Enhancements_###" "_____ Category Description [below] _____" off
+	gawk             "Needed for ble.sh (core dependency)" on
+    ble.sh           "Bash line editor with autosuggestions and syntax highlighting" off
+    zsh              "Z shell (alternative to bash)" off
+    #maybe AUR #oh-my-zsh        "Framework for managing zsh configuration" off
+    #starship         "Cross-shell prompt with git and lang support" off
 	
+    "###_File_Management_###" "_____ Category Description [below] _____" off
+    ranger             "A console file manager" on
+    yazi              "A terminal file manager with git integration" off
 	zip                "File compression utility" on
 	unzip              "File decompression utility" on
 	
+
+    "###_Useful_CLI_Tools_###" "_____ Category Description [below] _____" off
 	bat                "Modern cat alternative with syntax highlighting" off
 	lsd                "Modern ls alternative with icons and colors" off
 	zoxide             "Smarter cd command that learns directory usage" off
 	fzf                "Fuzzy finder for fast search" on
 	ripgrep            "Fast grep alternative for searching text" on
-	
-	"##########_Network_Tools_CLI_##########" "__________ Category Description [below] __________" off
+
+	"###_Network_Tools_CLI_###" "_____ Category Description [below] _____" off
 	wget          "Command-line downloader (HTTP, HTTPS, FTP)" on
 	# net-tools  # ill add when i understand each
 	# nmap
 	# iwd
 	ufw           "Simple firewall manager (iptables frontend)" on
 	fail2ban      "Intrusion prevention tool for SSH and services" off
-)
-shrink essentials_terminal_dialog essentials_terminal
-
-
-essentials_desktop=()
-essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop environment with it, so safe to be installed by rookies when inside a Desktop environment
-	"##########_essentials_desktop_Tools_##########" "__________ Category Description [below] __________" off
-	kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
-	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
-	mousepad            "Simple GUI text editor (Notepad-like)" on
-	mpv                 "Media player for audio/video (CLI+GUI)" on
-	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
+    yt-dlp        "CLI tool to download videos from YouTube and other sites" off
 	
+    "###_Virtual_Emulators_###" "_____ Category Description [below] _____" off
+    qemu-system  "Generic and open source machine emulator and virtualizer" off
+    virtualbox   "Powerful x86 and AMD64/Intel64 virtualization product" off
+
+    # tui
+    "${ess_tui_pkgs_dialog[@]}"
+)
+
+
+essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop environment with it, so safe to be installed by rookies when inside a Desktop environment
+    "######_essentials_desktop_pkgs_######" "__________ Collective Category __________" off
+
+	"###_essentials_desktop_Tools_###" "_____ Category Description [below] _____" off
+	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
+	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
+
+    "###_Terminals_###" "_____ Category Description [below] _____" off
+	kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
+    xfce4-terminal    "XFCE terminal emulator" off
+    gnome-terminal     "GNOME terminal emulator" off
+    alacritty          "GPU-accelerated terminal emulator (cross-platform)" off
+    tilix              "Tiling terminal emulator (GTK)" off
+    zutty              "Lightweight terminal emulator (X11)" off
+
+    
+    "###_Text_Editors_###" "_____ Category Description [below] _____" off
+	mousepad            "Simple GUI text editor (Notepad-like)" on
+    gedit               "GNOME text editor (Notepad-like)" off
+    leafpad             "Lightweight GUI text editor (Notepad-like)" off
+    pluma               "MATE text editor (Notepad-like)" off
+    xed                 "Linux Mint text editor (Notepad-like)" off
+
+    "###_Media_Players_###" "_____ Category Description [below] _____" off
+	mpv                 "Media player for audio/video (CLI+GUI)" on
+    vlc                 "Versatile media player (GUI)" off
+
+    "###_Web_Browsers_###" "_____ Category Description [below] _____" off
+    firefox             "A web browser" on
+    chromium            "A web browser" off
+
+    
+
+    "###_content_creation_###" "_____ Category Description [below] _____" off
 	obs-studio          "Screen recorder and streamer (open-source)" on
 	shotcut             "Non-linear video editor (free)" on
+    gimp                "Image editor (open-source Photoshop alternative)" off
+    inkscape           "Vector graphics editor (open-source Illustrator alternative)" off
 
-	blueman             "Bluetooth device manager GUI (blueman-manager)" on
-	"$network_manager_pkg" "Network connection manager (wired/wireless)" on
-    network-manager-applet "Network connection manager GUI applet" on
-	
+    "###_Desktop_Integration_###" "_____ Category Description [below] _____" off
 	xdg-desktop-portal  "Desktop integration/screen share service (required by DEs)" on
 	xdg-utils           "CLI desktop tools (xdg-open, mime handling, etc.)" on
 
+    "###_Audio_Video_###" "_____ Category Description [below] _____" off
+    pulseaudio                      "Legacy audio server (PulseAudio)" off
+    jack-audio-connection-kit       "Low-latency audio server (JACK)" off
 	pipewire                        "Modern audio/video server (PulseAudio/Jack replacement)" on
 	"$pipewire_libs_pkg" "Audio client libraries for PipeWire" on
-	
 
+    pavucontrol                     "PulseAudio/PipeWire volume control GUI" on
+    vlc-plugin-pipewire             "PipeWire support for VLC media player" off
+
+	
+    "###_Screenshot_Clipboard_###" "_____ Category Description [below] _____" off
+    "#_sub_#"           "___ [X11 mainly] ___" off
 	maim                "CLI screenshot utility (full/region)(X11 only)" off
 	xclip               "CLI clipboard manager (X11 only)" off
-
+    "#_sub_#"           "___ [Wayland mainly] ___" off
+    grim                "Screenshot tool (Wayland only)" off
+    slurp               "Region selector for screenshot (Wayland only)" off
+    wl-clipboard       "Clipboard manager (Wayland only)" off
+    "#_sub_#"           "___ [Post Screenshot tools] ___" off
     "$spectacle_pkg"    "A widely supported ss app" off
     flameshot           "A widely supported ss app" off
 	
+    "###_Network_Tools_GUI_###" "_____ Category Description [below] _____" off
+	blueman             "Bluetooth device manager GUI (blueman-manager)" on
+	"$network_manager_pkg" "Network connection manager (wired/wireless)" on
+    network-manager-applet "Network connection manager GUI applet" on
+    youtubedl-gui "[deb] GUI for youtube-dl/yt-dlp" on
+
+    "###_Accessibility_Fonts_###" "_____ Category Description [below] _____" off
 	speech-dispatcher  "Needed by softwares that relay on text-to-speech" off #  for TTS (i.e. text-to-speech for firefox and many)
 	"$firacode_pkg"     "Monospace developer font (no glyphs)" off
 )
-shrink essentials_desktop_dialog essentials_desktop
 
-essentials_hyprland=()
 essentials_hyprland_dialog=(
+    "######_essentials_hyprland_pkgs_######" "__________ Collective Category __________" off
+
 	"##########_Hyprland_Utils_##########" "__________ Category Description [below] __________" off
 	waybar                      "Customizable status/task bar for Wayland" on
-	rofi                        "Launcher and window switcher (X11/Wayland)" on
+    quickbar                    "Lightweight Wayland status bar" off
+	
+    rofi                        "Launcher and window switcher (X11/Wayland)" on
+    wofi                        "A Wayland native launcher" off
+
 	hyprpaper                   "Wallpaper daemon for Hyprland" on
+    mpvpaper                    "MPV-based wallpaper setter for Hyprland" off
+    swww                        "Simple Wayland wallpaper setter" off
+
 	
     "#_________#" "sub catagory" off
 	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
@@ -1783,11 +1920,10 @@ essentials_hyprland_dialog=(
 	slurp                       "Region selector for screenshot (Wayland only)" on
     swappy                      "Post SS tool (in short)" on
 )
-shrink essentials_hyprland_dialog essentials_hyprland
 
-corechunk_hyprland=()
 corechunk_hyprland_dialog=(
-	"##########_Hyprland_Utils_##########" "__________ Category Description [below] __________" off
+    "######_corechunk_hyprland_pkgs_######" "__________ Collective Category __________" off
+                                                 # fully custom, not merged from any other array
 
 	"#_________# Core Hyprland Utilities" "sub catagory" off
 	hyprpaper                   "Wallpaper daemon for Hyprland" on
@@ -1797,6 +1933,7 @@ corechunk_hyprland_dialog=(
 	"#_________# Must for corechunk/hyprland" "sub catagory (used directly in the dots)" off
     kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
 	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
+	ranger                      "A console file manager" on
 	firefox                     "A web browser" on
 
 	"#_____# Launchers & Bars" "subsub catagory" off
@@ -1812,7 +1949,6 @@ corechunk_hyprland_dialog=(
 	swappy                      "Post SS tool (in short)" on
 
     "#_________# Recommended cli" "sub catagory" off
-	ranger                      "A console file manager" on
 	neovim                      "Modern Vim-based text editor" on
 	gawk                        "Needed for ble.sh (core dependency)" on
 	tmux                        "Terminal multiplexer (split panes, sessions)" on
@@ -1822,22 +1958,37 @@ corechunk_hyprland_dialog=(
 	unzip                       "File decompression utility" on
 
     "#_________# Recommended GUI" "sub catagory" off
-	mousepad            "Simple GUI text editor (Notepad-like)" on
-	mpv                 "Media player for audio/video (CLI+GUI)" on
-	zathura             "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
+	mousepad                    "Simple GUI text editor (Notepad-like)" on
+	mpv                        "Media player for audio/video (CLI+GUI)" on
+	zathura                    "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
 	"$edge_pkg"                 "A web browser" off
 )
-shrink corechunk_hyprland_dialog corechunk_hyprland
 
-essentials_extra=()
 essentials_extra_dialog=(
 	oh-my-posh   "Shell prompt theming engine (cross-shell)" on
 	auto-cpufreq "CPU frequency optimizer and power saver" on
 )
+
+
+
+
+
+
+# non tui usage arrays
+essentials_dev=()
+essentials_terminal=()
+essentials_desktop=()
+essentials_hyprland=()
+corechunk_hyprland=()
+essentials_extra=()
+
+
+shrink essentials_dev_dialog essentials_dev
+shrink essentials_terminal_dialog essentials_terminal
+shrink essentials_desktop_dialog essentials_desktop
+shrink essentials_hyprland_dialog essentials_hyprland
+shrink corechunk_hyprland_dialog corechunk_hyprland
 shrink essentials_extra_dialog essentials_extra
-
-
-
 
 
 
@@ -1992,87 +2143,203 @@ menu_info(){
 ==============================================================
 					   $GREEN INFO SECTION$RESET
 ==============================================================
+$RED[ Error Handling ]$RESET
+If the software encounters an error (such as unsupported distro, missing dependencies, or failed commands), it will:
+- Print a clear error message to the terminal.
+- Exit with a non-zero status code.
+- In some cases, suggest manual installation or troubleshooting steps.
+
+For example:
+- Unsupported distro: 'Unsupported distro' and exit.
+- Missing package: Error message with package name.
+- Sourcing issues: Message about missing or unsourced files.
+
+==============================================================
 =========================$YELLOW Navigation$RESET =========================
 $YELLOW Use ↑ ↓ / PgUp / PgDn to scroll vertically
 $YELLOW Use ← → to scroll horizontally (with -S mode)
 $YELLOW Press 'q' to exit viewer$RESET
 ==============================================================
-───────────────────────────────$MAGENTA[ Development CLI Packages ]$RESET───────────────────────────────
-Package               | Description                                    | Compatibility            | Remarks                          | Command
----------------------------------------------------------------------------------------------------------------
+
+───────────────────────────────$MAGENTA[ Development Tools ]$RESET───────────────────────────────
+--- Development Tools ---
 git                   | Version control system                         | CLI (All)                | Essential for dev work            | git
-$(printf "%-21s" "$build_essential_pkg") | GCC, G++, Make build tools                    | CLI (All)                | Core compiler tools               | gcc, g++, make
+gh                    | GitHub CLI tool                                | CLI (All)                | GitHub integration                | gh
+docker                | Containerization platform                      | CLI (All)                | Docker engine                     | docker
+docker-compose        | Container orchestration tool                   | CLI (All)                | Compose multi-container apps      | docker-compose
+$(printf "%-21s" "$build_essential_pkg") | Essential build tools (gcc, g++, make)           | CLI (All)                | Core compiler tools               | gcc, g++, make
 gdb                   | Debugger for compiled languages                | CLI (All)                | Used for debugging C/C++          | gdb
 $(printf "%-21s" "$manpages_pkg") | Developer manual pages                         | CLI (All)                | Adds developer manpages           | man
+
+--- Build Systems ---
 make                  | GNU build automation tool                      | CLI (All)                | Often pre-installed               | make
-$(printf "%-21s" "$ninja_pkg") | Fast build system                              | CLI (All)                | Alternative to make               | ninja
+$(printf "%-21s" "$ninja_pkg") | Fast alternative build system                     | CLI (All)                | Alternative to make               | ninja
 cmake                 | Cross-platform build system generator          | CLI (All)                | Generates build configs           | cmake
+cargo                 | Rust package manager and build tool            | CLI (All)                | Rust build system                 | cargo
+npm                   | Node.js package manager                        | CLI (All)                | JavaScript ecosystem              | npm
+yarn                  | Alternative Node.js package manager            | CLI (All)                | Alternative to npm                | yarn
+gradle                | Build automation tool (Java, Android, etc.)    | CLI (All)                | Java/Android build system         | gradle
+maven                 | Java project management tool                   | CLI (All)                | Java build system                 | mvn
+ant                   | Java build tool                                | CLI (All)                | Java build system                 | ant
+autotools             | GNU build system (autoconf, automake, libtool) | CLI (All)                | C/C++ build system                | autoconf, automake, libtool
+
+--- Compilers & Interpreters ---
+gcc                   | C, C++, Objective-C, Fortran, Ada, D, Go       | CLI (All)                | Main compiler suite               | gcc
+clang                 | C, C++, Objective-C compiler                   | CLI (All)                | LLVM-based compiler               | clang
+javac                 | Java programming language compiler             | CLI (All)                | Java compiler                     | javac
 $(printf "%-21s" "$openjdk_pkg") | Java Development Kit (includes JRE)            | CLI/GUI (All)            | Required for Java development     | java, javac
+dotnet-sdk            | Microsoft .NET SDK                             | CLI (All)                | .NET development                  | dotnet
+kotlin                | Kotlin programming language compiler           | CLI (All)                | JVM language                      | kotlinc
 $(printf "%-21s" "$python_pkg") | Python programming language                    | CLI/GUI (All)            | Modern scripting language         | python3
 $(printf "%-21s" "$pip_pkg") | Python package manager                         | CLI (All)                | For installing Python modules     | pip3
+golang                | Go programming language compiler               | CLI (All)                | Go compiler                       | go
+$(printf "%-21s" "$rust_pkg") | Rust programming language compiler                | CLI (All)                | Rust compiler                     | rustc
+rust-src              | Rust standard library source code              | CLI (All)                | Rust source for dev               | N/A
+nodejs                | JavaScript runtime environment                 | CLI (All)                | Node.js runtime                   | node
+php                   | PHP programming language                       | CLI (All)                | Web scripting                     | php
+ruby                  | Ruby programming language                      | CLI (All)                | Scripting language                | ruby
+perl                  | Perl programming language                      | CLI (All)                | Scripting language                | perl
+swift                 | Swift programming language                     | CLI (All)                | Apple language                    | swift
+lua                   | Lua programming language                       | CLI (All)                | Embedded scripting                | lua
+r-base                | R programming language environment             | CLI (All)                | Statistical computing             | R
+julia                 | Julia programming language                     | CLI (All)                | Scientific computing              | julia
+erlang                | Erlang programming language                    | CLI (All)                | Concurrent programming            | erl
+elixir                | Elixir programming language                    | CLI (All)                | Functional language               | elixir
+haskell               | Haskell programming language compiler          | CLI (All)                | Functional language               | ghc
+scala                 | Scala programming language                     | CLI (All)                | JVM language                      | scala
 
-────────────────────────────────$BLUE[ Core CLI Packages ]$RESET───────────────────────────────────
-Package               | Description                                    | Compatibility            | Remarks                          | Command
----------------------------------------------------------------------------------------------------------------
-gawk                  | Text processing and scripting tool             | CLI (All)                | Dependency for ble.sh             | gawk
+───────────────────────────────$BLUE[ Terminal Tools ]$RESET───────────────────────────────
+--- Terminals & Editors ---
+nano                  | Beginner-friendly terminal text editor         | CLI (All)                | Easy for beginners                | nano
+neovim                | Modern Vim-based text editor                   | CLI/GUI (All)            | Vim-based, powerful editor        | nvim
 tmux                  | Terminal multiplexer                           | CLI (All)                | Manage multiple sessions          | tmux
-neovim                | Modern text editor                             | CLI/GUI (All)            | Vim-based, powerful editor        | nvim
-nano                  | Simple text editor                             | CLI (All)                | Easy for beginners                | nano
-mpv                   | CLI media player                               | CLI/GUI (All)            | Also supports GUI playback        | mpv
-btop                  | Modern system monitor                          | CLI (All)                | Task-manager alternative          | btop
-fastfetch             | System info viewer                             | CLI (All)                | Similar to neofetch               | fastfetch
-zip/unzip             | Compression utilities                          | CLI (All)                | Common file operations            | zip, unzip
-bat                   | cat alternative with highlighting              | CLI (All)                | Enhanced file viewer              | bat
-lsd                   | Modern ls alternative                          | CLI (All)                | Adds icons and color              | lsd
-zoxide                | Smart cd command                               | CLI (All)                | Learns directory usage            | z
-fzf                   | Fuzzy finder                                   | CLI (All)                | Used in scripts and search        | fzf
-ripgrep               | Fast text searcher                             | CLI (All)                | Modern grep alternative           | rg
-$(printf "%-21s" "$firacode_pkg") | Monospace developer font                       | GUI/Desktop only         | No glyphs included                | N/A
 
-───────────────────────────────$ORANGE[ Network Tools CLI ]$RESET────────────────────────────────────
-Package               | Description                                    | Compatibility            | Remarks                          | Command
----------------------------------------------------------------------------------------------------------------
+--- Media Players & Tools (CLI) ---
+mpv                   | CLI/GUI media player                           | CLI/GUI (All)            | Also supports GUI playback        | mpv
+ffmpeg                | CLI audio/video converter and recorder         | CLI (All)                | Media conversion                  | ffmpeg
+
+--- System Monitoring ---
+btop                  | System monitor (like Task Manager)             | CLI (All)                | Task-manager alternative          | btop
+htop                  | Interactive process viewer                     | CLI (All)                | Alternative to btop               | htop
+fastfetch             | System info fetcher                            | CLI (All)                | Similar to neofetch               | fastfetch
+neofetch              | System info fetcher                            | CLI (All)                | System info display               | neofetch
+
+--- Shell Enhancements ---
+gawk                  | Needed for ble.sh (core dependency)            | CLI (All)                | Text processing                   | gawk
+ble.sh                | Bash line editor with autosuggestions          | CLI (All)                | Bash enhancement                  | ble.sh
+zsh                   | Z shell (alternative to bash)                  | CLI (All)                | Alternative shell                 | zsh
+
+--- File Management ---
+ranger                | Console file manager                           | CLI (All)                | File management                   | ranger
+yazi                  | Terminal file manager with git integration     | CLI (All)                | Modern file manager               | yazi
+zip/unzip             | Compression/decompression utilities            | CLI (All)                | Common file operations            | zip, unzip
+
+--- Useful CLI Tools ---
+bat                   | Modern cat alternative with syntax highlighting| CLI (All)                | Enhanced file viewer              | bat
+lsd                   | Modern ls alternative with icons and colors    | CLI (All)                | Adds icons and color              | lsd
+zoxide                | Smarter cd command                             | CLI (All)                | Learns directory usage            | zoxide
+fzf                   | Fuzzy finder for fast search                   | CLI (All)                | Used in scripts and search        | fzf
+ripgrep               | Fast grep alternative for searching text       | CLI (All)                | Modern grep alternative           | rg
+
+--- Network Tools (CLI) ---
 wget                  | Command-line downloader                        | CLI (All)                | Supports HTTP, HTTPS, FTP         | wget
 ufw                   | Simple firewall manager                        | CLI (All)                | Frontend for iptables             | ufw
-fail2ban              | Intrusion prevention tool                      | CLI (Server/Desktop)     | Protects SSH/services             | fail2ban-client
+fail2ban              | Intrusion prevention tool for SSH/services     | CLI (Server/Desktop)     | Protects SSH/services             | fail2ban-client
+yt-dlp                | CLI tool to download videos from YouTube       | CLI (All)                | YouTube downloader                | yt-dlp
 
-────────────────────────────────$GREEN[ Core GUI Packages ]$RESET───────────────────────────────────
-Package               | Description                                    | Compatibility            | Remarks                          | Command
----------------------------------------------------------------------------------------------------------------
-blueman               | Bluetooth device manager (GUI)                 | Desktop (X11/Wayland)    | GUI frontend for bluetoothctl     | blueman-manager
-$(printf "%-21s" "$network_manager_pkg") | Manage wired/wireless connections              | Desktop (All)            | Often used with GUI applets       | nm-connection-editor
-kitty                 | GPU-accelerated terminal emulator              | Desktop (All)            | Image and emoji support           | kitty
-$(printf "%-21s" "$thunar_pkg") | Lightweight file manager                       | Desktop (X11/Wayland)    | XFCE’s file manager               | thunar
+--- TUI Tools ---
+gum                   | Modern CLI UI toolkit                          | CLI (All)                | Interactive CLI UI                | gum
+dialog                | Classic CLI dialog tool                        | CLI (All)                | Dialog boxes in shell scripts     | dialog
+${whiptail_pkg}       | Whiptail dialog alternative                    | CLI (All)                | Lightweight dialog                | whiptail
+
+───────────────────────────────$GREEN[ Desktop Tools ]$RESET───────────────────────────────
+--- File Managers ---
+$(printf "%-21s" "$thunar_pkg") | Lightweight file manager (XFCE)                  | Desktop (X11/Wayland)    | XFCE’s file manager               | thunar
+
+--- Document Viewers ---
+zathura               | Keyboard-driven document viewer (PDF, EPUB, etc.)| Desktop (All)            | Keyboard-driven UI                | zathura
+
+--- Terminals ---
+kitty                 | GPU-accelerated terminal emulator (images, ligatures)| Desktop (All)            | Image and emoji support           | kitty
+xfce4-terminal        | XFCE terminal emulator                         | Desktop (All)            | XFCE terminal                     | xfce4-terminal
+gnome-terminal        | GNOME terminal emulator                        | Desktop (All)            | GNOME terminal                    | gnome-terminal
+alacritty             | GPU-accelerated terminal emulator              | Desktop (All)            | Cross-platform terminal           | alacritty
+tilix                 | Tiling terminal emulator (GTK)                 | Desktop (All)            | Tiling terminal                   | tilix
+zutty                 | Lightweight terminal emulator (X11)            | Desktop (All)            | Minimal terminal                  | zutty
+
+--- Text Editors ---
 mousepad              | Simple GUI text editor                         | Desktop (All)            | Basic Notepad-like editor         | mousepad
+gedit                 | GNOME text editor                              | Desktop (All)            | GNOME’s Notepad-like editor       | gedit
+leafpad               | Lightweight GUI text editor                    | Desktop (All)            | Minimal Notepad-like editor       | leafpad
+pluma                 | MATE text editor                               | Desktop (All)            | MATE’s Notepad-like editor        | pluma
+xed                   | Linux Mint text editor                         | Desktop (All)            | Mint’s Notepad-like editor        | xed
+
+--- Media Players ---
 mpv                   | Media player                                   | Desktop (All)            | GUI and CLI playback supported    | mpv
-zathura               | Document viewer (PDF, EPUB, etc.)              | Desktop (All)            | Keyboard-driven UI                | zathura
+vlc                   | Versatile media player (GUI)                   | Desktop (All)            | Popular media player              | vlc
+
+--- Web Browsers ---
+firefox               | Web browser                                    | Desktop (All)            | Popular browser                   | firefox
+chromium              | Web browser                                    | Desktop (All)            | Chromium browser                  | chromium
+
+--- Content Creation ---
 obs-studio            | Screen recorder and streamer                   | Desktop (All)            | Free and open-source              | obs
 shotcut               | Video editor                                   | Desktop (All)            | Non-linear video editor           | shotcut
-xdg-desktop-portal    | Screen sharing and app integration layer       | Desktop (All)            | Required for flatpak/screenshare  | N/A
-xdg-utils             | Desktop integration utilities                  | Desktop (All)            | Handles xdg-open, mime, etc.      | xdg-open
-maim                  | Screenshot tool                                | Desktop (X11/Wayland)    | Region and full capture support   | maim
-xclip                 | Clipboard tool                                 | Desktop (X11/Wayland)    | Scriptable clipboard access       | xclip
-$(printf "%-21s" "$spectacle_pkg") | Screenshot tool                                | Desktop (All)            | A widely supported screenshot app | spectacle
+gimp                  | Image editor                                   | Desktop (All)            | Photoshop alternative             | gimp
+inkscape              | Vector graphics editor                         | Desktop (All)            | Illustrator alternative           | inkscape
+
+--- Desktop Integration ---
+xdg-desktop-portal    | Desktop integration/screen share service       | Desktop (All)            | Required by DEs                   | xdg-desktop-portal
+xdg-utils             | CLI desktop tools (xdg-open, mime handling)    | Desktop (All)            | Handles xdg-open, mime, etc.      | xdg-open
+
+--- Audio/Video ---
+pulseaudio            | Legacy audio server                            | Desktop (All)            | PulseAudio server                 | pulseaudio
+jack-audio-connection-kit| Low-latency audio server (JACK)             | Desktop (All)            | JACK audio server                 | jackd
+pipewire              | Modern audio/video server                      | Desktop (All)            | PulseAudio/Jack replacement       | pipewire
+$(printf "%-21s" "$pipewire_libs_pkg") | Audio client libraries for PipeWire              | Desktop (All)            | PipeWire client libraries         | N/A
+pavucontrol           | PulseAudio/PipeWire volume control GUI         | Desktop (All)            | Volume control GUI                | pavucontrol
+vlc-plugin-pipewire   | PipeWire support for VLC media player          | Desktop (All)            | VLC PipeWire plugin               | N/A
+
+--- Screenshot & Clipboard ---
+maim                  | CLI screenshot utility (X11 only)              | Desktop (X11)            | Full/region screenshot            | maim
+xclip                 | CLI clipboard manager (X11 only)               | Desktop (X11)            | Clipboard access                  | xclip
+grim                  | Screenshot tool (Wayland only)                 | Desktop (Wayland)        | Works with slurp                  | grim
+slurp                 | Region selector for screenshot (Wayland only)  | Desktop (Wayland)        | Used with grim                    | slurp
+wl-clipboard          | Clipboard manager (Wayland only)               | Desktop (Wayland)        | Clipboard access                  | wl-copy, wl-paste
+$(printf "%-21s" "$spectacle_pkg") | A widely supported screenshot app                 | Desktop (All)            | KDE screenshot tool               | spectacle
+flameshot             | A widely supported screenshot app              | Desktop (All)            | Screenshot tool                   | flameshot
+
+--- Network Tools (GUI) ---
+blueman               | Bluetooth device manager GUI                   | Desktop (All)            | GUI frontend for bluetoothctl     | blueman-manager
+$(printf "%-21s" "$network_manager_pkg") | Network connection manager (wired/wireless)      | Desktop (All)            | Often used with GUI applets       | nm-connection-editor
+network-manager-applet| Network connection manager GUI applet          | Desktop (All)            | Tray applet for NetworkManager    | network-manager-applet
+youtubedl-gui         | GUI for youtube-dl/yt-dlp                      | Desktop (All)            | YouTube downloader GUI            | youtubedl-gui
+
+--- Accessibility & Fonts ---
+speech-dispatcher     | Needed by softwares that rely on text-to-speech| Desktop (All)            | TTS support for apps              | speech-dispatcher
+$(printf "%-21s" "$firacode_pkg") | Monospace developer font                       | GUI/Desktop only         | No glyphs included                | N/A
 
 ───────────────────────────────$SKY_BLUE[ Hyprland Utilities ]$RESET────────────────────────────────────
-Package               | Description                                    | Compatibility            | Remarks                          | Command
----------------------------------------------------------------------------------------------------------------
-xdg-desktop-portal-hyprland | Hyprland portal backend                 | Wayland (Hyprland)       | Enables screenshots/sharing       | N/A
+--- Hyprland Utils ---
+waybar                | Customizable status/task bar for Wayland        | Wayland (All)            | System info and tray bar          | waybar
+rofi                  | Launcher and window switcher (X11/Wayland)     | X11/Wayland              | Similar to dmenu, extensible      | rofi
+wofi                  | Wayland native launcher                        | Wayland                  | Launcher for Wayland              | wofi
 hyprpaper             | Wallpaper daemon for Hyprland                  | Wayland (Hyprland)       | Lightweight wallpaper manager     | hyprpaper
+xdg-desktop-portal-hyprland | Hyprland portal backend                 | Wayland (Hyprland)       | Enables screenshots/sharing       | N/A
 $(printf "%-21s" "$hyprcursor_pkg") | Cursor theme manager for Hyprland              | Wayland (Hyprland)       | Controls custom cursor themes     | N/A
-waybar                | Customizable status/task bar                   | Wayland (All)            | System info and tray bar          | waybar
-rofi                  | Launcher and window switcher                   | X11/Wayland              | Similar to dmenu, very extensible | rofi
-grim                  | Screenshot tool                                | Wayland only             | Works with slurp for region grab  | grim
-slurp                 | Region selector for screenshots                | Wayland only             | Used with grim                   | slurp
-wl-clipboard          | Clipboard utility                              | Wayland only             | Works like xclip alternative      | wl-copy
+cliphist              | Clipboard manager for Wayland                   | Wayland                  | Clipboard history manager         | cliphist
+wl-clipboard          | Clipboard manager (Wayland only)               | Wayland                  | Clipboard access                  | wl-copy, wl-paste
+grim                  | Screenshot tool (Wayland only)                 | Wayland                  | Works with slurp                  | grim
+slurp                 | Region selector for screenshot (Wayland only)  | Wayland                  | Used with grim                    | slurp
+swappy                | Post screenshot tool for Wayland                | Wayland                  | Annotate/edit screenshots         | swappy
 
 ───────────────────────────────$YELLOW[ GitHub Apps (Custom Install) ]$RESET───────────────────────────
-Package               | Description                                    | Compatibility            | Remarks                          | Command
----------------------------------------------------------------------------------------------------------------
+--- GitHub Apps ---
 oh-my-posh            | Shell prompt theme engine                      | CLI (All)                | Adds themes and status segments   | oh-my-posh
 auto-cpufreq          | CPU frequency optimizer                        | CLI (All)                | Power saving tool                 | auto-cpufreq
 
 ────────────────────────────────$ORANGE[ Firmware Packages ]$RESET────────────────────────────────────
+--- Firmware ---
 Chipset               | Packages                                       | Compatibility            | Remarks
 ---------------------------------------------------------------------------------------------------------------
 INTEL                 | $(if [[ "$(package_manager)" == "apt" ]]; then echo "firmware-misc-nonfree, firmware-linux-nonfree, firmware-sof-signed, firmware-iwlwifi, firmware-intel-graphics, firmware-intel-misc, firmware-intel-sound"; elif [[ "$(package_manager)" == "pacman" ]]; then echo "intel-ucode, linux-firmware, sof-firmware, mesa, vulkan-intel, intel-media-driver"; elif [[ "$(package_manager)" == "dnf" ]]; then echo "microcode_ctl, linux-firmware, alsa-sof-firmware, mesa-vulkan-drivers, intel-media-driver"; fi) | x86_64 | Enables Intel Wi-Fi, audio, GPU firmware
@@ -2107,10 +2374,9 @@ menu_essential(){
             echo "$BLUE 3.$RESET Core$YELLOW GUI$RESET packages"
             echo "$BLUE 4.$SKY_BLUE Hyprland$RESET Echosystem packages"
             echo "$BLUE 5.$MAGENTA corechunk's hyprland$RESET packages"
+            echo "$RED 5_force.$MAGENTA [force] corechunk's hyprland$RESET packages"
             echo "$BLUE 6.$RESET GitHub Essential Packages"
             echo "$BLUE 9.$RESET INFO PAGE [navigation with up/down arrow]"
-            echo "$RED all.$RESET install$ORANGE all packages$RESET shown here"
-            echo "$RED all_f.$RESET install$ORANGE [1-5]$RESET [force]"
             echo "$RED x.$RED EXIT$RESET"
             echo "$divider"
             read -p "Select Your Preferred Option : " cho_2
@@ -2126,10 +2392,9 @@ menu_essential(){
             3 "Core GUI packages" \
             4 "Hyprland Echosystem packages" \
             5 "corechunk's hyprland packages" \
+            5_force "[force] corechunk's hyprland packages" \
             6 "GitHub Essential Packages" \
             9 "INFO PAGE [navigation with up/down arrow]" \
-            all "install all packages$RESET shown here" \
-            all_f "install [1-5] [force]" \
             x "EXIT" \
             2>&1 >/dev/tty)
 
@@ -2153,6 +2418,8 @@ menu_essential(){
             3)  prompt_install_type "${essentials_desktop[@]}" ;;
             4)  prompt_install_type "${essentials_hyprland[@]}" ;;
             5)  prompt_install_type "${corechunk_hyprland[@]}" ;;
+            5_force)
+                for pkg in "${corechunk_hyprland[@]}"; do install_pkg_dynamic "$pkg" install-force; done ;;
             6)  clear; menu_github_pkgs ;;
                                                                         #00)install_pkg_dynamic dialog ;;
                                                                         #01)for pkg in "${firmware_intel[@]}";do install_pkg_dynamic "$pkg" install-force; done ;;
@@ -2184,6 +2451,8 @@ menu_essential(){
             3)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_desktop" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_desktop_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             4)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_hyprland" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             5)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "corechunk's_hyprland_pkgs" --checklist "Select/toggle preffered options : " 30 90 25 "${corechunk_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            5_force)
+                for pkg in "${corechunk_hyprland[@]}"; do install_pkg_dynamic "$pkg" install-force; done ;;
             6) clear; menu_github_pkgs ;;
             9) menu_info ;;
             x) tput reset;clear;break ;;
