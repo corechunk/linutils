@@ -20,6 +20,8 @@ if [[ $(package_manager) == "apt" ]]; then
     pip_pkg="python3-pip"
     network_manager_pkg="network-manager"
     edge_pkg="microsoft-edge-stable"
+    libspa_bluetooth_pkg="libspa-0.2-bluetooth" # APT specific
+    swaync_pkg="sway-notification-center" # APT specific
     
     # Defaults for Ubuntu, Mint, etc.
     spectacle_pkg="spectacle"
@@ -53,6 +55,8 @@ elif [[ $(package_manager) == "pacman" ]]; then
     edge_pkg="microsoft-edge-stable-bin"
     hyprcursor_pkg="hyprcursor"
     whiptail_pkg="newt"
+    libspa_bluetooth_pkg="pipewire-bluez" # PACMAN specific
+    swaync_pkg="swaync" # PACMAN specific
 elif [[ $(package_manager) == "dnf" ]]; then
     # Fedora [ or fedora based ]
     build_essential_pkg="@development-tools"
@@ -69,6 +73,8 @@ elif [[ $(package_manager) == "dnf" ]]; then
     spectacle_pkg="spectacle"
     edge_pkg="microsoft-edge-stable"
     hyprcursor_pkg="hyprcursor"
+    libspa_bluetooth_pkg="pipewire-plugin-bluez" # DNF specific
+    swaync_pkg="SwayNotificationCenter" # DNF specific
 else
 	echo "Unsupported distro"
 	exit 1

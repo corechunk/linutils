@@ -269,8 +269,18 @@ corechunk_hyprland_dialog=(
 	"#_____# Launchers & Bars" "subsub catagory" off
 	waybar                      "Customizable status/task bar for Wayland" on
 	rofi                        "Launcher and window switcher (X11/Wayland)" on
-	wofi                        "A Wayland native launcher" off
+	yad                         "Yet Another Dialog (for GUI scripting)" on
 
+    "#_____# network,bluetooth, GUI applet etc" "subsub catagory" off
+    blueman                     "Bluetooth device manager GUI" on
+    "$libspa_bluetooth_pkg"        "dependency for blueman to handle audio device" on
+    
+    "$network_manager_pkg"      "Network connection manager (wired/wireless)" on
+    network-manager-applet      "GUI applet for network-manager" on
+    iwd                         "dependency for network-manager-applet" on
+
+	"#_____# Notifications" "subsub catagory" off
+    "$swaync_pkg"               "A lightweight notification daemon for Wayland" on
 	"#_____# Clipboard & Screenshot" "subsub catagory" off
 	cliphist                    "clipboard meneger" on
 	wl-clipboard                "Clipboard manager (Wayland only)" on
@@ -285,13 +295,31 @@ corechunk_hyprland_dialog=(
 	btop                        "System monitor (like Task Manager)" on
 	fastfetch                   "System information fetcher (like neofetch)" on
 	zip                         "File compression utility" on
-	unzip                       "File decompression utility" on
+	unzip                       "File decompression utility (needed for oh-my-posh)" on
 
     "#_________# Recommended GUI" "sub catagory" off
 	mousepad                    "Simple GUI text editor (Notepad-like)" on
 	mpv                        "Media player for audio/video (CLI+GUI)" on
 	zathura                    "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
-	"$edge_pkg"                 "A web browser" off
+
+    "##_Unused_But_Identified_Dependencies_##" "sub catagory" off
+    bc                          "Arbitrary precision calculator language (identified from jksel.sh)" off
+    libnotify-bin               "Send desktop notifications (identified from jksel.sh)" off
+    jq                          "Command-line JSON processor (identified from jksel.sh)" off
+    swww                        "A Wayland native wallpaper daemon (identified from jksel.sh)" off
+    mpvpaper                    "Video wallpaper utility for Wayland (identified from jksel.sh)" off
+    swaybg                      "A wallpaper utility for Wayland (identified from jksel.sh)" off
+    imagemagick                 "Image manipulation programs (identified from jksel.sh)" off
+    ffmpeg                      "Multimedia framework (identified from jksel.sh)" off
+    sddm                        "Simple Desktop Display Manager (Login Manager) (identified from jksel.sh)" off
+    qt6-base-dev                "Qt 6 base development files" off
+    qt6-tools-dev               "Qt 6 tools development files" off
+    qt6-tools-dev-tools         "Qt 6 tools development utilities" off
+    qt6-wayland                 "Qt 6 Wayland client integration" off
+    qt6-wayland-dev             "Qt 6 Wayland development files" off
+    qt6-declarative-dev         "Qt 6 declarative development files" off
+    qt6-svg-dev                 "Qt 6 SVG development files" off
+    libhyprutils-dev            "Hyprland utilities library development files" off
 )
 
 essentials_extra_dialog=(
