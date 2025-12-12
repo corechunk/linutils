@@ -68,7 +68,7 @@ logo_ubuntu="$ORANGE
  ░░████████   ████████  ░░████████ ████ █████  ░░█████  ░░████████
   ░░░░░░░░   ░░░░░░░░    ░░░░░░░░ ░░░░ ░░░░░    ░░░░░    ░░░░░░░░ 
 $RESET"
-logo_debian="$GREEN
+logo_linuxmint="$GREEN
  ████   ███                                                       ███              █████   
 ░░███  ░░░                                                       ░░░              ░░███    
  ░███  ████  ████████   █████ ████ █████ █████   █████████████   ████  ████████   ███████  
@@ -129,6 +129,8 @@ DISTRO_ID_echo(){
         echo "$logo_nixos"
     elif [[ "$DISTRO_ID" == "ubuntu" ]];then
         echo "$logo_ubuntu"
+    elif [[ "$DISTRO_ID" == "linuxmint" ]];then
+        echo "$logo_linuxmint"
     elif [[ "$DISTRO_ID" == "arch" ]];then
         echo "$logo_arch"
     elif [[ "$DISTRO_ID" == "fedora" ]];then
