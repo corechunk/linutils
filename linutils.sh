@@ -32,7 +32,7 @@ export ARCH_NAME=$(uname -m) # Detect system architecture
 
 ##dep_mark##
 
-main="https://raw.githubusercontent.com/corechunk/linutils/main"
+main="https://raw.githubusercontent.com/corechunk/linutils/update"
 dep=(
     base/base.sh #utils
     base/ascii.sh
