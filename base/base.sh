@@ -1,24 +1,24 @@
 # Set some colors for output messages 
-OK="$(tput setaf 2)[OK]$(tput sgr0)"
-ERROR="$(tput setaf 1)[ERROR]$(tput sgr0)"
-NOTE="$(tput setaf 3)[NOTE]$(tput sgr0)"
-CAT="$(tput setaf 6)[ACTION]$(tput sgr0)"
-MAGENTA="$(tput setaf 5)"
-ORANGE="$(tput setaf 214)"
-WARNING="$(tput setaf 1)"
-RED="$(tput setaf 1)"
-YELLOW="$(tput setaf 3)"
-GREEN="$(tput setaf 2)"
-BLUE="$(tput setaf 4)"
-SKY_BLUE="$(tput setaf 6)"
-RESET="$(tput sgr0)"
+export OK="$(tput setaf 2)[OK]$(tput sgr0)"
+export ERROR="$(tput setaf 1)[ERROR]$(tput sgr0)"
+export NOTE="$(tput setaf 3)[NOTE]$(tput sgr0)"
+export CAT="$(tput setaf 6)[ACTION]$(tput sgr0)"
+export MAGENTA="$(tput setaf 5)"
+export ORANGE="$(tput setaf 214)"
+export WARNING="$(tput setaf 1)"
+export RED="$(tput setaf 1)"
+export YELLOW="$(tput setaf 3)"
+export GREEN="$(tput setaf 2)"
+export BLUE="$(tput setaf 4)"
+export SKY_BLUE="$(tput setaf 6)"
+export RESET="$(tput sgr0)"
 
-INFO="$(tput setaf 4)[INFO]$(tput sgr0)"
-WARN="$(tput setaf 214)[WARN]$(tput sgr0)"
+export INFO="$(tput setaf 4)[INFO]$(tput sgr0)"
+export WARN="$(tput setaf 214)[WARN]$(tput sgr0)"
 
-log_start="$GREEN ----------$BLUE  ----------$RESET"
-log_end="$BLUE ----------$GREEN  ----------$RESET"
-divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
+export log_start="$GREEN ----------$BLUE  ----------$RESET"
+export log_end="$BLUE ----------$GREEN  ----------$RESET"
+export divider="$BLUE ----------$GREEN  ----------$BLUE ----------$GREEN  ----------$RESET"
 clean(){
     tput reset;clear
 }
@@ -38,6 +38,8 @@ package_manager(){
         echo "pacman"
     elif command_exists dnf;then
         echo "dnf"
+    elif command_exists nix-env;then
+        echo "nix"
     else
         echo "none"
     fi
@@ -83,6 +85,19 @@ verify_support() {
         done
         if ! $is_supported; then
             echo -e "${ERROR} Your DNF-based distribution ($DISTRO_ID) is not explicitly supported." >&2
+            exit 1
+        fi
+    elif [[ "$(package_manager)" == "nix" ]]; then
+        local supported_distros=("nixos")
+        local is_supported=false
+        for distro in "${supported_distros[@]}"; do
+            if [[ "$DISTRO_ID" == "$distro" ]]; then
+                is_supported=true
+                break
+            fi
+        done
+        if ! $is_supported; then
+            echo -e "${ERROR} Your Nix-based distribution ($DISTRO_ID) is not explicitly supported." >&2
             exit 1
         fi
     else

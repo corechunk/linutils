@@ -1,4 +1,4 @@
-SHELL := /bin/bash
+SHELL := /usr/bin/env bash
 
 # Define the name of the combined script
 TARGET_SCRIPT := linutils
@@ -6,6 +6,7 @@ TARGET_SCRIPT := linutils
 # List all dependency files in the correct order for concatenation
 DEPENDENCY_FILES := \
     base/base.sh \
+	base/ascii.sh \
     base/pkg_mng_debian.sh \
     base/pkg_mng_ubuntu.sh \
     base/pkg_mng_arch.sh \
@@ -20,7 +21,8 @@ DEPENDENCY_FILES := \
     essential/essential_pre_info.sh \
     essential/essential.sh \
     essential/security.sh \
-    dotfiles/dotfiles.sh 
+    dotfiles/dotfiles.sh \
+	NixOS/main_nixos.sh
 
 # Define installation directory
 INSTALL_DIR := /usr/local/bin

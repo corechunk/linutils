@@ -1,12 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # some functions/variable called here are available on other file
 # and they are need to be sourced in order to run properly
-
-
-
-
-
 
 clear
 # Check if the current user can run sudo without a password prompt
@@ -40,10 +35,11 @@ export ARCH_NAME=$(uname -m) # Detect system architecture
 main="https://raw.githubusercontent.com/corechunk/linutils/main"
 dep=(
     base/base.sh #utils
-    base/pkg_mng_debian.sh
-    base/pkg_mng_ubuntu.sh
-    base/pkg_mng_arch.sh
-    base/pkg_mng_fedora.sh
+    base/ascii.sh
+    base/pkg_mng_debian.sh     # for desktop environment pkg/generic pkg management
+    base/pkg_mng_ubuntu.sh     # for desktop environment pkg/generic pkg management
+    base/pkg_mng_arch.sh       # for desktop environment pkg/generic pkg management
+    base/pkg_mng_fedora.sh     # for desktop environment pkg/generic pkg management
     base/pkg_mng_util.sh #menu
     tasksel_custom/tasksel_custom.sh #menu
     
@@ -59,6 +55,9 @@ dep=(
     essential/essential.sh #menu
 
     essential/security.sh
+
+    # NixOS support
+    NixOS/main_nixos.sh
 )
 
 bar_length=50
@@ -149,16 +148,9 @@ fi
 
 #=========ALL_Loaded_msg=========
 if [[ $mode == cli || $2 == * ]];then # temporarily this if/else is made to run cli(always) cause ascii looks great. and cant be shown in tui
-    echo "
-
-    $BLUE   ____                 ____ _                 _         __$GREEN  _   _                   _     _   _         
-    $BLUE  / ___|___  _ __ ___  / ___| |__  _   _ _ __ | | __    / /$GREEN | | (_)  _ __    _   _  | |_  (_) | |  ___   
-    $BLUE | |   / _ \| '__/ _ \| |   | '_ \| | | | '_ \| |/ /   / / $GREEN | | | | | '_ \  | | | | | __| | | | | / __|  
-    $BLUE | |__| (_) | | |  __/| |___| | | | |_| | | | |   <   / /  $GREEN | | | | | | | | | |_| | | |_  | | | | \__ \  
-    $BLUE  \____\___/|_|  \___| \____|_| |_|\__,_|_| |_|_|\_\ /_/   $GREEN |_| |_| |_| |_|  \__,_|  \__| |_| |_| |___/_ 
-    $RESET
-    "
+    echo "$logo_title"
     echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg"
+    DISTRO_ID_echo
     read -n1 -r -p "Press any key to continue..." key
     clear
 elif   [[ $mode == tui ]];then
@@ -178,7 +170,7 @@ main_menu (){
     while true; do
     local cho
         if [[ $mode == tui ]];then
-            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu" --menu "Select the Preferred Option :" 30 90 15 \
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu ($DISTRO_ID)" --menu "Select the Preferred Option :" 30 90 15 \
             00 "Edit pakg manager source list" \
             01 "Download Desktop Environment & more" \
             1  "essential softwares" \
@@ -198,6 +190,7 @@ main_menu (){
 
             clean
         elif [[ $mode == cli ]];then
+            echo "$YELLOW --- Main Menu ($DISTRO_ID) --- $RESET"
             echo "$WARNING 00.$RESET Edit pakg manager source list"
             echo "$WARNING 01.$RESET Download Desktop Environment & more"
             echo "$divider"
@@ -245,9 +238,18 @@ main_menu (){
 
 # Verify system support before showing the main menu
 verify_support
-(
-cd $HOME
-main_menu
+( # execute in $HOME directory to download things in corechunk.dotfiles.d folder
+    cd $HOME
+
+    case "$(package_manager)" in 
+    "apt" | "pacman" | "dnf")
+        main_menu   # the generic one
+        ;;
+    "nix")
+        main_menu_nixos
+        ;;
+    esac
+
 )
 exit 0
 

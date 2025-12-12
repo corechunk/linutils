@@ -76,8 +76,12 @@ elif [[ $(package_manager) == "dnf" ]]; then
     libspa_bluetooth_pkg="pipewire-plugin-bluez" # DNF specific
     swaync_pkg="SwayNotificationCenter" # DNF specific
 else
-	echo "Unsupported distro"
-	exit 1
+    # This block is reached if package_manager() returns "nix" or "none".
+    # If "nix", do nothing as requested.
+    # If "none", log a warning but don't exit, as verify_support() handles exits.
+    if [[ "$(package_manager)" == "none" ]]; then
+        echo -e "${ERROR} No recognized package manager detected. This might indicate an issue or an unsupported configuration. Proceeding with caution.${RESET}"
+    fi
 fi
 
 ## shrink function was here
