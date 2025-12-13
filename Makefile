@@ -46,7 +46,7 @@ $(TARGET_SCRIPT): linutils.sh $(DEPENDENCY_FILES)
 	# Extract the "top part" from linutils.sh (from line 1 up to before 'main="https://...'
 	# This includes the original shebang, initial comments, check_sudo, DISTRO_ID detection.
 	# The 'main=' line itself is excluded.
-	sed -n '1,/^main="https:\/\/raw.githubusercontent.com\/corechunk\/linutils\/main"/ { /^main=/!p }' linutils.sh > $(TARGET_SCRIPT)
+	sed -n '1,/^##dep_mark##/ { /^##dep_mark##/!p }' linutils.sh > $(TARGET_SCRIPT)
 	
 	# Concatenate all dependency files, ensuring each is followed by a newline
 	for file in $(DEPENDENCY_FILES); do \
