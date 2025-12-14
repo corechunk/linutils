@@ -31,8 +31,7 @@ $BLUE ░░░░░░░░░░░░░░░░░░░░░░░░�
 $BLUE ░█▀▀░█▀█░█▀▄░█▀▀░█▀▀░█░█░█░█░█▀█░█░█$MAGENTA ░░░░█$GREEN ░█░░░▀█▀░█▀█░█░█░▀█▀░▀█▀░█░░░█▀▀░░$RESET
 $BLUE ░█░░░█░█░█▀▄░█▀▀░█░░░█▀█░█░█░█░█░█▀▄$MAGENTA ░░▄▀░$GREEN ░█░░░░█░░█░█░█░█░░█░░░█░░█░░░▀▀█░░$RESET
 $BLUE ░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀$MAGENTA ░█░░░$GREEN ░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀░░$RESET
-$BLUE ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░$MAGENTA ░░░░░$GREEN ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░$RESET
-"
+$BLUE ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░$MAGENTA ░░░░░$GREEN ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░$RESET"
 
 
 
@@ -46,7 +45,7 @@ $SKY_BLUE ░███ ░░██████  ░███  ░░░██�
 $SKY_BLUE ░███  ░░█████  ░███   ███░░░███ $BLUE░░███     ███  ███    ░███
 $SKY_BLUE █████  ░░█████ █████ █████ █████$BLUE ░░░███████░  ░░█████████ 
 $SKY_BLUE░░░░░    ░░░░░ ░░░░░ ░░░░░ ░░░░░ $BLUE   ░░░░░░░     ░░░░░░░░░  
-"
+$RESET"
 
 logo_debian="$RED
  ██████████            █████      ███                             
@@ -123,22 +122,24 @@ $RESET"
 #echo "$logo_corechunk"
 
 DISTRO_ID_echo(){
-    if [[ "$DISTRO_ID" == "debian" ]];then
-        echo "$logo_debian"
-    elif [[ "$DISTRO_ID" == "nixos" ]];then
-        echo "$logo_nixos"
-    elif [[ "$DISTRO_ID" == "ubuntu" ]];then
-        echo "$logo_ubuntu"
-    elif [[ "$DISTRO_ID" == "linuxmint" ]];then
-        echo "$logo_linuxmint"
-    elif [[ "$DISTRO_ID" == "arch" ]];then
-        echo "$logo_arch"
-    elif [[ "$DISTRO_ID" == "fedora" ]];then
-        echo "$logo_fedora"
-    elif [[ "$DISTRO_ID" == "kali" ]];then
-        echo "$logo_kali"
-    else
-        echo "$logo_unsupported" # Use the user-defined unsupported logo
-        echo -e "${RED}This distribution is not explicitly supported. Using system settings is dangerous; use with your own risk.${RESET}"
+    if ((rows>=28));then
+        if [[ "$DISTRO_ID" == "debian" ]];then
+            echo "$logo_debian"
+        elif [[ "$DISTRO_ID" == "nixos" ]];then
+            echo "$logo_nixos"
+        elif [[ "$DISTRO_ID" == "ubuntu" ]];then
+            echo "$logo_ubuntu"
+        elif [[ "$DISTRO_ID" == "linuxmint" ]];then
+            echo "$logo_linuxmint"
+        elif [[ "$DISTRO_ID" == "arch" ]];then
+            echo "$logo_arch"
+        elif [[ "$DISTRO_ID" == "fedora" ]];then
+            echo "$logo_fedora"
+        elif [[ "$DISTRO_ID" == "kali" ]];then
+            echo "$logo_kali"
+        else
+            echo "$logo_unsupported" # Use the user-defined unsupported logo
+            echo -e "${RED}This distribution is not explicitly supported. Using system settings is dangerous; use with your own risk.${RESET}"
+        fi
     fi
 }

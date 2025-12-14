@@ -74,9 +74,10 @@ tasksel_custom_menu(){    # for opt1 as a distro neutral tasksel alternative
     local cho
     local pkgs=();
         if [[ $mode == tui ]];then
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                     --title "Download Desktop Environment with default DM" \
-                    --checklist "Select/toggle preffered options : " 30 90 25 \
+                    --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" \
                     "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
 
             local exit_status=$?
@@ -132,9 +133,10 @@ adv_DE_menu(){  # for opt 01 as an advanced opt to manage desktop environment on
     local cho
     local pkgs=();
         if [[ $mode == tui ]];then
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                     --title "Manage Desktop Environment (Advanced)" \
-                    --checklist "Select/toggle preffered option : " 30 90 25 \
+                    --checklist "Select/toggle preffered option : " "$rows" "$cols" "$scroll" \
                     "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
 
             local exit_status=$?
@@ -190,9 +192,10 @@ adv_DM_menu(){  # for opt 02 as an advanced opt to manage Display Manager only
     local cho
     pkgs=();
         if [[ $mode == tui ]];then
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                     --title "Manage Display Manager (Advanced)" \
-                    --checklist "Select/toggle preffered option : " 30 90 25 \
+                    --checklist "Select/toggle preffered option : " "$rows" "$cols" "$scroll" \
                     "${DM_cho_dialog[@]}" 2>&1 >/dev/tty)
 
             local exit_status=$?
@@ -249,9 +252,10 @@ DE_DM_menu(){
     local cho
     while true;do
         if [[ $mode == tui ]];then
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                 --title "Download Desktop Environment and Display Manager" \
-                --menu "Select the Preferred Option :" 30 90 25 \
+                --menu "Select the Preferred Option :" "$rows" "$cols" "$scroll" \
                 1 "Desktop with it's recommended Display Manager (Default - no hassle)" \
                 2 "[coming soon][tempplate] sddm + hyprland (custom - already set)" \
                 deb "Tasksel (DE downloader - Debian based distros only !)" \

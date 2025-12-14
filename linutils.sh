@@ -146,14 +146,19 @@ elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ====
     mode=tui
 fi
 
+console_size_check
+console_warn_check # needs console_size_check
 #=========ALL_Loaded_msg=========
-if [[ $mode == cli || $2 == * ]];then # temporarily this if/else is made to run cli(always) cause ascii looks great. and cant be shown in tui
+if [[ $mode == cli || $2 == * ]];then # temporarily this if/else is made to run cli(always) cause ascii art looks great. and cant be shown in tui
     echo "$logo_title"
-    echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg"
+    echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg\n"
+    console_info
     DISTRO_ID_echo
+    # debug space [start] ----------------------------------------------------------------------------------
+    # debug space [end] ------------------------------------------------------------------------------------
     read -n1 -r -p "Press any key to continue..." key
     clear
-elif   [[ $mode == tui ]];then
+elif   [[ $mode == tui ]];then # i will keep this part as depricated from now, i guess
     dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg" 10 60
     clean
 fi
@@ -170,7 +175,8 @@ main_menu (){
     while true; do
     local cho
         if [[ $mode == tui ]];then
-            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu ($DISTRO_ID)" --menu "Select the Preferred Option :" 30 90 15 \
+            console_size_check # check each time cause in DE term emulator can be resized frequently
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu ($DISTRO_ID)" --menu "Select the Preferred Option :" "$rows" "$cols" "$scroll" \
             00 "Edit pakg manager source list" \
             01 "Download Desktop Environment & more" \
             1  "essential softwares" \

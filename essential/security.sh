@@ -25,10 +25,10 @@ ufw_menu(){
 			echo "$RED x.$RESET EXIT"
 			read -p "Select a option :" cho
         elif [[ $mode == tui ]];then
-			echo hi
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                         --title "Enable firewall (via ufw & fail2ban)" \
-                        --menu "Choose Your Preferred Option : " 30 90 25 \
+                        --menu "Choose Your Preferred Option : " "$rows" "$cols" "$scroll" \
 					1 "install ufw firewall $ufw_stat" \
 					2 "enable ufw & set rules" \
 					3 "install fail2ban $f2b_stat" \

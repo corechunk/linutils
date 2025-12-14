@@ -109,7 +109,8 @@ arch_pkg_mng_menu(){
             echo "$ORANGE x. EXIT $RESET "
             read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "Pacman Manager Menu" --menu "Choose option : " 20 60 15 \
+            console_size_check
+            cho=$(dialog --title "Pacman Manager Menu" --menu "Choose option : " "$rows" "$cols" "$scroll" \
             edit "Edit /etc/pacman.conf" \
             multilib "Enable [multilib] repository" \
             rank "Rank mirrors with reflector" \

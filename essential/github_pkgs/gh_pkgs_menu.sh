@@ -13,9 +13,10 @@ menu_github_pkgs() {
             echo "$divider"
             read -p "Select Your Preferred Option : " cho_3
             echo ""
-        elif [[ $mode == tui ]]; then
+        elif [[ $mode == tui ]];then
+            console_size_check
             cho_3=$(dialog --title " ##### ##### GitHub Essential Packages ##### ##### " \
-            --menu "Select Option : " 30 90 25\
+            --menu "Select Option : " "$rows" "$cols" "$scroll"\
             1 "Rofi Patched (Wayland fork)" \
             2 "Auto-CPUFreq (Power optimization)" \
             x "EXIT" \

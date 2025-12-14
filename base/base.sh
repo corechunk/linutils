@@ -23,6 +23,55 @@ clean(){
     tput reset;clear
 }
 
+console_size_check()
+{
+    cols=$(tput cols) # vars usable by tui like dialog
+    rows=$(tput lines) # vars usable by tui like dialog
+    
+    _cols=$(tput cols) # actuall screen sizes (unchanged variables)
+    _rows=$(tput lines) # actuall screen sizes (unchanged variables)
+
+    if ((cols > 99));then # shrink width for convenience if screen is big enough 
+        ((cols-=10))
+        if ((cols > 109));then
+            ((cols-=10))
+        fi
+    elif ((cols<=99 && cols>=94));then
+        ((cols-=4))         # 90 was my initial choice
+    fi # else it stays full width
+
+    if ((rows >= 24 + 5));then
+        ((rows-=5)) # for the backtitle of menu
+    fi
+
+
+    scroll=$((rows-5))  # scrollable space cause btn and drawing take 5 char vertical space in total
+}
+console_warn_check() # only needed on first launch # needs console_size_check
+{
+    if ((_cols>94));then
+        cols_warn=${GREEN}
+    elif ((_cols<=94 && _cols>=80));then
+        cols_warn=${YELLOW}
+    else
+        cols_warn=${RED}
+    fi
+    if ((_rows>=37));then
+        rows_warn=${GREEN}
+    elif ((_rows<=36 && _rows>=24));then
+        rows_warn=${YELLOW}
+    else
+        rows_warn=${RED}
+    fi
+}
+console_info()
+{
+    console_size_check
+    echo "Optimal term resolution is ${GREEN}(80w x 24h)${RESET} or ${GREEN}beyond${RESET}"
+    echo "i suggest ${BLUE}(94w x 37h)${RESET} or ${GREEN}beyond${RESET}"
+    echo "Your terminal resolution is : (${cols_warn}${_cols}w${RESET} x ${rows_warn}${_rows}h${RESET})"
+}
+
 command_exists(){
     command -v "$1" >/dev/null 2>&1
     return $?
@@ -280,7 +329,7 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
             echo ""
             read -p "Choose preferred option : " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " 30 90 25\
+            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " "$rows" "$cols" "$scroll"\
             1 "install with prompt"\
             2 "install without prompt [force]"\
             3 "re-install with prompt"\
@@ -335,7 +384,8 @@ prompt_install_type_simple(){       # used install_pkgs_dynamic()  <------------
             echo ""
             read -p "Choose preferred option : " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " 30 90 25\
+            console_size_check
+            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " "$rows" "$cols" "$scroll"\
             1 "install with prompt"\
             2 "re-install with prompt"\
             3 "uninstall with prompt"\

@@ -14,10 +14,10 @@ acf(){
             read -p "Select a option :" cho
             clear
         elif [[ $mode == tui ]];then
-
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                         --title "Enable efficient battery optimization (via auto-cpufreq)" \
-                        --menu "Choose Your Preferred Option : " 30 90 25 \
+                        --menu "Choose Your Preferred Option : " "$rows" "$cols" "$scroll" \
                 1 "install GUI monitor" \
                 2 "view status" \
                 3 "remove auto-cpufreq totally" \

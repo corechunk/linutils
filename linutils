@@ -55,6 +55,55 @@ clean(){
     tput reset;clear
 }
 
+console_size_check()
+{
+    cols=$(tput cols) # vars usable by tui like dialog
+    rows=$(tput lines) # vars usable by tui like dialog
+    
+    _cols=$(tput cols) # actuall screen sizes (unchanged variables)
+    _rows=$(tput lines) # actuall screen sizes (unchanged variables)
+
+    if ((cols > 99));then # shrink width for convenience if screen is big enough 
+        ((cols-=10))
+        if ((cols > 109));then
+            ((cols-=10))
+        fi
+    elif ((cols<=99 && cols>=94));then
+        ((cols-=4))         # 90 was my initial choice
+    fi # else it stays full width
+
+    if ((rows >= 24 + 5));then
+        ((rows-=5)) # for the backtitle of menu
+    fi
+
+
+    scroll=$((rows-5))  # scrollable space cause btn and drawing take 5 char vertical space in total
+}
+console_warn_check() # only needed on first launch # needs console_size_check
+{
+    if ((_cols>94));then
+        cols_warn=${GREEN}
+    elif ((_cols<=94 && _cols>=80));then
+        cols_warn=${YELLOW}
+    else
+        cols_warn=${RED}
+    fi
+    if ((_rows>=37));then
+        rows_warn=${GREEN}
+    elif ((_rows<=36 && _rows>=24));then
+        rows_warn=${YELLOW}
+    else
+        rows_warn=${RED}
+    fi
+}
+console_info()
+{
+    console_size_check
+    echo "Optimal term resolution is ${GREEN}(80w x 24h)${RESET} or ${GREEN}beyond${RESET}"
+    echo "i suggest ${BLUE}(94w x 37h)${RESET} or ${GREEN}beyond${RESET}"
+    echo "Your terminal resolution is : (${cols_warn}${_cols}w${RESET} x ${rows_warn}${_rows}h${RESET})"
+}
+
 command_exists(){
     command -v "$1" >/dev/null 2>&1
     return $?
@@ -312,7 +361,7 @@ prompt_install_type(){       # used install_pkgs_dynamic()  <------------
             echo ""
             read -p "Choose preferred option : " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " 30 90 25\
+            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " "$rows" "$cols" "$scroll"\
             1 "install with prompt"\
             2 "install without prompt [force]"\
             3 "re-install with prompt"\
@@ -367,7 +416,8 @@ prompt_install_type_simple(){       # used install_pkgs_dynamic()  <------------
             echo ""
             read -p "Choose preferred option : " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " 30 90 25\
+            console_size_check
+            cho=$(dialog --title "Installation Type Selection" --menu "Choose preferred option : " "$rows" "$cols" "$scroll"\
             1 "install with prompt"\
             2 "re-install with prompt"\
             3 "uninstall with prompt"\
@@ -475,8 +525,7 @@ $BLUE ░░░░░░░░░░░░░░░░░░░░░░░░�
 $BLUE ░█▀▀░█▀█░█▀▄░█▀▀░█▀▀░█░█░█░█░█▀█░█░█$MAGENTA ░░░░█$GREEN ░█░░░▀█▀░█▀█░█░█░▀█▀░▀█▀░█░░░█▀▀░░$RESET
 $BLUE ░█░░░█░█░█▀▄░█▀▀░█░░░█▀█░█░█░█░█░█▀▄$MAGENTA ░░▄▀░$GREEN ░█░░░░█░░█░█░█░█░░█░░░█░░█░░░▀▀█░░$RESET
 $BLUE ░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀$MAGENTA ░█░░░$GREEN ░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀░░$RESET
-$BLUE ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░$MAGENTA ░░░░░$GREEN ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░$RESET
-"
+$BLUE ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░$MAGENTA ░░░░░$GREEN ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░$RESET"
 
 
 
@@ -490,7 +539,7 @@ $SKY_BLUE ░███ ░░██████  ░███  ░░░██�
 $SKY_BLUE ░███  ░░█████  ░███   ███░░░███ $BLUE░░███     ███  ███    ░███
 $SKY_BLUE █████  ░░█████ █████ █████ █████$BLUE ░░░███████░  ░░█████████ 
 $SKY_BLUE░░░░░    ░░░░░ ░░░░░ ░░░░░ ░░░░░ $BLUE   ░░░░░░░     ░░░░░░░░░  
-"
+$RESET"
 
 logo_debian="$RED
  ██████████            █████      ███                             
@@ -567,23 +616,25 @@ $RESET"
 #echo "$logo_corechunk"
 
 DISTRO_ID_echo(){
-    if [[ "$DISTRO_ID" == "debian" ]];then
-        echo "$logo_debian"
-    elif [[ "$DISTRO_ID" == "nixos" ]];then
-        echo "$logo_nixos"
-    elif [[ "$DISTRO_ID" == "ubuntu" ]];then
-        echo "$logo_ubuntu"
-    elif [[ "$DISTRO_ID" == "linuxmint" ]];then
-        echo "$logo_linuxmint"
-    elif [[ "$DISTRO_ID" == "arch" ]];then
-        echo "$logo_arch"
-    elif [[ "$DISTRO_ID" == "fedora" ]];then
-        echo "$logo_fedora"
-    elif [[ "$DISTRO_ID" == "kali" ]];then
-        echo "$logo_kali"
-    else
-        echo "$logo_unsupported" # Use the user-defined unsupported logo
-        echo -e "${RED}This distribution is not explicitly supported. Using system settings is dangerous; use with your own risk.${RESET}"
+    if ((rows>=28));then
+        if [[ "$DISTRO_ID" == "debian" ]];then
+            echo "$logo_debian"
+        elif [[ "$DISTRO_ID" == "nixos" ]];then
+            echo "$logo_nixos"
+        elif [[ "$DISTRO_ID" == "ubuntu" ]];then
+            echo "$logo_ubuntu"
+        elif [[ "$DISTRO_ID" == "linuxmint" ]];then
+            echo "$logo_linuxmint"
+        elif [[ "$DISTRO_ID" == "arch" ]];then
+            echo "$logo_arch"
+        elif [[ "$DISTRO_ID" == "fedora" ]];then
+            echo "$logo_fedora"
+        elif [[ "$DISTRO_ID" == "kali" ]];then
+            echo "$logo_kali"
+        else
+            echo "$logo_unsupported" # Use the user-defined unsupported logo
+            echo -e "${RED}This distribution is not explicitly supported. Using system settings is dangerous; use with your own risk.${RESET}"
+        fi
     fi
 }
 # This file contains package manager utility functions specific to Debian-based systems.
@@ -763,7 +814,8 @@ debian_pkg_mng_menu(){
             echo "$ORANGE x. EXIT $RESET "
             read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "APT Manager Menu" --menu "Choose option : " 20 60 15 \
+            console_size_check
+            cho=$(dialog --title "APT Manager Menu" --menu "Choose option : " "$rows" "$cols" "$scroll" \
             edit "[Debian] edit sources list manually" \
             sid "[Debian] Switch to unstable/sid" \
             x EXIT \
@@ -887,7 +939,8 @@ ubuntu_pkg_mng_menu(){
             echo "$ORANGE x. EXIT $RESET "
             read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "APT Manager Menu (Ubuntu)" --menu "Choose option : " 20 60 15 \
+            console_size_check
+            cho=$(dialog --title "APT Manager Menu (Ubuntu)" --menu "Choose option : " "$rows" "$cols" "$scroll" \
             edit "Edit sources list manually" \
             enable_repos "Enable Universe, Multiverse, Restricted Repositories" \
             x EXIT \
@@ -1051,7 +1104,8 @@ arch_pkg_mng_menu(){
             echo "$ORANGE x. EXIT $RESET "
             read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "Pacman Manager Menu" --menu "Choose option : " 20 60 15 \
+            console_size_check
+            cho=$(dialog --title "Pacman Manager Menu" --menu "Choose option : " "$rows" "$cols" "$scroll" \
             edit "Edit /etc/pacman.conf" \
             multilib "Enable [multilib] repository" \
             rank "Rank mirrors with reflector" \
@@ -1188,7 +1242,8 @@ fedora_pkg_mng_menu(){
             echo "$ORANGE x. EXIT $RESET "
             read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "DNF Manager Menu" --menu "Choose option : " 20 60 15 \
+            console_size_check
+            cho=$(dialog --title "DNF Manager Menu" --menu "Choose option : " "$rows" "$cols" "$scroll" \
             edit "Edit /etc/dnf/dnf.conf" \
             fusion "Enable RPM Fusion (Free & Non-Free)" \
             x EXIT \
@@ -1334,9 +1389,10 @@ tasksel_custom_menu(){    # for opt1 as a distro neutral tasksel alternative
     local cho
     local pkgs=();
         if [[ $mode == tui ]];then
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                     --title "Download Desktop Environment with default DM" \
-                    --checklist "Select/toggle preffered options : " 30 90 25 \
+                    --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" \
                     "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
 
             local exit_status=$?
@@ -1392,9 +1448,10 @@ adv_DE_menu(){  # for opt 01 as an advanced opt to manage desktop environment on
     local cho
     local pkgs=();
         if [[ $mode == tui ]];then
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                     --title "Manage Desktop Environment (Advanced)" \
-                    --checklist "Select/toggle preffered option : " 30 90 25 \
+                    --checklist "Select/toggle preffered option : " "$rows" "$cols" "$scroll" \
                     "${DE_cho_dialog[@]}" 2>&1 >/dev/tty)
 
             local exit_status=$?
@@ -1450,9 +1507,10 @@ adv_DM_menu(){  # for opt 02 as an advanced opt to manage Display Manager only
     local cho
     pkgs=();
         if [[ $mode == tui ]];then
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                     --title "Manage Display Manager (Advanced)" \
-                    --checklist "Select/toggle preffered option : " 30 90 25 \
+                    --checklist "Select/toggle preffered option : " "$rows" "$cols" "$scroll" \
                     "${DM_cho_dialog[@]}" 2>&1 >/dev/tty)
 
             local exit_status=$?
@@ -1509,9 +1567,10 @@ DE_DM_menu(){
     local cho
     while true;do
         if [[ $mode == tui ]];then
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                 --title "Download Desktop Environment and Display Manager" \
-                --menu "Select the Preferred Option :" 30 90 25 \
+                --menu "Select the Preferred Option :" "$rows" "$cols" "$scroll" \
                 1 "Desktop with it's recommended Display Manager (Default - no hassle)" \
                 2 "[coming soon][tempplate] sddm + hyprland (custom - already set)" \
                 deb "Tasksel (DE downloader - Debian based distros only !)" \
@@ -1582,10 +1641,10 @@ acf(){
             read -p "Select a option :" cho
             clear
         elif [[ $mode == tui ]];then
-
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                         --title "Enable efficient battery optimization (via auto-cpufreq)" \
-                        --menu "Choose Your Preferred Option : " 30 90 25 \
+                        --menu "Choose Your Preferred Option : " "$rows" "$cols" "$scroll" \
                 1 "install GUI monitor" \
                 2 "view status" \
                 3 "remove auto-cpufreq totally" \
@@ -1716,9 +1775,10 @@ menu_github_pkgs() {
             echo "$divider"
             read -p "Select Your Preferred Option : " cho_3
             echo ""
-        elif [[ $mode == tui ]]; then
+        elif [[ $mode == tui ]];then
+            console_size_check
             cho_3=$(dialog --title " ##### ##### GitHub Essential Packages ##### ##### " \
-            --menu "Select Option : " 30 90 25\
+            --menu "Select Option : " "$rows" "$cols" "$scroll"\
             1 "Rofi Patched (Wayland fork)" \
             2 "Auto-CPUFreq (Power optimization)" \
             x "EXIT" \
@@ -2572,8 +2632,9 @@ menu_essential(){
             read -p "Select Your Preferred Option : " cho_2
             echo ""
         elif [[ $mode == tui ]];then
+            console_size_check
             cho_2=$(dialog --title " ##### ##### Essential Packages ##### ##### " \
-            --menu "Select Option : " 30 90 25\
+            --menu "Select Option : " "$rows" "$cols" "$scroll"\
             01 "[INTEL] Firmware packages" \
             02 "[AMD] Firmware packages" \
             03 "[NVIDIA] Firmware packages" \
@@ -2633,14 +2694,14 @@ menu_essential(){
         elif [[ $mode == tui ]];then   # [to future me] make the cli portion proccess like this one; im lazy right now
             echo ""
             case $cho_2 in
-            01) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "Intel Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_intel_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
-            02) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "AMD Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_amd_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
-            03) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "NVIDIA Firmwares" --checklist "Select/toggle preffered options : " 30 90 25 "${firmware_nvidia_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
-            1)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_dev" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_dev_dialog[@]}" 2>&1 >/dev/tty);read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for (( i=0; i<${#raw_pkgs[@]}; i++ ));do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done ;prompt_install_type  "${pkgs[@]}" ;;
-            2)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_terminal" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_terminal_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
-            3)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_desktop" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_desktop_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
-            4)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_hyprland" --checklist "Select/toggle preffered options : " 30 90 25 "${essentials_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
-            5)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "corechunk's_hyprland_pkgs" --checklist "Select/toggle preffered options : " 30 90 25 "${corechunk_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            01) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "Intel Firmwares" --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" "${firmware_intel_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            02) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "AMD Firmwares" --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" "${firmware_amd_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            03) raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "NVIDIA Firmwares" --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" "${firmware_nvidia_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            1)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_dev" --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" "${essentials_dev_dialog[@]}" 2>&1 >/dev/tty);read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for (( i=0; i<${#raw_pkgs[@]}; i++ ));do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done ;prompt_install_type  "${pkgs[@]}" ;;
+            2)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_terminal" --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" "${essentials_terminal_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${raw_pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            3)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_desktop" --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" "${essentials_desktop_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            4)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "essentials_hyprland" --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" "${essentials_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
+            5)  raw_pkgs=$(dialog --backtitle "corechunk : linutils --> [ https://github.com/corechunk/linutils.git ]" --title "corechunk's_hyprland_pkgs" --checklist "Select/toggle preffered options : " "$rows" "$cols" "$scroll" "${corechunk_hyprland_dialog[@]}" 2>&1 >/dev/tty); read -ra raw_pkgs <<< "$raw_pkgs"; pkgs=(); for ((i=0;i<${#raw_pkgs[@]};i++)); do [[ ${raw_pkgs[$i]} == *#* ]] && continue; pkgs+=("${pkgs[$i]}"); done; prompt_install_type "${pkgs[@]}" ;;
             5_force)
                 for pkg in "${corechunk_hyprland[@]}"; do install_pkg_dynamic "$pkg" install-force; done ;;
             6) clear; menu_github_pkgs ;;
@@ -2677,10 +2738,10 @@ ufw_menu(){
 			echo "$RED x.$RESET EXIT"
 			read -p "Select a option :" cho
         elif [[ $mode == tui ]];then
-			echo hi
+            console_size_check
             cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" \
                         --title "Enable firewall (via ufw & fail2ban)" \
-                        --menu "Choose Your Preferred Option : " 30 90 25 \
+                        --menu "Choose Your Preferred Option : " "$rows" "$cols" "$scroll" \
 					1 "install ufw firewall $ufw_stat" \
 					2 "enable ufw & set rules" \
 					3 "install fail2ban $f2b_stat" \
@@ -2991,7 +3052,8 @@ main_menu_nixos (){
     while true; do
     local cho
         if [[ $mode == tui ]];then
-            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu (NixOS)" --menu "Select the Preferred Option :" 30 90 15 \
+            console_size_check
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu (NixOS)" --menu "Select the Preferred Option :" "$rows" "$cols" "$scroll" \
             00 "Edit configuration.nix" \
             01 "Edit home.nix" \
             1  "Try packages temporarily (nix-shell)" \
@@ -3090,14 +3152,19 @@ elif [[ $2 == tui || $2 == * ]];then       #============ DEFAULT MODE : TUI ====
     mode=tui
 fi
 
+console_size_check
+console_warn_check # needs console_size_check
 #=========ALL_Loaded_msg=========
-if [[ $mode == cli || $2 == * ]];then # temporarily this if/else is made to run cli(always) cause ascii looks great. and cant be shown in tui
+if [[ $mode == cli || $2 == * ]];then # temporarily this if/else is made to run cli(always) cause ascii art looks great. and cant be shown in tui
     echo "$logo_title"
-    echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg"
+    echo -e "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg\n"
+    console_info
     DISTRO_ID_echo
+    # debug space [start] ----------------------------------------------------------------------------------
+    # debug space [end] ------------------------------------------------------------------------------------
     read -n1 -r -p "Press any key to continue..." key
     clear
-elif   [[ $mode == tui ]];then
+elif   [[ $mode == tui ]];then # i will keep this part as depricated from now, i guess
     dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "notification" --msgbox "\n✅ All dependencies loaded!\n✅ Distro: $DISTRO_ID\n✅ Pkg Manager: $(package_manager)\n✅ Arch: $ARCH_NAME\n✅$mode_msg" 10 60
     clean
 fi
@@ -3114,7 +3181,8 @@ main_menu (){
     while true; do
     local cho
         if [[ $mode == tui ]];then
-            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu ($DISTRO_ID)" --menu "Select the Preferred Option :" 30 90 15 \
+            console_size_check # check each time cause in DE term emulator can be resized frequently
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu ($DISTRO_ID)" --menu "Select the Preferred Option :" "$rows" "$cols" "$scroll" \
             00 "Edit pakg manager source list" \
             01 "Download Desktop Environment & more" \
             1  "essential softwares" \

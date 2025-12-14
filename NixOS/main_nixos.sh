@@ -24,7 +24,8 @@ main_menu_nixos (){
     while true; do
     local cho
         if [[ $mode == tui ]];then
-            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu (NixOS)" --menu "Select the Preferred Option :" 30 90 15 \
+            console_size_check
+            cho=$(dialog --backtitle "[ https://github.com/corechunk/linutils ]" --title "Main Menu (NixOS)" --menu "Select the Preferred Option :" "$rows" "$cols" "$scroll" \
             00 "Edit configuration.nix" \
             01 "Edit home.nix" \
             1  "Try packages temporarily (nix-shell)" \

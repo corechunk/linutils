@@ -67,7 +67,8 @@ ubuntu_pkg_mng_menu(){
             echo "$ORANGE x. EXIT $RESET "
             read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "APT Manager Menu (Ubuntu)" --menu "Choose option : " 20 60 15 \
+            console_size_check
+            cho=$(dialog --title "APT Manager Menu (Ubuntu)" --menu "Choose option : " "$rows" "$cols" "$scroll" \
             edit "Edit sources list manually" \
             enable_repos "Enable Universe, Multiverse, Restricted Repositories" \
             x EXIT \

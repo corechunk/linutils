@@ -175,7 +175,8 @@ debian_pkg_mng_menu(){
             echo "$ORANGE x. EXIT $RESET "
             read -p "$GREEN[$RESET select by the option name $GREEN] :$RESET " cho
         elif [[ $mode == tui ]];then
-            cho=$(dialog --title "APT Manager Menu" --menu "Choose option : " 20 60 15 \
+            console_size_check
+            cho=$(dialog --title "APT Manager Menu" --menu "Choose option : " "$rows" "$cols" "$scroll" \
             edit "[Debian] edit sources list manually" \
             sid "[Debian] Switch to unstable/sid" \
             x EXIT \
