@@ -36,15 +36,15 @@ essentials_dev_dialog=(
     "###_Development_Tools_###"     "_____ Category Description [below] _____" off
 	git                                   "Version control system" on
     gh                                    "GitHub CLI tool" off
-    docker                               "Containerization platform" off
-    docker-compose                      "Container orchestration tool" off
+    docker                                "Containerization platform" off
+    docker-compose                        "Container orchestration tool" off
 	"$build_essential_pkg"                "Essential build tools (gcc, g++, make)" on
 	gdb                                   "Debugging tools for C/C++" on
 	"$manpages_pkg"                       "Developer manual pages" on
 
     "###_Build_Systems_###"         "_____ Category Description [below] _____" off
 	make                                  "GNU build utility" on
-	"$ninja_pkg"                           "Fast alternative build system" on
+	"$ninja_pkg"                          "Fast alternative build system" on
 	cmake                                 "Cross-platform C++ build tool" on
     cargo                                 "Rust package manager and build tool" off
     npm                                   "Node.js package manager" off
@@ -158,16 +158,16 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
     zutty              "Lightweight terminal emulator (X11)" off
 
     
-    "###_Text_Editors_###" "_____ Category Description [below] _____" off
-	mousepad            "Simple GUI text editor (Notepad-like)" on
-    gedit               "GNOME text editor (Notepad-like)" off
-    leafpad             "Lightweight GUI text editor (Notepad-like)" off
-    pluma               "MATE text editor (Notepad-like)" off
-    xed                 "Linux Mint text editor (Notepad-like)" off
+    "###_Text_Editors_###" "_____ Category Description [below] _____"    off
+	mousepad               "Simple GUI text editor (Notepad-like)"       on
+    gedit                  "GNOME text editor (Notepad-like)"            off
+    leafpad                "Lightweight GUI text editor (Notepad-like)"  off
+    pluma                  "MATE text editor (Notepad-like)"             off
+    xed                    "Linux Mint text editor (Notepad-like)"       off
 
     "###_Media_Players_###" "_____ Category Description [below] _____" off
-	mpv                 "Media player for audio/video (CLI+GUI)" on
-    vlc                 "Versatile media player (GUI)" off
+	mpv                     "Media player for audio/video (CLI+GUI)"   on
+    vlc                     "Versatile media player (GUI)"             off
 
     "###_Web_Browsers_###" "_____ Category Description [below] _____" off
     firefox             "A web browser" on
@@ -189,7 +189,7 @@ essentials_desktop_dialog=(   # meant to contain pkgs that might pull desktop en
     pulseaudio                      "Legacy audio server (PulseAudio)" off
     jack-audio-connection-kit       "Low-latency audio server (JACK)" off
 	pipewire                        "Modern audio/video server (PulseAudio/Jack replacement)" on
-	"$pipewire_libs_pkg" "Audio client libraries for PipeWire" on
+	"$pipewire_libs_pkg"            "Audio client libraries for PipeWire" on
 
     pavucontrol                     "PulseAudio/PipeWire volume control GUI" on
     vlc-plugin-pipewire             "PipeWire support for VLC media player" off
@@ -242,7 +242,7 @@ essentials_hyprland_dialog=(
     network-manager-applet "Network connection manager GUI applet" on
 	
     "#_________#" "sub catagory" off
-    cliphist                    "clipboard meneger" on
+    cliphist                    "clipboard manager" on
 	wl-clipboard                "Clipboard manager (Wayland only)" on
 
     "#_________#" "sub catagory" off
@@ -255,23 +255,27 @@ corechunk_hyprland_dialog=(
     "######_corechunk_hyprland_pkgs_######" "__________ Collective Category __________" off
                                                  # fully custom, not merged from any other array
 
-	"#_________# Core Hyprland Utilities" "sub catagory" off
+	"#_________#Core_Hyprland_Utilities" "sub catagory" off
 	hyprpaper                   "Wallpaper daemon for Hyprland" on
 	xdg-desktop-portal-hyprland "Hyprland portal backend for screenshots/sharing" on
 	"$hyprcursor_pkg"           "Cursor theme manager for Hyprland" on
 
-	"#_________# Must for corechunk/hyprland" "sub catagory (used directly in the dots)" off
-    kitty               "GPU-accelerated terminal emulator (images, ligatures)" on
-	"$thunar_pkg"       "Lightweight file manager (XFCE)" on
+	"#_________#Must_for_corechunk/hyprland" "sub catagory (used directly in the dots)" off
+    kitty                       "GPU-accelerated terminal emulator (images, ligatures)" on
+	"$thunar_pkg"               "Lightweight file manager (XFCE)" on
 	ranger                      "A console file manager" on
 	firefox                     "A web browser" on
+    nwg-look                    "-" on
+    nwg-displays                "-" on
 
-	"#_____# Launchers & Bars" "subsub catagory" off
+	"#_____#_Launchers_&_Bars" "subsub catagory" off
 	waybar                      "Customizable status/task bar for Wayland" on
 	rofi                        "Launcher and window switcher (X11/Wayland)" on
 	yad                         "Yet Another Dialog (for GUI scripting)" on
+    wlogout "-" on
 
-    "#_____# network,bluetooth, GUI applet etc" "subsub catagory" off
+
+    "#_____#_network,bluetooth,_GUI_applet_etc" "subsub catagory" off
     blueman                     "Bluetooth device manager GUI" on
     "$libspa_bluetooth_pkg"        "dependency for blueman to handle audio device" on
     
@@ -279,16 +283,16 @@ corechunk_hyprland_dialog=(
     network-manager-applet      "GUI applet for network-manager" on
     iwd                         "dependency for network-manager-applet" on
 
-	"#_____# Notifications" "subsub catagory" off
+	"#_____#Notifications" "subsub catagory" off
     "$swaync_pkg"               "A lightweight notification daemon for Wayland" on
-	"#_____# Clipboard & Screenshot" "subsub catagory" off
+	"#_____#Clipboard_&_Screenshot" "subsub catagory" off
 	cliphist                    "clipboard meneger" on
 	wl-clipboard                "Clipboard manager (Wayland only)" on
 	grim                        "Screenshot tool (Wayland only)" on
 	slurp                       "Region selector for screenshot (Wayland only)" on
 	swappy                      "Post SS tool (in short)" on
 
-    "#_________# Recommended cli" "sub catagory" off
+    "#_________#Recommended_cli" "sub catagory" off
 	neovim                      "Modern Vim-based text editor" on
 	gawk                        "Needed for ble.sh (core dependency)" on
 	tmux                        "Terminal multiplexer (split panes, sessions)" on
@@ -297,8 +301,8 @@ corechunk_hyprland_dialog=(
 	zip                         "File compression utility" on
 	unzip                       "File decompression utility (needed for oh-my-posh)" on
 
-    "#_________# Recommended GUI" "sub catagory" off
-	mousepad                    "Simple GUI text editor (Notepad-like)" on
+    "#_________#Recommended_GUI" "sub catagory" off
+	mousepad                   "Simple GUI text editor (Notepad-like)" on
 	mpv                        "Media player for audio/video (CLI+GUI)" on
 	zathura                    "Keyboard-driven document viewer (PDF, EPUB, etc.)" on
 
